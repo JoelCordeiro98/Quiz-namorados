@@ -23,6 +23,8 @@
   #btn-ranny{position:fixed;top:1rem;right:1rem;background:transparent;border:1.5px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.4);padding:0.45rem 1.1rem;border-radius:50px;font-size:0.85rem;font-family:'Lato',sans-serif;cursor:default;z-index:999;transition:all 0.3s;pointer-events:none;letter-spacing:0.5px}
   #btn-ranny.unlocked{border-color:var(--red-light);color:var(--red-light);cursor:pointer;pointer-events:all;box-shadow:0 0 12px rgba(231,76,60,0.4)}
   #btn-ranny.unlocked:hover{background:rgba(231,76,60,0.15)}
+  #btn-secret{display:none;position:fixed;top:1rem;left:1rem;width:42px;height:42px;background:rgba(192,57,43,0.85);border:2px solid rgba(255,255,255,0.3);color:#fff;border-radius:50%;font-size:1.2rem;font-weight:700;font-family:'Playfair Display',serif;font-style:italic;cursor:pointer;z-index:999;transition:all 0.3s;box-shadow:0 0 12px rgba(192,57,43,0.5);line-height:1}
+  #btn-secret:hover{background:var(--red-light);transform:scale(1.08)}
   #screen-quiz{z-index:1;align-items:center;justify-content:center}
   .quiz-inner{position:relative;z-index:2;width:100%;max-width:640px;padding:1.5rem 1.2rem 2rem;margin:0 auto}
   .quiz-progress{display:flex;align-items:center;gap:0.75rem;margin-bottom:1.2rem}
@@ -70,8 +72,57 @@
 </head>
 <body>
 
-<div class="bg" id="global-bg"></div>
+<div class="bg" id="global-bg" style="filter:blur(8px);transform:scale(1.05)"></div>
+
+<!-- Tela de senha -->
+<div id="screen-password" style="position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:1.5rem;">
+  <div class="popup-box" style="max-width:360px;width:100%;">
+    <div class="popup-hearts">🔒</div>
+    <div class="popup-title">Acesso especial</div>
+    <p class="popup-msg" style="margin-bottom:1rem;">Digite a senha para entrar no quiz</p>
+    <input id="password-input" type="password" placeholder="Senha..." 
+      style="width:100%;padding:0.75rem 1rem;border-radius:12px;border:1.5px solid rgba(192,57,43,0.5);background:rgba(255,255,255,0.08);color:#fff;font-size:1rem;font-family:Lato,sans-serif;outline:none;margin-bottom:0.75rem;text-align:center;letter-spacing:2px;"
+      >
+    <p id="password-error" style="color:#e74c3c;font-size:0.85rem;margin-bottom:0.75rem;min-height:1.2rem;"></p>
+    <button class="popup-btn" onclick="checkPassword()" style="width:100%;">Entrar ❤️</button>
+  </div>
+</div>
+
+<script>
+function checkPassword(){
+  var val = document.getElementById('password-input').value;
+  var err = document.getElementById('password-error');
+  if(val === 'Moonlight'){
+    document.getElementById('screen-password').style.display='none';
+    document.getElementById('main-content').style.display='block';
+    document.getElementById('global-bg').style.filter='none';
+    document.getElementById('global-bg').style.transform='none';
+  } else {
+    err.textContent = 'Senha incorreta. Tente novamente!';
+    document.getElementById('password-input').value='';
+    setTimeout(function(){err.textContent='';}, 2500);
+  }
+}
+document.addEventListener('DOMContentLoaded', function(){
+  var inp = document.getElementById('password-input');
+  if(inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') checkPassword(); });
+});
+
+function openSecret(){ document.getElementById('popup-secret').classList.add('show'); }
+
+function updateSecret(){
+  if(score===0){
+    var btn = document.getElementById('btn-secret');
+    btn.style.display='flex';
+    btn.style.alignItems='center';
+    btn.style.justifyContent='center';
+  }
+}
+</script>
+
+<div id="main-content" style="display:none;">
 <button id="btn-ranny" onclick="openRanny()">Ranny ♡</button>
+<button id="btn-secret" onclick="openSecret()">?</button>
 
 <div class="screen active" id="screen-intro">
   <div class="intro-inner">
@@ -162,6 +213,19 @@
     <div class="popup-title">Que pena...</div>
     <p class="popup-msg">Infelizmente não atingiu a pontuação máxima. Tente novamente com um pouco mais de atenção! ;)</p>
     <button class="popup-btn" onclick="closePartial()">Ver minha pontuação</button>
+  </div>
+</div>
+
+<!-- Popup Segredo -->
+<div class="popup-overlay" id="popup-secret">
+  <div class="popup-box">
+    <div class="popup-hearts">🤫✨</div>
+    <div class="popup-title">Segredo Revelado!</div>
+    <p class="popup-msg">Parabéns, meu amor!<br><br>
+    Você revelou o segredo escondido no quiz :D<br><br>
+    Aqui é revelado que vai além de um quiz e que sempre será atualizado, seja com perguntas, temas, fotos... Sempre que quiser você pode entrar e conferir as novidades. Espero que tenha gostado da experiência, saiba que eu te amo demais, minha morena linda ♡<br><br>
+    <em style="color:#f7c1c1;">Do seu eterno apaixonado, Joel Cordeiro</em></p>
+    <button class="popup-btn" onclick="closePopup('popup-secret')">❤️ Eu te amo</button>
   </div>
 </div>
 
@@ -282,17 +346,17 @@ function renderQuestion(){
 }
 function startTimer(){
   clearInterval(timerInterval);
-  timeLeft=25;updateTimerUI();
+  timeLeft=40;updateTimerUI();
   timerInterval=setInterval(()=>{
     timeLeft--;updateTimerUI();
     if(timeLeft<=0){clearInterval(timerInterval);timeUp();}
   },1000);
 }
 function updateTimerUI(){
-  const pct=(timeLeft/25)*100;
+  const pct=(timeLeft/40)*100;
   const fill=document.getElementById('timer-fill');
   fill.style.width=pct+'%';
-  fill.className='timer-fill'+(timeLeft<=8?' warning':'');
+  fill.className='timer-fill'+(timeLeft<=10?' warning':'');
   document.getElementById('timer-num').textContent=timeLeft;
 }
 function timeUp(){
@@ -338,6 +402,7 @@ function endQuiz(){
   clearInterval(timerInterval);
   setScreen('screen-end');setBg(TOTAL-1);
   document.getElementById('end-score').textContent=`Sua pontuação: ${score} de ${TOTAL}`;
+  updateSecret();
   if(score===TOTAL){
     maxReached=true;updateRanny();
     document.getElementById('end-emoji').textContent='🏆';
@@ -360,5 +425,6 @@ function closePopup(id){document.getElementById(id).classList.remove('show');}
 
 setBg(-1);
 </script>
+</div>
 </body>
 </html>
