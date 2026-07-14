@@ -294,7 +294,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div class="form-group">
       <label>Selecione fotos ou vídeos</label>
       <div class="upload-area" onclick="document.getElementById('file-input').click()">
-        <input type="file" id="file-input" accept="image/*,video/*" multiple onchange="previewFiles(this)">
+        <input type="file" id="file-input" accept="*/*" multiple onchange="previewFiles(this)">
         <div class="upload-icon">📁</div>
         <div class="upload-text">Toque para selecionar arquivos</div>
       </div>
@@ -381,7 +381,6 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 
 <div class="toast" id="toast"></div>
 
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <script>
 var SUPABASE_URL = "https://yokmbuheeqjbawrmpoco.supabase.co";
 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlva21idWhlZXFqYmF3cm1wb2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMDQ0OTksImV4cCI6MjA5OTU4MDQ5OX0.VOpiMOpG3669SSOXlp797akqh-ALUdVmGYKX3_5aRII";
@@ -406,48 +405,6 @@ function tipoArquivo(file) {
     mime = MIME_POR_EXT[ext] || "application/octet-stream";
   }
   return mime;
-}
-
-// ===== CONVERSÃO DE VÍDEO (garante compatibilidade com iPhone/HDR) =====
-var ffmpegInstance = null;
-function getFFmpeg() {
-  if (!ffmpegInstance) {
-    ffmpegInstance = FFmpeg.createFFmpeg({
-      log: false,
-      corePath: "https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js"
-    });
-  }
-  return ffmpegInstance;
-}
-
-function transcodeVideo(file, onStatus) {
-  var ffmpeg = getFFmpeg();
-  var inName = "in_" + Date.now() + (file.name.match(/\.[a-zA-Z0-9]+$/) || [".mp4"])[0];
-  var outName = "out_" + Date.now() + ".mp4";
-  return Promise.resolve()
-    .then(function() {
-      if (ffmpeg.isLoaded()) return null;
-      if (onStatus) onStatus("Preparando conversor...");
-      return ffmpeg.load();
-    })
-    .then(function() { return FFmpeg.fetchFile(file); })
-    .then(function(data) {
-      ffmpeg.FS("writeFile", inName, data);
-      return ffmpeg.run(
-        "-i", inName,
-        "-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
-        "-pix_fmt", "yuv420p",
-        "-c:a", "aac", "-b:a", "128k",
-        "-movflags", "+faststart",
-        outName
-      );
-    })
-    .then(function() {
-      var out = ffmpeg.FS("readFile", outName);
-      try { ffmpeg.FS("unlink", inName); } catch(e) {}
-      try { ffmpeg.FS("unlink", outName); } catch(e) {}
-      return new Blob([out.buffer], { type: "video/mp4" });
-    });
 }
 
 function api(path, opts) {
@@ -592,7 +549,15 @@ function renderHeroPhotos(items) {
 }
 
 function previewFiles(input) {
-  arquivosSelecionados = Array.from(input.files);
+  var todos = Array.from(input.files);
+  arquivosSelecionados = todos.filter(function(file) {
+    var mime = tipoArquivo(file);
+    return mime.startsWith("image/") || mime.startsWith("video/");
+  });
+  var ignorados = todos.length - arquivosSelecionados.length;
+  if (ignorados > 0) {
+    mostrarToast(ignorados === 1 ? "1 arquivo ignorado (não é foto/vídeo)" : ignorados + " arquivos ignorados (não são foto/vídeo)");
+  }
   var preview = document.getElementById("upload-preview");
   preview.innerHTML = "";
   arquivosSelecionados.forEach(function(file, i) {
@@ -636,41 +601,26 @@ function salvarFotos() {
     var file = arquivos[i];
     var mime = tipoArquivo(file);
     var isVideo = mime.startsWith("video/");
-    var extOriginal = (file.name.split(".").pop() || "").toLowerCase();
-    // .mp4 já costuma ser H.264/AAC compatível (ex: vídeos do WhatsApp) — só converte
-    // formatos problemáticos (.mov, .avi, .mkv etc). Conversão via WASM em celular
-    // é pesada e pode corromper o arquivo, então evitamos quando não é necessário.
-    var precisaConverter = isVideo && extOriginal !== "mp4";
+    var extOriginal = (file.name.split(".").pop() || "bin").toLowerCase();
 
-    var prep = Promise.resolve({ blob: file, mime: mime, ext: (extOriginal || "bin") });
-    if (precisaConverter) {
-      document.getElementById("up-text").textContent = "Convertendo vídeo " + (i + 1) + " de " + total + "...";
-      prep = transcodeVideo(file, function(msg) {
-        document.getElementById("up-text").textContent = msg;
-      }).then(function(blob) {
-        return { blob: blob, mime: "video/mp4", ext: "mp4" };
-      }).catch(function(e) {
-        console.error("Erro na conversão, enviando original:", e);
-        return { blob: file, mime: mime, ext: (file.name.split(".").pop() || "mp4") };
-      });
-    }
+    var nomeBase = file.name.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9._]/g, "_");
+    var path = Date.now() + "_" + i + "_" + nomeBase + "." + extOriginal;
+    var storageUrl = SUPABASE_URL + "/storage/v1/object/midias/" + path;
 
-    prep.then(function(res) {
-      var nomeBase = file.name.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9._]/g, "_");
-      var path = Date.now() + "_" + i + "_" + nomeBase + "." + res.ext;
-      var storageUrl = SUPABASE_URL + "/storage/v1/object/midias/" + path;
+    document.getElementById("up-text").textContent = "Enviando " + (i + 1) + " de " + total + "...";
 
-      document.getElementById("up-text").textContent = "Enviando " + (i + 1) + " de " + total + "...";
-
-      return fetch(storageUrl, {
-        method: "POST",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": "Bearer " + session.access_token,
-          "Content-Type": res.mime,
-          "x-upsert": "true"
-        },
-        body: res.blob
+    Promise.resolve()
+      .then(function() {
+        return fetch(storageUrl, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": "Bearer " + session.access_token,
+            "Content-Type": mime,
+            "x-upsert": "true"
+          },
+          body: file
+        });
       })
       .then(function(r) {
         return r.json().then(function(data) {
@@ -693,19 +643,18 @@ function salvarFotos() {
           },
           body: JSON.stringify({ url: publicUrl, tipo: isVideo ? "video" : "foto", path: "midias/" + path })
         });
+      })
+      .then(function() {
+        feitos++;
+        document.getElementById("up-bar-fill").style.width = (feitos / total * 100) + "%";
+        processar(i + 1);
+      })
+      .catch(function(e) {
+        feitos++;
+        console.error("Erro no upload:", e);
+        mostrarToast(e.message || "Erro ao enviar arquivo.");
+        processar(i + 1);
       });
-    })
-    .then(function() {
-      feitos++;
-      document.getElementById("up-bar-fill").style.width = (feitos / total * 100) + "%";
-      processar(i + 1);
-    })
-    .catch(function(e) {
-      feitos++;
-      console.error("Erro no upload:", e);
-      mostrarToast(e.message || "Erro ao enviar arquivo.");
-      processar(i + 1);
-    });
   }
 
   processar(0);
