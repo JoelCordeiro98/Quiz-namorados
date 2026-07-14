@@ -554,8 +554,8 @@ function salvarFotos() {
 
   arquivosSelecionados.forEach(function(file, idx) {
     var isVideo = file.type.startsWith("video/");
-    var path = "midias/" + Date.now() + "_" + idx + "_" + file.name.replace(/[^a-zA-Z0-9._]/g, "_");
-    var storageUrl = SUPABASE_URL + "/storage/v1/object/" + path;
+    var path = Date.now() + "_" + idx + "_" + file.name.replace(/[^a-zA-Z0-9._]/g, "_");
+    var storageUrl = SUPABASE_URL + "/storage/v1/object/midias/" + path;
 
     document.getElementById("up-text").textContent = "Enviando " + (idx + 1) + " de " + total + "...";
 
@@ -571,7 +571,7 @@ function salvarFotos() {
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      var publicUrl = SUPABASE_URL + "/storage/v1/object/public/" + path;
+      var publicUrl = SUPABASE_URL + "/storage/v1/object/public/midias/" + path;
       return api("/rest/v1/midias", {
         method: "POST",
         headers: {
@@ -580,7 +580,7 @@ function salvarFotos() {
           "Content-Type": "application/json",
           "Prefer": "return=minimal"
         },
-        body: JSON.stringify({ url: publicUrl, tipo: isVideo ? "video" : "foto", path: path })
+        body: JSON.stringify({ url: publicUrl, tipo: isVideo ? "video" : "foto", path: "midias/" + path })
       });
     })
     .then(function() {
