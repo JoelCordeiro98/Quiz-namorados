@@ -16,14 +16,10 @@
 :root{--red:#C0392B;--redl:#E74C3C;--redd:#922B21;--blk:#0d0d0d;--blk2:#161616;--blk3:#1f1f1f;--white:#fff;--gray:#888}
 body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--blk2)}::-webkit-scrollbar-thumb{background:var(--redd);border-radius:4px}
-
-/* ===== LOADING ===== */
 #loading{position:fixed;inset:0;background:var(--blk);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem}
 .loading-heart{font-size:3rem;animation:heartbeat 1s infinite}
 @keyframes heartbeat{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
-.loading-text{font-family:"Playfair Display",serif;color:var(--redl);font-size:1.1rem}
-
-/* ===== LOGIN ===== */
+.loading-text{font-family:"Playfair Display",serif;color:var(--redl);font-size:1.1rem;letter-spacing:1px}
 #screen-login{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:1.5rem;background:var(--blk)}
 #screen-login.show{display:flex}
 .login-bg{position:absolute;inset:0;background:radial-gradient(ellipse at center,#1a0000 0%,#0d0d0d 70%)}
@@ -39,59 +35,43 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .btn-primary{width:100%;background:var(--red);border:none;color:#fff;padding:0.95rem;border-radius:12px;font-size:1rem;font-family:"Lato",sans-serif;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px}
 .btn-primary:hover{background:var(--redl)}
 .btn-primary:disabled{opacity:0.6;cursor:default}
-
-/* ===== APP ===== */
 #app{display:none;min-height:100vh;padding-bottom:80px}
 #app.show{display:block}
-
-/* BOTTOM NAV */
 .bnav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--blk2);border-top:1px solid rgba(192,57,43,0.2);display:flex;padding:0.5rem 0;padding-bottom:calc(0.5rem + env(safe-area-inset-bottom))}
 .bitem{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.2rem;padding:0.4rem;cursor:pointer;transition:all 0.2s;color:rgba(255,255,255,0.4);border:none;background:none}
 .bitem.active{color:var(--redl)}
 .bitem-icon{font-size:1.4rem;line-height:1}
 .bitem-label{font-size:0.6rem;letter-spacing:0.5px;text-transform:uppercase;font-weight:700}
-
-/* PÁGINAS */
 .page{display:none;min-height:calc(100vh - 80px);animation:fadeIn 0.25s ease}
 .page.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-
-/* PAGE HEADER */
 .phdr{padding:3rem 1.5rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:flex-end;justify-content:space-between}
 .phdr-left .plabel{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--redl);margin-bottom:0.3rem}
 .phdr-left h2{font-family:"Playfair Display",serif;font-size:1.8rem}
 .phdr-left p{color:var(--gray);font-size:0.82rem;margin-top:0.3rem}
 .btn-add{background:var(--red);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(192,57,43,0.4);transition:all 0.2s;flex-shrink:0}
 .btn-add:hover{background:var(--redl);transform:scale(1.1)}
-
-/* HOME */
 .home-hero{position:relative;height:55vw;max-height:320px;min-height:200px;overflow:hidden;background:var(--blk3)}
 .hero-photos{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);height:100%;gap:2px;opacity:0.45;filter:brightness(0.7)}
 .hero-photos div{background-size:cover;background-position:center}
-.hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(13,13,13,0.3) 0%,rgba(13,13,13,0.7) 100%)}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(13,13,13,0.3) 0%,rgba(13,13,13,0.75) 100%)}
 .hero-content{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1rem}
 .hero-tag{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--redl);border:1px solid rgba(192,57,43,0.4);padding:0.25rem 0.9rem;border-radius:50px;margin-bottom:0.6rem}
 .hero-title{font-family:"Playfair Display",serif;font-size:clamp(1.8rem,6vw,2.8rem);line-height:1.2}
 .hero-title em{color:var(--redl);font-style:italic}
-
 .home-cards{padding:1.5rem}
 .home-cards h3{font-family:"Playfair Display",serif;font-size:1.2rem;margin-bottom:1rem;color:rgba(255,255,255,0.8)}
 .cards-row{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem}
-.hcard{background:var(--blk3);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:1.2rem;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
-.hcard:hover,.hcard:active{border-color:rgba(192,57,43,0.4);transform:scale(0.98)}
+.hcard{background:var(--blk3);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:1.2rem;cursor:pointer;transition:all 0.2s}
+.hcard:active{transform:scale(0.97);border-color:rgba(192,57,43,0.4)}
 .hcard-icon{font-size:1.8rem;margin-bottom:0.5rem}
 .hcard-label{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--redl);margin-bottom:0.2rem}
 .hcard-title{font-family:"Playfair Display",serif;font-size:0.95rem;line-height:1.3}
 .hcard-count{font-size:0.75rem;color:var(--gray);margin-top:0.25rem}
-
-/* GALERIA */
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px}
 .photo-item{aspect-ratio:1;background-size:cover;background-position:center;cursor:pointer;background-color:var(--blk3);position:relative;overflow:hidden}
-.photo-item:hover{filter:brightness(1.1)}
 .photo-item.video::after{content:"▶";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#fff;background:rgba(0,0,0,0.3)}
-.photo-empty{grid-column:1/-1;padding:3rem;text-align:center;color:var(--gray);font-size:0.9rem}
-
-/* LIGHTBOX */
+.photo-empty{grid-column:1/-1;padding:3rem;text-align:center;color:var(--gray);font-size:0.9rem;line-height:1.8}
 .lightbox{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.97);align-items:center;justify-content:center;flex-direction:column}
 .lightbox.show{display:flex}
 .lightbox img,.lightbox video{max-width:95vw;max-height:80vh;object-fit:contain;border-radius:8px}
@@ -99,19 +79,15 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .lbox-nav{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;background:rgba(192,57,43,0.7);border:none;border-radius:50%;color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .lbox-prev{left:0.5rem}.lbox-next{right:0.5rem}
 .lbox-del{position:absolute;bottom:2rem;right:1rem;background:rgba(192,57,43,0.85);border:none;color:#fff;padding:0.6rem 1.2rem;border-radius:50px;font-size:0.85rem;cursor:pointer;font-family:"Lato",sans-serif;font-weight:700}
-
-/* TEXTOS */
 .texto-list{padding:1rem}
 .texto-card{background:var(--blk3);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:1.4rem;margin-bottom:0.75rem;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
 .texto-card::before{content:"";position:absolute;top:0;left:0;width:3px;height:100%;background:var(--red);transform:scaleY(0);transition:transform 0.2s;transform-origin:bottom}
-.texto-card:hover::before,.texto-card:active::before{transform:scaleY(1)}
-.texto-card:hover,.texto-card:active{border-color:rgba(192,57,43,0.3)}
+.texto-card:active::before{transform:scaleY(1)}
+.texto-card:active{border-color:rgba(192,57,43,0.3)}
 .tc-tipo{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--redl);margin-bottom:0.4rem}
 .tc-titulo{font-family:"Playfair Display",serif;font-size:1.05rem;margin-bottom:0.4rem}
 .tc-preview{font-size:0.82rem;color:var(--gray);line-height:1.5;font-style:italic}
-.tc-footer{margin-top:0.75rem;font-size:0.72rem;color:rgba(255,255,255,0.25);display:flex;justify-content:space-between;align-items:center}
-
-/* DESEJOS */
+.tc-footer{margin-top:0.75rem;font-size:0.72rem;color:rgba(255,255,255,0.25)}
 .desejos-list{padding:1rem}
 .dprog-bar{background:var(--blk3);border-radius:14px;padding:1.2rem;margin-bottom:1rem;border:1px solid rgba(255,255,255,0.06)}
 .dprog-top{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.6rem}
@@ -129,13 +105,10 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .desejo-item.done .d-titulo{text-decoration:line-through;color:rgba(255,255,255,0.4)}
 .d-status{font-size:0.68rem;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px}
 .desejo-item.done .d-status{color:#5dbb37}
-.d-del{background:none;border:none;color:rgba(255,255,255,0.2);font-size:1rem;cursor:pointer;padding:0.25rem;transition:color 0.2s}
-.d-del:hover{color:#e74c3c}
-
-/* MODAIS */
-.modal-overlay{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.85);align-items:flex-end;justify-content:center;padding:0}
+.d-del{background:none;border:none;color:rgba(255,255,255,0.2);font-size:1rem;cursor:pointer;padding:0.25rem}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.85);align-items:flex-end;justify-content:center}
 .modal-overlay.show{display:flex}
-.modal-box{background:var(--blk2);border:1px solid rgba(192,57,43,0.3);border-radius:24px 24px 0 0;padding:1.5rem;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;animation:slideUp 0.3s ease}
+.modal-box{background:var(--blk2);border:1px solid rgba(192,57,43,0.3);border-radius:24px 24px 0 0;padding:1.5rem;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;animation:slideUp 0.3s ease}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-handle{width:40px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 1.2rem}
 .modal-title{font-family:"Playfair Display",serif;font-size:1.3rem;margin-bottom:1.2rem;color:#fff}
@@ -146,7 +119,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .form-group select option{background:var(--blk2);color:#fff}
 .form-group textarea{min-height:140px;line-height:1.6}
 .upload-area{border:2px dashed rgba(192,57,43,0.3);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:all 0.2s;background:rgba(192,57,43,0.05)}
-.upload-area:hover{border-color:var(--redl);background:rgba(192,57,43,0.08)}
+.upload-area:active{border-color:var(--redl);background:rgba(192,57,43,0.1)}
 .upload-area input{display:none}
 .upload-icon{font-size:2rem;margin-bottom:0.5rem}
 .upload-text{font-size:0.85rem;color:var(--gray)}
@@ -154,13 +127,10 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .up-prev-item{aspect-ratio:1;border-radius:8px;background-size:cover;background-position:center;background-color:var(--blk3);position:relative}
 .up-prev-item button{position:absolute;top:2px;right:2px;width:20px;height:20px;background:rgba(192,57,43,0.9);border:none;border-radius:50%;color:#fff;font-size:0.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .modal-btns{display:flex;gap:0.75rem;margin-top:1.2rem}
-.btn-cancel{flex:1;background:transparent;border:1.5px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);padding:0.85rem;border-radius:12px;font-size:0.9rem;font-family:"Lato",sans-serif;cursor:pointer;transition:all 0.2s}
-.btn-cancel:hover{border-color:rgba(255,255,255,0.3);color:#fff}
+.btn-cancel{flex:1;background:transparent;border:1.5px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);padding:0.85rem;border-radius:12px;font-size:0.9rem;font-family:"Lato",sans-serif;cursor:pointer}
 .btn-save{flex:2;background:var(--red);border:none;color:#fff;padding:0.85rem;border-radius:12px;font-size:0.9rem;font-family:"Lato",sans-serif;font-weight:700;cursor:pointer;transition:all 0.2s}
 .btn-save:hover{background:var(--redl)}
 .btn-save:disabled{opacity:0.6;cursor:default}
-
-/* POPUP TEXTO */
 .texto-popup{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.92);align-items:flex-end;justify-content:center}
 .texto-popup.show{display:flex}
 .texto-popup-box{background:var(--blk2);border:1px solid rgba(192,57,43,0.25);border-radius:24px 24px 0 0;padding:1.5rem;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;animation:slideUp 0.3s ease;position:relative}
@@ -169,33 +139,24 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .tp-titulo{font-family:"Playfair Display",serif;font-size:1.4rem;margin-bottom:1.2rem;line-height:1.3}
 .tp-body{font-size:0.92rem;line-height:1.9;color:rgba(255,255,255,0.85);white-space:pre-line}
 .tp-del{margin-top:1.5rem;background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.3);color:var(--redl);padding:0.6rem 1.2rem;border-radius:50px;font-size:0.82rem;cursor:pointer;font-family:"Lato",sans-serif;display:inline-block}
-
-/* UPLOAD PROGRESS */
-.upload-progress{display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;flex-direction:column;gap:1rem}
+.upload-progress{display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,0.9);align-items:center;justify-content:center;flex-direction:column;gap:1rem}
 .upload-progress.show{display:flex}
 .up-heart{font-size:2.5rem;animation:heartbeat 0.6s infinite}
-.up-text{color:#fff;font-size:0.95rem}
-.up-bar-track{width:200px;height:6px;background:rgba(255,255,255,0.15);border-radius:6px;overflow:hidden}
+.up-text{color:#fff;font-size:0.95rem;text-align:center;max-width:280px}
+.up-bar-track{width:220px;height:6px;background:rgba(255,255,255,0.15);border-radius:6px;overflow:hidden}
 .up-bar-fill{height:100%;background:var(--redl);border-radius:6px;transition:width 0.3s}
-
-/* TOAST */
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--blk2);border:1px solid rgba(192,57,43,0.4);color:#fff;padding:0.7rem 1.4rem;border-radius:50px;font-size:0.85rem;opacity:0;transition:all 0.3s;z-index:800;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* LOGOUT */
-.logout-btn{position:fixed;top:1rem;right:1rem;z-index:50;background:rgba(192,57,43,0.2);border:1px solid rgba(192,57,43,0.3);color:var(--redl);padding:0.4rem 0.9rem;border-radius:50px;font-size:0.75rem;cursor:pointer;font-family:"Lato",sans-serif;font-weight:700;transition:all 0.2s}
-.logout-btn:hover{background:rgba(192,57,43,0.35)}
+.logout-btn{position:fixed;top:1rem;right:1rem;z-index:50;background:rgba(192,57,43,0.2);border:1px solid rgba(192,57,43,0.3);color:var(--redl);padding:0.4rem 0.9rem;border-radius:50px;font-size:0.75rem;cursor:pointer;font-family:"Lato",sans-serif;font-weight:700}
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
 <div id="loading">
   <div class="loading-heart">♥</div>
   <div class="loading-text">Nosso Espaço</div>
 </div>
 
-<!-- LOGIN -->
 <div id="screen-login">
   <div class="login-bg"></div>
   <div class="login-box">
@@ -215,11 +176,9 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
   <button class="logout-btn" onclick="fazerLogout()">Sair</button>
 
-  <!-- HOME -->
   <div class="page active" id="page-home">
     <div class="home-hero">
       <div class="hero-photos" id="hero-photos"></div>
@@ -260,7 +219,6 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </div>
   </div>
 
-  <!-- GALERIA -->
   <div class="page" id="page-galeria">
     <div class="phdr">
       <div class="phdr-left">
@@ -268,14 +226,13 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
         <h2>Nossa Galeria</h2>
         <p>Fotos e vídeos de nós</p>
       </div>
-      <button class="btn-add" onclick="abrirModalFoto()" title="Adicionar">+</button>
+      <button class="btn-add" onclick="abrirModalFoto()">+</button>
     </div>
     <div class="photo-grid" id="photo-grid">
       <div class="photo-empty">Nenhuma foto ainda.<br>Toque em + para adicionar!</div>
     </div>
   </div>
 
-  <!-- TEXTOS -->
   <div class="page" id="page-textos">
     <div class="phdr">
       <div class="phdr-left">
@@ -283,14 +240,13 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
         <h2>Poemas & Mensagens</h2>
         <p>Palavras escritas por nós</p>
       </div>
-      <button class="btn-add" onclick="abrirModalTexto()" title="Adicionar">+</button>
+      <button class="btn-add" onclick="abrirModalTexto()">+</button>
     </div>
     <div class="texto-list" id="texto-list">
       <div class="photo-empty">Nenhum texto ainda.<br>Toque em + para adicionar!</div>
     </div>
   </div>
 
-  <!-- DESEJOS -->
   <div class="page" id="page-desejos">
     <div class="phdr">
       <div class="phdr-left">
@@ -298,7 +254,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
         <h2>Desejos</h2>
         <p>Clique para marcar como realizado</p>
       </div>
-      <button class="btn-add" onclick="abrirModalDesejo()" title="Adicionar">+</button>
+      <button class="btn-add" onclick="abrirModalDesejo()">+</button>
     </div>
     <div class="desejos-list">
       <div class="dprog-bar">
@@ -314,23 +270,18 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </div>
   </div>
 
-  <!-- BOTTOM NAV -->
   <nav class="bnav">
     <button class="bitem active" onclick="goTo('home')" data-page="home">
-      <span class="bitem-icon">🏠</span>
-      <span class="bitem-label">Início</span>
+      <span class="bitem-icon">🏠</span><span class="bitem-label">Início</span>
     </button>
     <button class="bitem" onclick="goTo('galeria')" data-page="galeria">
-      <span class="bitem-icon">📸</span>
-      <span class="bitem-label">Galeria</span>
+      <span class="bitem-icon">📸</span><span class="bitem-label">Galeria</span>
     </button>
     <button class="bitem" onclick="goTo('textos')" data-page="textos">
-      <span class="bitem-icon">✍️</span>
-      <span class="bitem-label">Textos</span>
+      <span class="bitem-icon">✍️</span><span class="bitem-label">Textos</span>
     </button>
     <button class="bitem" onclick="goTo('desejos')" data-page="desejos">
-      <span class="bitem-icon">✨</span>
-      <span class="bitem-label">Desejos</span>
+      <span class="bitem-icon">✨</span><span class="bitem-label">Desejos</span>
     </button>
   </nav>
 </div>
@@ -403,7 +354,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="fecharLightbox()">
-  <button class="lbox-close" onclick="fecharLightbox()">✕</button>
+  <button class="lbox-close" onclick="event.stopPropagation();fecharLightbox()">✕</button>
   <button class="lbox-nav lbox-prev" onclick="event.stopPropagation();navLightbox(-1)">‹</button>
   <div id="lbox-content"></div>
   <button class="lbox-nav lbox-next" onclick="event.stopPropagation();navLightbox(1)">›</button>
@@ -428,82 +379,104 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   <div class="up-bar-track"><div class="up-bar-fill" id="up-bar-fill" style="width:0%"></div></div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- FIREBASE -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDS8cJ5Xj17bkWLy0dMunR_-ONpJmjEw-c",
-  authDomain: "nosso-espaco-dae01.firebaseapp.com",
-  projectId: "nosso-espaco-dae01",
-  storageBucket: "nosso-espaco-dae01.firebasestorage.app",
-  messagingSenderId: "70269275345",
-  appId: "1:70269275345:web:440a49276429cc503d09f0"
-};
-
-const fireApp = initializeApp(firebaseConfig);
-const auth = getAuth(fireApp);
-const db = getFirestore(fireApp);
-const storage = getStorage(fireApp);
-
-// Estado global
+<script>
+var SUPABASE_URL = "https://yokmbuheeqjbawrmpoco.supabase.co";
+var SUPABASE_KEY = "sb_publishable_7KmI1vyT3VHg7sYUuakQSQ_j3zYJWOv";
+var session = null;
 var midias = [];
 var textos = [];
 var desejos = [];
 var curLbox = 0;
-var textoAtual = null;
+var arquivosSelecionados = [];
 
-// Auth
-onAuthStateChanged(auth, function(user) {
-  document.getElementById("loading").style.display = "none";
-  if (user) {
-    document.getElementById("screen-login").classList.remove("show");
-    document.getElementById("app").classList.add("show");
-    carregarTudo();
+function api(path, opts) {
+  var headers = {
+    "apikey": SUPABASE_KEY,
+    "Content-Type": "application/json"
+  };
+  if (session) headers["Authorization"] = "Bearer " + session.access_token;
+  return fetch(SUPABASE_URL + path, Object.assign({ headers: headers }, opts));
+}
+
+function authApi(path, body) {
+  return fetch(SUPABASE_URL + "/auth/v1" + path, {
+    method: "POST",
+    headers: { "apikey": SUPABASE_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+}
+
+// Verificar sessão salva
+function init() {
+  var saved = localStorage.getItem("sb_session");
+  if (saved) {
+    try {
+      session = JSON.parse(saved);
+      mostrarApp();
+      carregarTudo();
+    } catch(e) {
+      mostrarLogin();
+    }
   } else {
-    document.getElementById("screen-login").classList.add("show");
-    document.getElementById("app").classList.remove("show");
+    mostrarLogin();
   }
-});
+  document.getElementById("loading").style.display = "none";
+}
 
-window.fazerLogin = function() {
+function mostrarLogin() {
+  document.getElementById("screen-login").classList.add("show");
+  document.getElementById("app").classList.remove("show");
+}
+
+function mostrarApp() {
+  document.getElementById("screen-login").classList.remove("show");
+  document.getElementById("app").classList.add("show");
+}
+
+function fazerLogin() {
   var email = document.getElementById("login-email").value.trim();
   var senha = document.getElementById("login-senha").value;
   var btn = document.getElementById("btn-login");
   var err = document.getElementById("login-error");
   if (!email || !senha) { err.textContent = "Preencha e-mail e senha."; return; }
-  btn.disabled = true;
-  btn.textContent = "Entrando...";
-  err.textContent = "";
-  signInWithEmailAndPassword(auth, email, senha)
-    .then(function() { btn.textContent = "Entrar ♥"; btn.disabled = false; })
-    .catch(function(e) {
-      err.textContent = "E-mail ou senha incorretos.";
-      btn.textContent = "Entrar ♥"; btn.disabled = false;
+  btn.disabled = true; btn.textContent = "Entrando..."; err.textContent = "";
+  authApi("/token?grant_type=password", { email: email, password: senha })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.access_token) {
+        session = data;
+        localStorage.setItem("sb_session", JSON.stringify(data));
+        mostrarApp();
+        carregarTudo();
+      } else {
+        err.textContent = "E-mail ou senha incorretos.";
+      }
+      btn.disabled = false; btn.textContent = "Entrar ♥";
+    })
+    .catch(function() {
+      err.textContent = "Erro de conexão. Tente novamente.";
+      btn.disabled = false; btn.textContent = "Entrar ♥";
     });
-};
+}
 
-window.fazerLogout = function() {
-  signOut(auth);
-};
+function fazerLogout() {
+  session = null;
+  localStorage.removeItem("sb_session");
+  midias = []; textos = []; desejos = [];
+  mostrarLogin();
+}
 
-// Navegação
-window.goTo = function(page) {
+function goTo(page) {
   document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
   document.querySelectorAll(".bitem").forEach(function(b) { b.classList.remove("active"); });
   document.getElementById("page-" + page).classList.add("active");
   var nav = document.querySelector(".bitem[data-page=" + page + "]");
   if (nav) nav.classList.add("active");
   window.scrollTo(0, 0);
-};
+}
 
-// Carregar dados
 function carregarTudo() {
   carregarMidias();
   carregarTextos();
@@ -512,13 +485,14 @@ function carregarTudo() {
 
 // ===== GALERIA =====
 function carregarMidias() {
-  var q = query(collection(db, "midias"), orderBy("criadoEm", "desc"));
-  onSnapshot(q, function(snap) {
-    midias = [];
-    snap.forEach(function(d) { midias.push(Object.assign({ id: d.id }, d.data())); });
-    renderGaleria();
-    document.getElementById("count-fotos").textContent = midias.length + " " + (midias.length === 1 ? "item" : "itens");
-  });
+  api("/rest/v1/midias?order=criado_em.desc&select=*")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!Array.isArray(data)) return;
+      midias = data;
+      renderGaleria();
+      document.getElementById("count-fotos").textContent = midias.length + (midias.length === 1 ? " item" : " itens");
+    });
 }
 
 function renderGaleria() {
@@ -533,7 +507,7 @@ function renderGaleria() {
   midias.forEach(function(m, idx) {
     var div = document.createElement("div");
     div.className = "photo-item" + (m.tipo === "video" ? " video" : "");
-    div.style.backgroundImage = "url(" + (m.thumb || m.url) + ")";
+    div.style.backgroundImage = "url(" + m.url + ")";
     div.onclick = function() { abrirLightbox(idx); };
     grid.appendChild(div);
   });
@@ -549,10 +523,7 @@ function renderHeroPhotos(items) {
   }
 }
 
-// Upload
-var arquivosSelecionados = [];
-
-window.previewFiles = function(input) {
+function previewFiles(input) {
   arquivosSelecionados = Array.from(input.files);
   var preview = document.getElementById("upload-preview");
   preview.innerHTML = "";
@@ -564,70 +535,80 @@ window.previewFiles = function(input) {
       div.style.backgroundImage = "url(" + e.target.result + ")";
       var btn = document.createElement("button");
       btn.textContent = "✕";
-      btn.onclick = function() {
-        arquivosSelecionados.splice(i, 1);
-        div.remove();
-      };
+      btn.onclick = function() { arquivosSelecionados.splice(i, 1); div.remove(); };
       div.appendChild(btn);
       preview.appendChild(div);
     };
     reader.readAsDataURL(file);
   });
-};
+}
 
-window.salvarFotos = function() {
+function salvarFotos() {
   if (arquivosSelecionados.length === 0) { mostrarToast("Selecione pelo menos um arquivo!"); return; }
   var btn = document.getElementById("btn-salvar-foto");
   btn.disabled = true;
   fecharModal("modal-foto");
-  mostrarProgresso(true, 0);
-
   var total = arquivosSelecionados.length;
   var feitos = 0;
+  mostrarProgresso(true, 0);
 
-  arquivosSelecionados.forEach(function(file) {
+  arquivosSelecionados.forEach(function(file, idx) {
     var isVideo = file.type.startsWith("video/");
-    var path = "midias/" + Date.now() + "_" + file.name;
-    var storRef = ref(storage, path);
-    var task = uploadBytesResumable(storRef, file);
+    var path = "midias/" + Date.now() + "_" + idx + "_" + file.name.replace(/[^a-zA-Z0-9._]/g, "_");
+    var storageUrl = SUPABASE_URL + "/storage/v1/object/" + path;
 
-    task.on("state_changed",
-      function(snap) {
-        var pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-        document.getElementById("up-bar-fill").style.width = pct + "%";
-        document.getElementById("up-text").textContent = "Enviando " + (feitos + 1) + " de " + total + "... " + pct + "%";
+    document.getElementById("up-text").textContent = "Enviando " + (idx + 1) + " de " + total + "...";
+
+    fetch(storageUrl, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + session.access_token,
+        "Content-Type": file.type,
+        "x-upsert": "true"
       },
-      function(err) { mostrarToast("Erro ao enviar: " + err.message); feitos++; if (feitos === total) { mostrarProgresso(false); btn.disabled = false; } },
-      function() {
-        getDownloadURL(task.snapshot.ref).then(function(url) {
-          addDoc(collection(db, "midias"), {
-            url: url,
-            tipo: isVideo ? "video" : "foto",
-            path: path,
-            criadoEm: new Date()
-          }).then(function() {
-            feitos++;
-            if (feitos === total) {
-              mostrarProgresso(false);
-              btn.disabled = false;
-              arquivosSelecionados = [];
-              document.getElementById("upload-preview").innerHTML = "";
-              document.getElementById("file-input").value = "";
-              mostrarToast("✓ Adicionado com sucesso!");
-            }
-          });
-        });
+      body: file
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var publicUrl = SUPABASE_URL + "/storage/v1/object/public/" + path;
+      return api("/rest/v1/midias", {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + session.access_token,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify({ url: publicUrl, tipo: isVideo ? "video" : "foto", path: path })
+      });
+    })
+    .then(function() {
+      feitos++;
+      document.getElementById("up-bar-fill").style.width = (feitos / total * 100) + "%";
+      if (feitos === total) {
+        mostrarProgresso(false);
+        btn.disabled = false;
+        arquivosSelecionados = [];
+        document.getElementById("upload-preview").innerHTML = "";
+        document.getElementById("file-input").value = "";
+        mostrarToast("✓ Adicionado com sucesso!");
+        carregarMidias();
       }
-    );
+    })
+    .catch(function(e) {
+      feitos++;
+      mostrarToast("Erro ao enviar arquivo.");
+      if (feitos === total) { mostrarProgresso(false); btn.disabled = false; }
+    });
   });
-};
+}
 
-// Lightbox
-window.abrirLightbox = function(idx) {
+function abrirLightbox(idx) {
   curLbox = idx;
   renderLboxItem();
   document.getElementById("lightbox").classList.add("show");
-};
+}
 
 function renderLboxItem() {
   var m = midias[curLbox];
@@ -635,45 +616,59 @@ function renderLboxItem() {
   cont.innerHTML = "";
   if (m.tipo === "video") {
     var v = document.createElement("video");
-    v.src = m.url; v.controls = true; v.style.maxWidth = "95vw"; v.style.maxHeight = "80vh"; v.style.borderRadius = "8px";
+    v.src = m.url; v.controls = true;
+    v.style.cssText = "max-width:95vw;max-height:80vh;border-radius:8px";
     cont.appendChild(v);
   } else {
     var img = document.createElement("img");
-    img.src = m.url; img.style.maxWidth = "95vw"; img.style.maxHeight = "80vh"; img.style.objectFit = "contain"; img.style.borderRadius = "8px";
+    img.src = m.url;
+    img.style.cssText = "max-width:95vw;max-height:80vh;object-fit:contain;border-radius:8px";
     cont.appendChild(img);
   }
 }
 
-window.fecharLightbox = function() {
+function fecharLightbox() {
   document.getElementById("lightbox").classList.remove("show");
   document.getElementById("lbox-content").innerHTML = "";
-};
+}
 
-window.navLightbox = function(dir) {
+function navLightbox(dir) {
   curLbox = (curLbox + dir + midias.length) % midias.length;
   renderLboxItem();
-};
+}
 
-window.deletarMidia = function() {
+function deletarMidia() {
   if (!confirm("Excluir esta mídia?")) return;
   var m = midias[curLbox];
-  var storRef = ref(storage, m.path);
-  deleteObject(storRef).catch(function() {});
-  deleteDoc(doc(db, "midias", m.id)).then(function() {
+  // Deletar do storage
+  fetch(SUPABASE_URL + "/storage/v1/object/" + m.path, {
+    method: "DELETE",
+    headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + session.access_token }
+  });
+  // Deletar do banco
+  api("/rest/v1/midias?id=eq." + m.id, {
+    method: "DELETE",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token
+    }
+  }).then(function() {
     fecharLightbox();
     mostrarToast("Excluído!");
+    carregarMidias();
   });
-};
+}
 
 // ===== TEXTOS =====
 function carregarTextos() {
-  var q = query(collection(db, "textos"), orderBy("criadoEm", "desc"));
-  onSnapshot(q, function(snap) {
-    textos = [];
-    snap.forEach(function(d) { textos.push(Object.assign({ id: d.id }, d.data())); });
-    renderTextos();
-    document.getElementById("count-textos").textContent = textos.length + " " + (textos.length === 1 ? "item" : "itens");
-  });
+  api("/rest/v1/textos?order=criado_em.desc&select=*")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!Array.isArray(data)) return;
+      textos = data;
+      renderTextos();
+      document.getElementById("count-textos").textContent = textos.length + (textos.length === 1 ? " item" : " itens");
+    });
 }
 
 function renderTextos() {
@@ -688,58 +683,70 @@ function renderTextos() {
     div.className = "texto-card";
     var preview = t.corpo ? t.corpo.substring(0, 100) + (t.corpo.length > 100 ? "..." : "") : "";
     div.innerHTML = '<div class="tc-tipo">' + (t.tipo || "Texto") + '</div>' +
-      '<div class="tc-titulo">' + (t.titulo || "Sem título") + '</div>' +
+      '<div class="tc-titulo">' + (t.titulo || "") + '</div>' +
       '<div class="tc-preview">' + preview + '</div>' +
-      '<div class="tc-footer"><span>Toque para ler ›</span></div>';
+      '<div class="tc-footer">Toque para ler ›</div>';
     div.onclick = function() { abrirTexto(idx); };
     list.appendChild(div);
   });
 }
 
-window.abrirTexto = function(idx) {
-  textoAtual = textos[idx];
-  document.getElementById("tp-tipo").textContent = textoAtual.tipo || "Texto";
-  document.getElementById("tp-titulo").textContent = textoAtual.titulo || "";
-  document.getElementById("tp-body").textContent = textoAtual.corpo || "";
-  document.getElementById("tp-del").onclick = function() { deletarTexto(textoAtual.id); };
+function abrirTexto(idx) {
+  var t = textos[idx];
+  document.getElementById("tp-tipo").textContent = t.tipo || "Texto";
+  document.getElementById("tp-titulo").textContent = t.titulo || "";
+  document.getElementById("tp-body").textContent = t.corpo || "";
+  document.getElementById("tp-del").onclick = function() { deletarTexto(t.id); };
   document.getElementById("texto-popup").classList.add("show");
-};
+}
 
-window.fecharTextoPopup = function() {
-  document.getElementById("texto-popup").classList.remove("show");
-};
+function fecharTextoPopup() { document.getElementById("texto-popup").classList.remove("show"); }
 
-window.salvarTexto = function() {
+function salvarTexto() {
   var tipo = document.getElementById("txt-tipo").value;
   var titulo = document.getElementById("txt-titulo").value.trim();
   var corpo = document.getElementById("txt-corpo").value.trim();
-  if (!titulo || !corpo) { mostrarToast("Preencha o título e o conteúdo!"); return; }
-  addDoc(collection(db, "textos"), { tipo: tipo, titulo: titulo, corpo: corpo, criadoEm: new Date() })
-    .then(function() {
-      fecharModal("modal-texto");
-      document.getElementById("txt-titulo").value = "";
-      document.getElementById("txt-corpo").value = "";
-      mostrarToast("✓ Texto salvo!");
-    });
-};
+  if (!titulo || !corpo) { mostrarToast("Preencha título e conteúdo!"); return; }
+  api("/rest/v1/textos", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal"
+    },
+    body: JSON.stringify({ tipo: tipo, titulo: titulo, corpo: corpo })
+  }).then(function() {
+    fecharModal("modal-texto");
+    document.getElementById("txt-titulo").value = "";
+    document.getElementById("txt-corpo").value = "";
+    mostrarToast("✓ Texto salvo!");
+    carregarTextos();
+  });
+}
 
-window.deletarTexto = function(id) {
+function deletarTexto(id) {
   if (!confirm("Excluir este texto?")) return;
-  deleteDoc(doc(db, "textos", id)).then(function() {
+  api("/rest/v1/textos?id=eq." + id, {
+    method: "DELETE",
+    headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + session.access_token }
+  }).then(function() {
     fecharTextoPopup();
     mostrarToast("Excluído!");
+    carregarTextos();
   });
-};
+}
 
 // ===== DESEJOS =====
 function carregarDesejos() {
-  var q = query(collection(db, "desejos"), orderBy("criadoEm", "asc"));
-  onSnapshot(q, function(snap) {
-    desejos = [];
-    snap.forEach(function(d) { desejos.push(Object.assign({ id: d.id }, d.data())); });
-    renderDesejos();
-    document.getElementById("count-desejos").textContent = desejos.length + " " + (desejos.length === 1 ? "item" : "itens");
-  });
+  api("/rest/v1/desejos?order=criado_em.asc&select=*")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!Array.isArray(data)) return;
+      desejos = data;
+      renderDesejos();
+      document.getElementById("count-desejos").textContent = desejos.length + (desejos.length === 1 ? " item" : " itens");
+    });
 }
 
 function renderDesejos() {
@@ -754,74 +761,110 @@ function renderDesejos() {
   }
   var realizados = desejos.filter(function(d) { return d.feito; }).length;
   var total = desejos.length;
-  var pct = total > 0 ? (realizados / total * 100) : 0;
   document.getElementById("dprog-count").textContent = realizados;
   document.getElementById("dprog-total").textContent = total;
-  document.getElementById("dprog-fill").style.width = pct + "%";
+  document.getElementById("dprog-fill").style.width = (total > 0 ? realizados / total * 100 : 0) + "%";
 
   desejos.forEach(function(d) {
     var div = document.createElement("div");
     div.className = "desejo-item" + (d.feito ? " done" : "");
     div.innerHTML = '<div class="d-check">' + (d.feito ? "✓" : "") + '</div>' +
-      '<div class="d-txt"><div class="d-titulo">' + d.titulo + '</div><div class="d-status">' + (d.feito ? "Realizado! ✓" : "Em breve...") + '</div></div>' +
+      '<div class="d-txt"><div class="d-titulo">' + d.titulo + '</div>' +
+      '<div class="d-status">' + (d.feito ? "Realizado! ✓" : "Em breve...") + '</div></div>' +
       '<button class="d-del" onclick="event.stopPropagation();deletarDesejo(\'' + d.id + '\')">🗑</button>';
     div.onclick = function(e) {
-      if (e.target.classList.contains("d-del") || e.target.closest(".d-del")) return;
+      if (e.target.classList.contains("d-del")) return;
       toggleDesejo(d.id, d.feito);
     };
     list.appendChild(div);
   });
 }
 
-window.salvarDesejo = function() {
+function salvarDesejo() {
   var titulo = document.getElementById("des-titulo").value.trim();
   if (!titulo) { mostrarToast("Digite o desejo!"); return; }
-  addDoc(collection(db, "desejos"), { titulo: titulo, feito: false, criadoEm: new Date() })
-    .then(function() {
-      fecharModal("modal-desejo");
-      document.getElementById("des-titulo").value = "";
-      mostrarToast("✓ Desejo adicionado!");
-    });
-};
+  api("/rest/v1/desejos", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal"
+    },
+    body: JSON.stringify({ titulo: titulo, feito: false })
+  }).then(function() {
+    fecharModal("modal-desejo");
+    document.getElementById("des-titulo").value = "";
+    mostrarToast("✓ Desejo adicionado!");
+    carregarDesejos();
+  });
+}
 
-window.toggleDesejo = function(id, feito) {
-  updateDoc(doc(db, "desejos", id), { feito: !feito });
-};
+function toggleDesejo(id, feito) {
+  api("/rest/v1/desejos?id=eq." + id, {
+    method: "PATCH",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal"
+    },
+    body: JSON.stringify({ feito: !feito })
+  }).then(function() { carregarDesejos(); });
+}
 
-window.deletarDesejo = function(id) {
+function deletarDesejo(id) {
   if (!confirm("Excluir este desejo?")) return;
-  deleteDoc(doc(db, "desejos", id)).then(function() { mostrarToast("Excluído!"); });
-};
+  api("/rest/v1/desejos?id=eq." + id, {
+    method: "DELETE",
+    headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + session.access_token }
+  }).then(function() {
+    mostrarToast("Excluído!");
+    carregarDesejos();
+  });
+}
 
 // ===== MODAIS =====
-window.abrirModalFoto = function() { document.getElementById("modal-foto").classList.add("show"); };
-window.abrirModalTexto = function() { document.getElementById("modal-texto").classList.add("show"); };
-window.abrirModalDesejo = function() { document.getElementById("modal-desejo").classList.add("show"); };
-window.fecharModal = function(id) { document.getElementById(id).classList.remove("show"); };
+function abrirModalFoto() { document.getElementById("modal-foto").classList.add("show"); }
+function abrirModalTexto() { document.getElementById("modal-texto").classList.add("show"); }
+function abrirModalDesejo() { document.getElementById("modal-desejo").classList.add("show"); }
+function fecharModal(id) { document.getElementById(id).classList.remove("show"); }
 
 // ===== UTILS =====
 function mostrarProgresso(show, pct) {
-  var el = document.getElementById("upload-progress");
-  el.classList.toggle("show", show);
+  document.getElementById("upload-progress").classList.toggle("show", show);
   if (pct !== undefined) document.getElementById("up-bar-fill").style.width = pct + "%";
 }
 
-window.mostrarToast = function(msg) {
+function mostrarToast(msg) {
   var t = document.getElementById("toast");
   t.textContent = msg;
   t.classList.add("show");
   setTimeout(function() { t.classList.remove("show"); }, 2500);
-};
+}
 
-// Enter no login
 document.getElementById("login-senha").addEventListener("keydown", function(e) {
-  if (e.key === "Enter") window.fazerLogin();
+  if (e.key === "Enter") fazerLogin();
 });
 
-// Service Worker
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js").catch(function(e) { console.log("SW:", e); });
+// Criar bucket de storage
+function criarBucket() {
+  fetch(SUPABASE_URL + "/storage/v1/bucket", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ id: "midias", name: "midias", public: true })
+  });
 }
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(function(){});
+}
+
+window.onload = init;
 </script>
 </body>
 </html>
