@@ -383,13 +383,29 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 
 <script>
 var SUPABASE_URL = "https://yokmbuheeqjbawrmpoco.supabase.co";
-var SUPABASE_KEY = "sb_publishable_7KmI1vyT3VHg7sYUuakQSQ_j3zYJWOv";
+var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlva21idWhlZXFqYmF3cm1wb2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMDQ0OTksImV4cCI6MjA5OTU4MDQ5OX0.VOpiMOpG3669SSOXlp797akqh-ALUdVmGYKX3_5aRII";
 var session = null;
 var midias = [];
 var textos = [];
 var desejos = [];
 var curLbox = 0;
 var arquivosSelecionados = [];
+
+var MIME_POR_EXT = {
+  mp4: "video/mp4", mov: "video/quicktime", m4v: "video/x-m4v",
+  avi: "video/x-msvideo", webm: "video/webm", mkv: "video/x-matroska", "3gp": "video/3gpp",
+  jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", gif: "image/gif",
+  heic: "image/heic", heif: "image/heif", webp: "image/webp"
+};
+
+function tipoArquivo(file) {
+  var mime = file.type;
+  if (!mime) {
+    var ext = (file.name.split(".").pop() || "").toLowerCase();
+    mime = MIME_POR_EXT[ext] || "application/octet-stream";
+  }
+  return mime;
+}
 
 function api(path, opts) {
   var headers = {
@@ -553,7 +569,8 @@ function salvarFotos() {
   mostrarProgresso(true, 0);
 
   arquivosSelecionados.forEach(function(file, idx) {
-    var isVideo = file.type.startsWith("video/");
+    var mime = tipoArquivo(file);
+    var isVideo = mime.startsWith("video/");
     var path = Date.now() + "_" + idx + "_" + file.name.replace(/[^a-zA-Z0-9._]/g, "_");
     var storageUrl = SUPABASE_URL + "/storage/v1/object/midias/" + path;
 
@@ -564,12 +581,20 @@ function salvarFotos() {
       headers: {
         "apikey": SUPABASE_KEY,
         "Authorization": "Bearer " + session.access_token,
-        "Content-Type": file.type,
+        "Content-Type": mime,
         "x-upsert": "true"
       },
       body: file
     })
-    .then(function(r) { return r.json(); })
+    .then(function(r) {
+      return r.json().then(function(data) {
+        if (!r.ok) {
+          var msg = (data && (data.message || data.error)) || ("HTTP " + r.status);
+          throw new Error("Falha no upload: " + msg);
+        }
+        return data;
+      });
+    })
     .then(function(data) {
       var publicUrl = SUPABASE_URL + "/storage/v1/object/public/midias/" + path;
       return api("/rest/v1/midias", {
@@ -598,7 +623,8 @@ function salvarFotos() {
     })
     .catch(function(e) {
       feitos++;
-      mostrarToast("Erro ao enviar arquivo.");
+      console.error("Erro no upload:", e);
+      mostrarToast(e.message || "Erro ao enviar arquivo.");
       if (feitos === total) { mostrarProgresso(false); btn.disabled = false; }
     });
   });
@@ -846,19 +872,6 @@ function mostrarToast(msg) {
 document.getElementById("login-senha").addEventListener("keydown", function(e) {
   if (e.key === "Enter") fazerLogin();
 });
-
-// Criar bucket de storage
-function criarBucket() {
-  fetch(SUPABASE_URL + "/storage/v1/bucket", {
-    method: "POST",
-    headers: {
-      "apikey": SUPABASE_KEY,
-      "Authorization": "Bearer " + session.access_token,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ id: "midias", name: "midias", public: true })
-  });
-}
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(function(){});
