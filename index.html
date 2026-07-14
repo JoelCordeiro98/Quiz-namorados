@@ -566,7 +566,9 @@ function renderGaleria() {
   midias.forEach(function(m, idx) {
     var div = document.createElement("div");
     div.className = "photo-item" + (m.tipo === "video" ? " video" : "");
-    div.style.backgroundImage = "url(" + m.url + ")";
+    if (m.tipo !== "video") {
+      div.style.backgroundImage = "url(" + m.url + ")";
+    }
     div.onclick = function() { abrirLightbox(idx); };
     grid.appendChild(div);
   });
@@ -577,7 +579,14 @@ function renderHeroPhotos(items) {
   hero.innerHTML = "";
   for (var i = 0; i < 6; i++) {
     var div = document.createElement("div");
-    if (items[i]) div.style.backgroundImage = "url(" + items[i].url + ")";
+    if (items[i]) {
+      if (items[i].tipo === "video") {
+        div.style.cssText = "display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:rgba(255,255,255,0.35);background:#1a1a1a";
+        div.textContent = "▶";
+      } else {
+        div.style.backgroundImage = "url(" + items[i].url + ")";
+      }
+    }
     hero.appendChild(div);
   }
 }
@@ -627,9 +636,14 @@ function salvarFotos() {
     var file = arquivos[i];
     var mime = tipoArquivo(file);
     var isVideo = mime.startsWith("video/");
+    var extOriginal = (file.name.split(".").pop() || "").toLowerCase();
+    // .mp4 já costuma ser H.264/AAC compatível (ex: vídeos do WhatsApp) — só converte
+    // formatos problemáticos (.mov, .avi, .mkv etc). Conversão via WASM em celular
+    // é pesada e pode corromper o arquivo, então evitamos quando não é necessário.
+    var precisaConverter = isVideo && extOriginal !== "mp4";
 
-    var prep = Promise.resolve({ blob: file, mime: mime, ext: (file.name.split(".").pop() || "bin") });
-    if (isVideo) {
+    var prep = Promise.resolve({ blob: file, mime: mime, ext: (extOriginal || "bin") });
+    if (precisaConverter) {
       document.getElementById("up-text").textContent = "Convertendo vídeo " + (i + 1) + " de " + total + "...";
       prep = transcodeVideo(file, function(msg) {
         document.getElementById("up-text").textContent = msg;
