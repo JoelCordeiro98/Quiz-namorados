@@ -59,6 +59,21 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .hero-tag{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--redl);border:1px solid rgba(192,57,43,0.4);padding:0.25rem 0.9rem;border-radius:50px;margin-bottom:0.6rem}
 .hero-title{font-family:"Playfair Display",serif;font-size:clamp(1.8rem,6vw,2.8rem);line-height:1.2}
 .hero-title em{color:var(--redl);font-style:italic}
+.diario-section{padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);text-align:center}
+.diario-section .plabel{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--redl);margin-bottom:0.3rem}
+.diario-title{font-family:"Playfair Display",serif;font-size:1.15rem;margin-bottom:1.2rem}
+.diario-campos{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;text-align:left}
+.diario-campo label{font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--redl);margin-bottom:0.4rem;display:block}
+.diario-campo textarea{width:100%;min-height:90px;padding:0.75rem;border-radius:12px;border:1.5px solid rgba(192,57,43,0.25);background:rgba(255,255,255,0.05);color:#fff;font-size:0.85rem;font-family:"Lato",sans-serif;outline:none;resize:none;transition:border-color 0.2s}
+.diario-campo textarea:focus{border-color:var(--redl)}
+.diario-salvo{font-size:0.7rem;color:var(--gray);margin-top:0.6rem;opacity:0;transition:opacity 0.3s;height:1rem}
+.diario-salvo.show{opacity:1}
+.diario-foto{position:relative;width:110px;height:110px;margin:1rem auto 0;border-radius:50%;overflow:hidden;cursor:pointer;background:var(--blk3);border:2px solid rgba(192,57,43,0.3);display:flex;align-items:center;justify-content:center}
+.diario-foto-img{position:absolute;inset:0;background-size:cover;background-position:center}
+.diario-foto-heart{position:relative;z-index:2;font-size:1.8rem;color:var(--redl);text-shadow:0 2px 8px rgba(0,0,0,0.6)}
+.destaque-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;max-height:50vh;overflow-y:auto;margin-bottom:0.5rem}
+.destaque-item{aspect-ratio:1;border-radius:10px;background-size:cover;background-position:center;cursor:pointer;background-color:var(--blk3);border:2px solid transparent}
+.destaque-item:active{border-color:var(--redl)}
 .home-cards{padding:1.5rem}
 .home-cards h3{font-family:"Playfair Display",serif;font-size:1.2rem;margin-bottom:1rem;color:rgba(255,255,255,0.8)}
 .cards-row{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem}
@@ -188,6 +203,27 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
         <h1 class="hero-title">Nosso<br><em>Espaço</em></h1>
       </div>
     </div>
+
+    <div class="diario-section">
+      <div class="plabel">Hoje</div>
+      <h3 class="diario-title">O que vocês estão pensando?</h3>
+      <div class="diario-campos">
+        <div class="diario-campo">
+          <label>Ele</label>
+          <textarea id="pensamento-ele" placeholder="O que está pensando hoje?" oninput="agendarSalvarPensamento()"></textarea>
+        </div>
+        <div class="diario-campo">
+          <label>Ela</label>
+          <textarea id="pensamento-ela" placeholder="O que está pensando hoje?" oninput="agendarSalvarPensamento()"></textarea>
+        </div>
+      </div>
+      <div class="diario-salvo" id="diario-salvo">Salvo ♥</div>
+      <div class="diario-foto" id="diario-foto" onclick="abrirModalDestaque()">
+        <div class="diario-foto-img" id="diario-foto-img"></div>
+        <div class="diario-foto-heart">♥</div>
+      </div>
+    </div>
+
     <div class="home-cards">
       <h3>Explore o nosso espaço</h3>
       <div class="cards-row">
@@ -352,6 +388,18 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   </div>
 </div>
 
+<!-- MODAL DESTAQUE (foto do casal) -->
+<div class="modal-overlay" id="modal-destaque" onclick="fecharModal('modal-destaque')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">♥ Escolher foto do casal</div>
+    <div class="destaque-grid" id="destaque-grid"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="fecharModal('modal-destaque')">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="fecharLightbox()">
   <button class="lbox-close" onclick="event.stopPropagation();fecharLightbox()">✕</button>
@@ -497,6 +545,107 @@ function carregarTudo() {
   carregarMidias();
   carregarTextos();
   carregarDesejos();
+  carregarPensamento();
+  carregarFotoDestaque();
+}
+
+document.addEventListener("visibilitychange", function() {
+  if (!document.hidden && session) {
+    carregarPensamento();
+  }
+});
+
+// ===== PENSAMENTO DO DIA =====
+function hojeStr() {
+  var d = new Date();
+  var m = String(d.getMonth() + 1).padStart(2, "0");
+  var dia = String(d.getDate()).padStart(2, "0");
+  return d.getFullYear() + "-" + m + "-" + dia;
+}
+
+function carregarPensamento() {
+  api("/rest/v1/pensamentos?data=eq." + hojeStr() + "&select=*")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!Array.isArray(data)) return;
+      var row = data[0] || null;
+      document.getElementById("pensamento-ele").value = row ? (row.ele || "") : "";
+      document.getElementById("pensamento-ela").value = row ? (row.ela || "") : "";
+    });
+}
+
+var pensamentoTimer = null;
+function agendarSalvarPensamento() {
+  clearTimeout(pensamentoTimer);
+  pensamentoTimer = setTimeout(salvarPensamento, 900);
+}
+
+function salvarPensamento() {
+  var ele = document.getElementById("pensamento-ele").value;
+  var ela = document.getElementById("pensamento-ela").value;
+  api("/rest/v1/pensamentos?on_conflict=data", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "resolution=merge-duplicates,return=minimal"
+    },
+    body: JSON.stringify({ data: hojeStr(), ele: ele, ela: ela })
+  }).then(function(r) {
+    if (r.ok) {
+      var el = document.getElementById("diario-salvo");
+      el.classList.add("show");
+      setTimeout(function() { el.classList.remove("show"); }, 1500);
+    }
+  });
+}
+
+// ===== FOTO DE DESTAQUE (foto do casal) =====
+function carregarFotoDestaque() {
+  api("/rest/v1/foto_destaque?id=eq.1&select=*")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!Array.isArray(data)) return;
+      var row = data[0] || null;
+      var img = document.getElementById("diario-foto-img");
+      img.style.backgroundImage = (row && row.url) ? "url(" + row.url + ")" : "";
+    });
+}
+
+function abrirModalDestaque() {
+  var grid = document.getElementById("destaque-grid");
+  grid.innerHTML = "";
+  var fotos = midias.filter(function(m) { return m.tipo !== "video"; });
+  if (fotos.length === 0) {
+    grid.innerHTML = '<div class="photo-empty">Nenhuma foto na galeria ainda.<br>Adicione fotos na Galeria primeiro.</div>';
+  } else {
+    fotos.forEach(function(m) {
+      var div = document.createElement("div");
+      div.className = "destaque-item";
+      div.style.backgroundImage = "url(" + m.url + ")";
+      div.onclick = function() { selecionarFotoDestaque(m); };
+      grid.appendChild(div);
+    });
+  }
+  document.getElementById("modal-destaque").classList.add("show");
+}
+
+function selecionarFotoDestaque(m) {
+  api("/rest/v1/foto_destaque?on_conflict=id", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "resolution=merge-duplicates,return=minimal"
+    },
+    body: JSON.stringify({ id: 1, url: m.url, midia_id: m.id })
+  }).then(function() {
+    fecharModal("modal-destaque");
+    carregarFotoDestaque();
+    mostrarToast("✓ Foto do casal atualizada!");
+  });
 }
 
 // ===== GALERIA =====
