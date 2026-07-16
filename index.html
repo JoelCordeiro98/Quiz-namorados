@@ -68,9 +68,9 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .diario-campo textarea:focus{border-color:var(--redl)}
 .diario-salvo{font-size:0.7rem;color:var(--gray);margin-top:0.6rem;opacity:0;transition:opacity 0.3s;height:1rem}
 .diario-salvo.show{opacity:1}
-.diario-foto{position:relative;width:110px;height:110px;margin:1rem auto 0;border-radius:50%;overflow:hidden;cursor:pointer;background:var(--blk3);border:2px solid rgba(192,57,43,0.3);display:flex;align-items:center;justify-content:center}
-.diario-foto-img{position:absolute;inset:0;background-size:cover;background-position:center}
-.diario-foto-heart{position:relative;z-index:2;font-size:1.8rem;color:var(--redl);text-shadow:0 2px 8px rgba(0,0,0,0.6)}
+.diario-foto{position:relative;width:170px;height:153px;margin:1.2rem auto 0;cursor:pointer;background:var(--blk3);clip-path:path("M85,150 C35.7,112.2 0,76.5 0,45.9 C0,20.4 20.4,0 45.9,0 C64.6,0 78.2,10.2 85,27.2 C91.8,10.2 105.4,0 124.1,0 C149.6,0 170,20.4 170,45.9 C170,76.5 134.3,112.2 85,150 Z")}
+.diario-foto-img{position:absolute;inset:0;background-size:cover;background-position:center;background-color:var(--blk3)}
+.diario-foto.empty::after{content:"+";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2rem;color:rgba(255,255,255,0.3)}
 .destaque-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;max-height:50vh;overflow-y:auto;margin-bottom:0.5rem}
 .destaque-item{aspect-ratio:1;border-radius:10px;background-size:cover;background-position:center;cursor:pointer;background-color:var(--blk3);border:2px solid transparent}
 .destaque-item:active{border-color:var(--redl)}
@@ -218,9 +218,8 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
         </div>
       </div>
       <div class="diario-salvo" id="diario-salvo">Salvo ♥</div>
-      <div class="diario-foto" id="diario-foto" onclick="abrirModalDestaque()">
+      <div class="diario-foto empty" id="diario-foto" onclick="abrirModalDestaque()">
         <div class="diario-foto-img" id="diario-foto-img"></div>
-        <div class="diario-foto-heart">♥</div>
       </div>
     </div>
 
@@ -472,20 +471,10 @@ function authApi(path, body) {
   });
 }
 
-// Verificar sessão salva
+// Sempre pede login de novo ao abrir o app (sessão não fica salva)
 function init() {
-  var saved = localStorage.getItem("sb_session");
-  if (saved) {
-    try {
-      session = JSON.parse(saved);
-      mostrarApp();
-      carregarTudo();
-    } catch(e) {
-      mostrarLogin();
-    }
-  } else {
-    mostrarLogin();
-  }
+  localStorage.removeItem("sb_session");
+  mostrarLogin();
   document.getElementById("loading").style.display = "none";
 }
 
@@ -511,7 +500,6 @@ function fazerLogin() {
     .then(function(data) {
       if (data.access_token) {
         session = data;
-        localStorage.setItem("sb_session", JSON.stringify(data));
         mostrarApp();
         carregarTudo();
       } else {
@@ -609,7 +597,14 @@ function carregarFotoDestaque() {
       if (!Array.isArray(data)) return;
       var row = data[0] || null;
       var img = document.getElementById("diario-foto-img");
-      img.style.backgroundImage = (row && row.url) ? "url(" + row.url + ")" : "";
+      var foto = document.getElementById("diario-foto");
+      if (row && row.url) {
+        img.style.backgroundImage = "url(" + row.url + ")";
+        foto.classList.remove("empty");
+      } else {
+        img.style.backgroundImage = "";
+        foto.classList.add("empty");
+      }
     });
 }
 
