@@ -63,17 +63,26 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .diario-section .plabel{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--redl);margin-bottom:0.3rem}
 .diario-title{font-family:"Playfair Display",serif;font-size:1.15rem;margin-bottom:1.2rem}
 .diario-campos{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;text-align:left}
-.diario-campo label{font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--redl);margin-bottom:0.4rem;display:block}
+.diario-campo-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem}
+.diario-campo label{font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--redl);margin:0}
+.diario-lido{background:none;border:none;font-size:1.15rem;line-height:1;cursor:pointer;padding:0.1rem 0.2rem;opacity:0.3;filter:grayscale(1);transition:opacity 0.25s,filter 0.25s}
+.diario-lido.lido{opacity:1;filter:none;animation:lidoPop 0.4s ease}
+@keyframes lidoPop{0%{transform:scale(1)}45%{transform:scale(1.5)}100%{transform:scale(1)}}
 .diario-campo textarea{width:100%;min-height:90px;padding:0.75rem;border-radius:12px;border:1.5px solid rgba(192,57,43,0.25);background:rgba(255,255,255,0.05);color:#fff;font-size:0.85rem;font-family:"Lato",sans-serif;outline:none;resize:none;transition:border-color 0.2s}
 .diario-campo textarea:focus{border-color:var(--redl)}
 .diario-salvo{font-size:0.7rem;color:var(--gray);margin-top:0.6rem;opacity:0;transition:opacity 0.3s;height:1rem}
 .diario-salvo.show{opacity:1}
-.diario-foto{position:relative;width:170px;height:153px;margin:1.2rem auto 0;cursor:pointer;background:var(--blk3);clip-path:path("M85,150 C35.7,112.2 0,76.5 0,45.9 C0,20.4 20.4,0 45.9,0 C64.6,0 78.2,10.2 85,27.2 C91.8,10.2 105.4,0 124.1,0 C149.6,0 170,20.4 170,45.9 C170,76.5 134.3,112.2 85,150 Z")}
+.diario-foto{position:relative;width:170px;height:153px;margin:1.2rem auto 0;cursor:pointer;background:var(--blk3);border:2px solid rgba(192,57,43,0.55);clip-path:path("M85,150 C35.7,112.2 0,76.5 0,45.9 C0,20.4 20.4,0 45.9,0 C64.6,0 78.2,10.2 85,27.2 C91.8,10.2 105.4,0 124.1,0 C149.6,0 170,20.4 170,45.9 C170,76.5 134.3,112.2 85,150 Z")}
 .diario-foto-img{position:absolute;inset:0;background-size:cover;background-position:center;background-color:var(--blk3)}
 .diario-foto.empty::after{content:"+";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2rem;color:rgba(255,255,255,0.3)}
 .destaque-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;max-height:50vh;overflow-y:auto;margin-bottom:0.5rem}
 .destaque-item{aspect-ratio:1;border-radius:10px;background-size:cover;background-position:center;cursor:pointer;background-color:var(--blk3);border:2px solid transparent}
 .destaque-item:active{border-color:var(--redl)}
+.indic-list{padding:0.5rem 1rem 1rem}
+.indic-subhdr{font-family:"Playfair Display",serif;font-size:1rem;padding:1rem 0 0.6rem;color:rgba(255,255,255,0.8)}
+.quem-toggle{display:flex;gap:0.75rem}
+.quem-btn{flex:1;padding:0.75rem;border-radius:12px;border:1.5px solid rgba(192,57,43,0.25);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);font-size:0.9rem;font-family:"Lato",sans-serif;cursor:pointer;transition:all 0.2s}
+.quem-btn.active{border-color:var(--redl);background:rgba(192,57,43,0.18);color:#fff}
 .home-cards{padding:1.5rem}
 .home-cards h3{font-family:"Playfair Display",serif;font-size:1.2rem;margin-bottom:1rem;color:rgba(255,255,255,0.8)}
 .cards-row{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem}
@@ -209,12 +218,18 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       <h3 class="diario-title">O que vocês estão pensando?</h3>
       <div class="diario-campos">
         <div class="diario-campo">
-          <label>Ele</label>
-          <textarea id="pensamento-ele" placeholder="O que está pensando hoje?" oninput="agendarSalvarPensamento()"></textarea>
+          <div class="diario-campo-hdr">
+            <label>Ele</label>
+            <button type="button" class="diario-lido" id="lido-ele" onclick="toggleLido('ele')" aria-label="Marcar como lido">☀️</button>
+          </div>
+          <textarea id="pensamento-ele" placeholder="O que está pensando hoje?" oninput="campoAlterado('ele')"></textarea>
         </div>
         <div class="diario-campo">
-          <label>Ela</label>
-          <textarea id="pensamento-ela" placeholder="O que está pensando hoje?" oninput="agendarSalvarPensamento()"></textarea>
+          <div class="diario-campo-hdr">
+            <label>Ela</label>
+            <button type="button" class="diario-lido" id="lido-ela" onclick="toggleLido('ela')" aria-label="Marcar como lido">🌙</button>
+          </div>
+          <textarea id="pensamento-ela" placeholder="O que está pensando hoje?" oninput="campoAlterado('ela')"></textarea>
         </div>
       </div>
       <div class="diario-salvo" id="diario-salvo">Salvo ♥</div>
@@ -305,6 +320,27 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </div>
   </div>
 
+  <div class="page" id="page-indicacoes">
+    <div class="phdr">
+      <div class="phdr-left">
+        <div class="plabel">Pra assistir</div>
+        <h2>Indicações</h2>
+        <p>Filmes e séries pra ver juntos</p>
+      </div>
+      <button class="btn-add" onclick="abrirModalIndicacao()">+</button>
+    </div>
+    <div class="indic-list">
+      <h3 class="indic-subhdr">☀️ Indicações dele</h3>
+      <div id="indic-list-ele">
+        <div class="photo-empty">Nenhuma indicação ainda.</div>
+      </div>
+      <h3 class="indic-subhdr">🌙 Indicações dela</h3>
+      <div id="indic-list-ela">
+        <div class="photo-empty">Nenhuma indicação ainda.</div>
+      </div>
+    </div>
+  </div>
+
   <nav class="bnav">
     <button class="bitem active" onclick="goTo('home')" data-page="home">
       <span class="bitem-icon">🏠</span><span class="bitem-label">Início</span>
@@ -317,6 +353,9 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </button>
     <button class="bitem" onclick="goTo('desejos')" data-page="desejos">
       <span class="bitem-icon">✨</span><span class="bitem-label">Desejos</span>
+    </button>
+    <button class="bitem" onclick="goTo('indicacoes')" data-page="indicacoes">
+      <span class="bitem-icon">🎬</span><span class="bitem-label">Filmes</span>
     </button>
   </nav>
 </div>
@@ -383,6 +422,29 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div class="modal-btns">
       <button class="btn-cancel" onclick="fecharModal('modal-desejo')">Cancelar</button>
       <button class="btn-save" onclick="salvarDesejo()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL INDICAÇÃO -->
+<div class="modal-overlay" id="modal-indicacao" onclick="fecharModal('modal-indicacao')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🎬 Nova indicação</div>
+    <div class="form-group">
+      <label>Quem indica?</label>
+      <div class="quem-toggle">
+        <button type="button" class="quem-btn" id="quem-btn-ele" onclick="selecionarQuem('ele')">☀️ Ele</button>
+        <button type="button" class="quem-btn" id="quem-btn-ela" onclick="selecionarQuem('ela')">🌙 Ela</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Filme ou série</label>
+      <input type="text" id="indic-titulo" placeholder="Ex: Interestelar...">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="fecharModal('modal-indicacao')">Cancelar</button>
+      <button class="btn-save" onclick="salvarIndicacao()">Salvar</button>
     </div>
   </div>
 </div>
@@ -535,6 +597,7 @@ function carregarTudo() {
   carregarDesejos();
   carregarPensamento();
   carregarFotoDestaque();
+  carregarIndicacoes();
 }
 
 document.addEventListener("visibilitychange", function() {
@@ -551,6 +614,9 @@ function hojeStr() {
   return d.getFullYear() + "-" + m + "-" + dia;
 }
 
+var lidoEle = false;
+var lidoEla = false;
+
 function carregarPensamento() {
   api("/rest/v1/pensamentos?data=eq." + hojeStr() + "&select=*")
     .then(function(r) { return r.json(); })
@@ -559,7 +625,27 @@ function carregarPensamento() {
       var row = data[0] || null;
       document.getElementById("pensamento-ele").value = row ? (row.ele || "") : "";
       document.getElementById("pensamento-ela").value = row ? (row.ela || "") : "";
+      lidoEle = row ? !!row.lido_ele : false;
+      lidoEla = row ? !!row.lido_ela : false;
+      atualizarBotoesLido();
     });
+}
+
+function atualizarBotoesLido() {
+  document.getElementById("lido-ele").classList.toggle("lido", lidoEle);
+  document.getElementById("lido-ela").classList.toggle("lido", lidoEla);
+}
+
+function toggleLido(quem) {
+  if (quem === "ele") { lidoEle = !lidoEle; } else { lidoEla = !lidoEla; }
+  atualizarBotoesLido();
+  salvarPensamento();
+}
+
+function campoAlterado(quem) {
+  if (quem === "ele") { lidoEle = false; } else { lidoEla = false; }
+  atualizarBotoesLido();
+  agendarSalvarPensamento();
 }
 
 var pensamentoTimer = null;
@@ -579,7 +665,7 @@ function salvarPensamento() {
       "Content-Type": "application/json",
       "Prefer": "resolution=merge-duplicates,return=minimal"
     },
-    body: JSON.stringify({ data: hojeStr(), ele: ele, ela: ela })
+    body: JSON.stringify({ data: hojeStr(), ele: ele, ela: ela, lido_ele: lidoEle, lido_ela: lidoEla })
   }).then(function(r) {
     if (r.ok) {
       var el = document.getElementById("diario-salvo");
@@ -1024,6 +1110,113 @@ function deletarDesejo(id) {
   }).then(function() {
     mostrarToast("Excluído!");
     carregarDesejos();
+  });
+}
+
+// ===== INDICAÇÕES (filmes e séries) =====
+var indicacoes = [];
+var quemSelecionado = null;
+
+function carregarIndicacoes() {
+  api("/rest/v1/indicacoes?order=criado_em.desc&select=*")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!Array.isArray(data)) return;
+      indicacoes = data;
+      renderIndicacoes();
+    });
+}
+
+function renderIndicacaoItem(i) {
+  var div = document.createElement("div");
+  div.className = "desejo-item" + (i.assistido ? " done" : "");
+  div.innerHTML = '<div class="d-check">' + (i.assistido ? "✓" : "") + '</div>' +
+    '<div class="d-txt"><div class="d-titulo">' + i.titulo + '</div>' +
+    '<div class="d-status">' + (i.assistido ? "Assistido! ✓" : "Pra ver") + '</div></div>' +
+    '<button class="d-del" onclick="event.stopPropagation();deletarIndicacao(\'' + i.id + '\')">🗑</button>';
+  div.onclick = function(e) {
+    if (e.target.classList.contains("d-del")) return;
+    toggleIndicacao(i.id, i.assistido);
+  };
+  return div;
+}
+
+function renderIndicacoes() {
+  var listaEle = document.getElementById("indic-list-ele");
+  var listaEla = document.getElementById("indic-list-ela");
+  var itensEle = indicacoes.filter(function(i) { return i.quem === "ele"; });
+  var itensEla = indicacoes.filter(function(i) { return i.quem === "ela"; });
+
+  listaEle.innerHTML = "";
+  if (itensEle.length === 0) {
+    listaEle.innerHTML = '<div class="photo-empty">Nenhuma indicação ainda.</div>';
+  } else {
+    itensEle.forEach(function(i) { listaEle.appendChild(renderIndicacaoItem(i)); });
+  }
+
+  listaEla.innerHTML = "";
+  if (itensEla.length === 0) {
+    listaEla.innerHTML = '<div class="photo-empty">Nenhuma indicação ainda.</div>';
+  } else {
+    itensEla.forEach(function(i) { listaEla.appendChild(renderIndicacaoItem(i)); });
+  }
+}
+
+function selecionarQuem(q) {
+  quemSelecionado = q;
+  document.getElementById("quem-btn-ele").classList.toggle("active", q === "ele");
+  document.getElementById("quem-btn-ela").classList.toggle("active", q === "ela");
+}
+
+function abrirModalIndicacao() {
+  quemSelecionado = null;
+  document.getElementById("quem-btn-ele").classList.remove("active");
+  document.getElementById("quem-btn-ela").classList.remove("active");
+  document.getElementById("indic-titulo").value = "";
+  document.getElementById("modal-indicacao").classList.add("show");
+}
+
+function salvarIndicacao() {
+  var titulo = document.getElementById("indic-titulo").value.trim();
+  if (!quemSelecionado) { mostrarToast("Escolha quem está indicando!"); return; }
+  if (!titulo) { mostrarToast("Digite o nome do filme ou série!"); return; }
+  api("/rest/v1/indicacoes", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal"
+    },
+    body: JSON.stringify({ titulo: titulo, quem: quemSelecionado, assistido: false })
+  }).then(function() {
+    fecharModal("modal-indicacao");
+    mostrarToast("✓ Indicação adicionada!");
+    carregarIndicacoes();
+  });
+}
+
+function toggleIndicacao(id, assistido) {
+  api("/rest/v1/indicacoes?id=eq." + id, {
+    method: "PATCH",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal"
+    },
+    body: JSON.stringify({ assistido: !assistido })
+  }).then(function() { carregarIndicacoes(); });
+}
+
+function deletarIndicacao(id) {
+  if (!confirm("Excluir esta indicação?")) return;
+  api("/rest/v1/indicacoes?id=eq." + id, {
+    method: "DELETE",
+    headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + session.access_token }
+  }).then(function() {
+    mostrarToast("Excluído!");
+    carregarIndicacoes();
   });
 }
 
