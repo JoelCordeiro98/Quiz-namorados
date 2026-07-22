@@ -106,6 +106,13 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .musica-item-artista{font-size:0.72rem;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .musica-item-del{background:none;border:none;color:rgba(255,255,255,0.2);font-size:1rem;cursor:pointer;padding:0.25rem;flex-shrink:0}
 .musica-list-wrap{max-height:45vh;overflow-y:auto}
+.relembrando-section{padding:0 1.5rem 1.5rem}
+.relembrando-section .plabel{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--redl);margin-bottom:0.5rem}
+.relembrando-card{display:flex;align-items:center;gap:0.85rem;padding:0.85rem 1rem;background:var(--blk3);border:1px solid rgba(255,255,255,0.07);border-radius:14px}
+.relembrando-thumb{display:none;width:50px;height:50px;border-radius:10px;background-size:cover;background-position:center;background-color:var(--blk2);flex-shrink:0}
+.relembrando-info{flex:1;min-width:0}
+.relembrando-tempo{font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--redl);margin-bottom:0.25rem}
+.relembrando-texto{font-family:"Playfair Display",serif;font-style:italic;font-size:0.88rem;color:rgba(255,255,255,0.85);line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .home-cards{padding:1.5rem}
 .home-cards h3{font-family:"Playfair Display",serif;font-size:1.2rem;margin-bottom:1rem;color:rgba(255,255,255,0.8)}
 .cards-row{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem}
@@ -269,6 +276,17 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       <div class="diario-salvo" id="diario-salvo">Salvo ♥</div>
       <div class="diario-foto empty" id="diario-foto" onclick="abrirModalDestaque()">
         <div class="diario-foto-img" id="diario-foto-img"></div>
+      </div>
+    </div>
+
+    <div class="relembrando-section" id="relembrando-section" style="display:none">
+      <div class="plabel">Relembrando</div>
+      <div class="relembrando-card" id="relembrando-card">
+        <div class="relembrando-thumb" id="relembrando-thumb"></div>
+        <div class="relembrando-info">
+          <div class="relembrando-tempo" id="relembrando-tempo"></div>
+          <div class="relembrando-texto" id="relembrando-texto"></div>
+        </div>
       </div>
     </div>
 
@@ -670,6 +688,7 @@ function carregarTudo() {
   carregarFotoDestaque();
   carregarIndicacoes();
   carregarMusicas();
+  carregarRelembrando();
   verificarAniversario();
 }
 
@@ -851,6 +870,96 @@ function selecionarFotoDestaque(m) {
     carregarFotoDestaque();
     mostrarToast("✓ Foto do casal atualizada!");
   });
+}
+
+// ===== RELEMBRANDO (memória do passado) =====
+function mesmoDiaCalendario(d1, d2) {
+  return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
+}
+
+function carregarRelembrando() {
+  Promise.all([
+    api("/rest/v1/pensamentos?select=data,ele,ela&order=data.desc").then(function(r) { return r.json(); }),
+    api("/rest/v1/textos?select=titulo,corpo,criado_em&order=criado_em.desc").then(function(r) { return r.json(); }),
+    api("/rest/v1/midias?select=url,tipo,criado_em&order=criado_em.desc").then(function(r) { return r.json(); })
+  ]).then(function(res) {
+    montarRelembrando(
+      Array.isArray(res[0]) ? res[0] : [],
+      Array.isArray(res[1]) ? res[1] : [],
+      Array.isArray(res[2]) ? res[2] : []
+    );
+  }).catch(function() {});
+}
+
+function montarRelembrando(pensamentosHist, textosHist, midiasHist) {
+  var hoje = new Date();
+  var candidatos = [];
+  var geral = [];
+
+  pensamentosHist.forEach(function(p) {
+    var texto = (p.ele && p.ele.trim()) || (p.ela && p.ela.trim());
+    if (!texto) return;
+    var d = new Date(p.data + "T12:00:00");
+    if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
+    var item = { tipo: "pensamento", data: d, texto: texto };
+    geral.push(item);
+    if (d.getMonth() === hoje.getMonth() && d.getDate() === hoje.getDate() && d.getFullYear() < hoje.getFullYear()) candidatos.push(item);
+  });
+
+  textosHist.forEach(function(t) {
+    if (!t.criado_em) return;
+    var d = new Date(t.criado_em);
+    if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
+    var item = { tipo: "texto", data: d, texto: t.titulo || t.corpo || "" };
+    geral.push(item);
+    if (d.getMonth() === hoje.getMonth() && d.getDate() === hoje.getDate() && d.getFullYear() < hoje.getFullYear()) candidatos.push(item);
+  });
+
+  midiasHist.forEach(function(m) {
+    if (m.tipo === "video" || !m.criado_em) return;
+    var d = new Date(m.criado_em);
+    if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
+    var item = { tipo: "foto", data: d, url: m.url };
+    geral.push(item);
+    if (d.getMonth() === hoje.getMonth() && d.getDate() === hoje.getDate() && d.getFullYear() < hoje.getFullYear()) candidatos.push(item);
+  });
+
+  var section = document.getElementById("relembrando-section");
+  var pool = candidatos.length > 0 ? candidatos : geral;
+  if (pool.length === 0) { section.style.display = "none"; return; }
+
+  var escolhido = pool[Math.floor(Math.random() * pool.length)];
+  renderRelembrando(escolhido, candidatos.length > 0);
+  section.style.display = "block";
+}
+
+function renderRelembrando(item, exato) {
+  var hoje = new Date();
+  var anos = hoje.getFullYear() - item.data.getFullYear();
+  var tempoEl = document.getElementById("relembrando-tempo");
+  var thumbEl = document.getElementById("relembrando-thumb");
+  var textoEl = document.getElementById("relembrando-texto");
+  var card = document.getElementById("relembrando-card");
+
+  tempoEl.textContent = (exato && anos >= 1) ? (anos === 1 ? "Há 1 ano" : "Há " + anos + " anos") : "Relembrando";
+
+  if (item.tipo === "foto") {
+    thumbEl.style.display = "block";
+    thumbEl.style.backgroundImage = "url(" + item.url + ")";
+    textoEl.textContent = "Uma foto de vocês ♥";
+    card.style.cursor = "pointer";
+    card.onclick = function() {
+      var idx = midias.findIndex(function(x) { return x.url === item.url; });
+      if (idx >= 0) abrirLightbox(idx);
+    };
+  } else {
+    thumbEl.style.display = "none";
+    thumbEl.style.backgroundImage = "";
+    var txt = item.texto.length > 90 ? item.texto.substring(0, 90) + "…" : item.texto;
+    textoEl.textContent = '"' + txt + '"';
+    card.style.cursor = "default";
+    card.onclick = null;
+  }
 }
 
 // ===== GALERIA =====
