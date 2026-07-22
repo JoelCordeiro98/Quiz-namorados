@@ -90,19 +90,16 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .d-star{background:none;border:none;color:rgba(255,255,255,0.25);font-size:1.15rem;cursor:pointer;padding:0.25rem}
 .d-star.active{color:#e6a81a}
 .musica-section{padding:0 1.5rem 1.5rem}
-.musica-bar{display:flex;align-items:center;gap:0.6rem;padding:0.5rem;background:var(--blk3);border:1px solid rgba(255,255,255,0.07);border-radius:14px}
-.musica-thumb{position:relative;width:38px;height:38px;border-radius:8px;background-size:cover;background-position:center;background-color:var(--blk2);flex-shrink:0;overflow:hidden}
-#yt-player{position:absolute;inset:0;opacity:0;pointer-events:none}
-.musica-info{flex:1;min-width:0;cursor:pointer}
-.musica-titulo{font-size:0.78rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.musica-artista{font-size:0.66rem;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.musica-btn{background:none;border:none;color:rgba(255,255,255,0.6);font-size:1rem;cursor:pointer;padding:0.3rem;flex-shrink:0}
-.musica-play{color:var(--redl);font-size:1.2rem}
+.musica-bar{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1rem;background:var(--blk3);border:1px solid rgba(255,255,255,0.07);border-radius:14px;cursor:pointer}
+.musica-icon{font-size:1.3rem;flex-shrink:0}
+.musica-info{flex:1;min-width:0}
+.musica-titulo{font-size:0.85rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.musica-artista{font-size:0.7rem;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.musica-arrow{color:rgba(255,255,255,0.3);font-size:1.3rem;flex-shrink:0}
 .musica-add-row{display:flex;gap:0.6rem;margin-bottom:1rem}
 .musica-add-row input{flex:1}
 .musica-item{display:flex;align-items:center;gap:0.75rem;padding:0.6rem;border-radius:12px;cursor:pointer;transition:background 0.2s}
 .musica-item:active{background:rgba(255,255,255,0.05)}
-.musica-item.playing{background:rgba(192,57,43,0.14)}
 .musica-item-thumb{width:44px;height:44px;border-radius:8px;background-size:cover;background-position:center;background-color:var(--blk2);flex-shrink:0}
 .musica-item-info{flex:1;min-width:0}
 .musica-item-titulo{font-size:0.85rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -267,18 +264,13 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </div>
 
     <div class="musica-section">
-      <div class="musica-bar">
-        <div class="musica-thumb" id="musica-thumb">
-          <div id="yt-player"></div>
-        </div>
-        <div class="musica-info" onclick="abrirModalMusicas()">
+      <div class="musica-bar" onclick="abrirModalMusicas()">
+        <div class="musica-icon">🎵</div>
+        <div class="musica-info">
           <div class="musica-titulo" id="musica-titulo">Nenhuma música ainda</div>
-          <div class="musica-artista" id="musica-artista">Toque em + pra adicionar</div>
+          <div class="musica-artista" id="musica-artista">Toque para adicionar</div>
         </div>
-        <button class="musica-btn" onclick="musicaAnterior()" aria-label="Anterior">⏮</button>
-        <button class="musica-btn musica-play" id="musica-play-btn" onclick="toggleMusica()" aria-label="Tocar ou pausar">▶</button>
-        <button class="musica-btn" onclick="musicaProxima()" aria-label="Próxima">⏭</button>
-        <button class="musica-btn" onclick="abrirModalMusicas()" aria-label="Adicionar música">+</button>
+        <div class="musica-arrow">›</div>
       </div>
     </div>
 
@@ -550,7 +542,6 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 
 <div class="toast" id="toast"></div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
 var SUPABASE_URL = "https://yokmbuheeqjbawrmpoco.supabase.co";
 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlva21idWhlZXFqYmF3cm1wb2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMDQ0OTksImV4cCI6MjA5OTU4MDQ5OX0.VOpiMOpG3669SSOXlp797akqh-ALUdVmGYKX3_5aRII";
@@ -1326,42 +1317,8 @@ function deletarIndicacao(id) {
   });
 }
 
-// ===== MÚSICAS (player minimalista via YouTube) =====
+// ===== MÚSICAS (lista de favoritas com link pro YouTube) =====
 var musicas = [];
-var musicaAtualIdx = -1;
-var ytPlayer = null;
-var ytReady = false;
-var tocando = false;
-
-function onYouTubeIframeAPIReady() {
-  ytPlayer = new YT.Player("yt-player", {
-    height: "2",
-    width: "2",
-    playerVars: { playsinline: 1 },
-    events: {
-      onReady: function() { ytReady = true; },
-      onStateChange: onYtStateChange
-    }
-  });
-}
-
-function onYtStateChange(e) {
-  if (typeof YT === "undefined") return;
-  if (e.data === YT.PlayerState.PLAYING) {
-    tocando = true;
-    atualizarBotaoPlay();
-  } else if (e.data === YT.PlayerState.PAUSED) {
-    tocando = false;
-    atualizarBotaoPlay();
-  } else if (e.data === YT.PlayerState.ENDED) {
-    musicaProxima();
-  }
-}
-
-function atualizarBotaoPlay() {
-  var btn = document.getElementById("musica-play-btn");
-  if (btn) btn.textContent = tocando ? "⏸" : "▶";
-}
 
 function extrairYoutubeId(url) {
   var m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
@@ -1382,22 +1339,13 @@ function carregarMusicas() {
 function renderMusicaBar() {
   var titulo = document.getElementById("musica-titulo");
   var artista = document.getElementById("musica-artista");
-  var thumb = document.getElementById("musica-thumb");
-  if (musicaAtualIdx >= 0 && musicas[musicaAtualIdx]) {
-    var m = musicas[musicaAtualIdx];
-    titulo.textContent = m.titulo || "Música";
-    artista.textContent = m.artista || "";
-    thumb.style.backgroundImage = m.thumb ? "url(" + m.thumb + ")" : "";
-  } else if (musicas.length > 0) {
+  if (musicas.length > 0) {
     titulo.textContent = musicas.length + (musicas.length === 1 ? " música salva" : " músicas salvas");
-    artista.textContent = "Toque pra ver a lista";
-    thumb.style.backgroundImage = "";
+    artista.textContent = "Toque para ver a lista";
   } else {
     titulo.textContent = "Nenhuma música ainda";
-    artista.textContent = "Toque em + pra adicionar";
-    thumb.style.backgroundImage = "";
+    artista.textContent = "Toque para adicionar";
   }
-  atualizarBotaoPlay();
 }
 
 function renderMusicaList() {
@@ -1408,17 +1356,16 @@ function renderMusicaList() {
     list.innerHTML = '<div class="photo-empty">Nenhuma música salva ainda.</div>';
     return;
   }
-  musicas.forEach(function(m, idx) {
+  musicas.forEach(function(m) {
     var div = document.createElement("div");
-    div.className = "musica-item" + (idx === musicaAtualIdx ? " playing" : "");
+    div.className = "musica-item";
     div.innerHTML = '<div class="musica-item-thumb" style="background-image:url(' + (m.thumb || "") + ')"></div>' +
       '<div class="musica-item-info"><div class="musica-item-titulo">' + (m.titulo || "Música") + '</div>' +
       '<div class="musica-item-artista">' + (m.artista || "") + '</div></div>' +
       '<button class="musica-item-del" onclick="event.stopPropagation();deletarMusica(\'' + m.id + '\')">🗑</button>';
     div.onclick = function(e) {
       if (e.target.classList.contains("musica-item-del")) return;
-      tocarMusica(idx);
-      fecharModal("modal-musicas");
+      window.open("https://www.youtube.com/watch?v=" + m.video_id, "_blank");
     };
     list.appendChild(div);
   });
@@ -1468,40 +1415,9 @@ function deletarMusica(id) {
     method: "DELETE",
     headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + session.access_token }
   }).then(function() {
-    if (musicas[musicaAtualIdx] && musicas[musicaAtualIdx].id === id) {
-      musicaAtualIdx = -1;
-      if (ytPlayer && ytReady) ytPlayer.stopVideo();
-    }
     mostrarToast("Excluído!");
     carregarMusicas();
   });
-}
-
-function tocarMusica(idx) {
-  if (!musicas[idx] || !ytReady || !ytPlayer) { mostrarToast("Player ainda carregando, tenta de novo em instante."); return; }
-  musicaAtualIdx = idx;
-  ytPlayer.loadVideoById(musicas[idx].video_id);
-  renderMusicaBar();
-  renderMusicaList();
-}
-
-function toggleMusica() {
-  if (musicas.length === 0) { abrirModalMusicas(); return; }
-  if (musicaAtualIdx === -1) { tocarMusica(0); return; }
-  if (!ytReady || !ytPlayer) return;
-  if (tocando) { ytPlayer.pauseVideo(); } else { ytPlayer.playVideo(); }
-}
-
-function musicaProxima() {
-  if (musicas.length === 0) return;
-  var prox = (musicaAtualIdx + 1) % musicas.length;
-  tocarMusica(prox);
-}
-
-function musicaAnterior() {
-  if (musicas.length === 0) return;
-  var ant = (musicaAtualIdx - 1 + musicas.length) % musicas.length;
-  tocarMusica(ant);
 }
 
 // ===== MODAIS =====
