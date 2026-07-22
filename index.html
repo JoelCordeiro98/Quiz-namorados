@@ -52,7 +52,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .btn-add{background:var(--red);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(192,57,43,0.4);transition:all 0.2s;flex-shrink:0}
 .btn-add:hover{background:var(--redl);transform:scale(1.1)}
 .home-hero{position:relative;height:55vw;max-height:320px;min-height:200px;overflow:hidden;background:var(--blk3)}
-.hero-photos{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);height:100%;gap:2px;opacity:0.45;filter:brightness(0.7)}
+.hero-photos{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);height:100%;gap:2px;opacity:0.45;filter:brightness(0.7);transition:opacity 0.4s ease}
 .hero-photos div{background-size:cover;background-position:center}
 .hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(13,13,13,0.3) 0%,rgba(13,13,13,0.75) 100%)}
 .hero-content{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1rem}
@@ -195,6 +195,14 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--blk2);border:1px solid rgba(192,57,43,0.4);color:#fff;padding:0.7rem 1.4rem;border-radius:50px;font-size:0.85rem;opacity:0;transition:all 0.3s;z-index:800;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .logout-btn{position:fixed;top:1rem;right:1rem;z-index:50;background:rgba(192,57,43,0.2);border:1px solid rgba(192,57,43,0.3);color:var(--redl);padding:0.4rem 0.9rem;border-radius:50px;font-size:0.75rem;cursor:pointer;font-family:"Lato",sans-serif;font-weight:700}
+.fab-aniversario{display:none;position:fixed;bottom:86px;right:1.1rem;width:56px;height:56px;border-radius:50%;background:var(--red);border:none;color:#fff;font-size:1.6rem;box-shadow:0 4px 20px rgba(192,57,43,0.55);cursor:pointer;z-index:400;align-items:center;justify-content:center;animation:fabBeat 1.15s infinite}
+.fab-aniversario.show{display:flex}
+@keyframes fabBeat{0%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}45%{transform:scale(1.18)}60%{transform:scale(1)}}
+.aniv-popup{display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;padding:1.5rem}
+.aniv-popup.show{display:flex}
+.aniv-popup-box{background:var(--blk2);border:1.5px solid var(--red);border-radius:24px;padding:2.2rem 1.8rem;max-width:360px;width:100%;text-align:center;box-shadow:0 0 60px rgba(192,57,43,0.35)}
+.aniv-popup-heart{font-size:2.6rem;color:var(--redl);animation:heartbeat 1s infinite;margin-bottom:1rem}
+.aniv-popup-msg{font-family:"Playfair Display",serif;font-size:1.1rem;line-height:1.6;color:#fff;margin-bottom:1.5rem}
 </style>
 </head>
 <body>
@@ -225,6 +233,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 
 <div id="app">
   <button class="logout-btn" onclick="fazerLogout()">Sair</button>
+  <button class="fab-aniversario" id="fab-aniversario" onclick="abrirPopupAniversario()" aria-label="Comemorar">♥</button>
 
   <div class="page active" id="page-home">
     <div class="home-hero">
@@ -540,6 +549,15 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   <div class="up-bar-track"><div class="up-bar-fill" id="up-bar-fill" style="width:0%"></div></div>
 </div>
 
+<!-- POPUP ANIVERSÁRIO -->
+<div class="aniv-popup" id="aniv-popup" onclick="fecharPopupAniversario()">
+  <div class="aniv-popup-box" onclick="event.stopPropagation()">
+    <div class="aniv-popup-heart">♥</div>
+    <div class="aniv-popup-msg" id="aniv-popup-msg"></div>
+    <button class="btn-save" onclick="fecharPopupAniversario()">Fechar ♥</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -630,6 +648,7 @@ function fazerLogin() {
 function fazerLogout() {
   session = null;
   localStorage.removeItem("sb_session");
+  clearInterval(heroSlideTimer);
   midias = []; textos = []; desejos = [];
   mostrarLogin();
 }
@@ -651,11 +670,35 @@ function carregarTudo() {
   carregarFotoDestaque();
   carregarIndicacoes();
   carregarMusicas();
+  verificarAniversario();
+}
+
+// ===== ANIVERSÁRIO (todo dia 15, anual em 15/05) =====
+function verificarAniversario() {
+  var hoje = new Date();
+  var fab = document.getElementById("fab-aniversario");
+  if (!fab) return;
+  fab.classList.toggle("show", hoje.getDate() === 15);
+}
+
+function abrirPopupAniversario() {
+  var hoje = new Date();
+  var anual = hoje.getMonth() === 4; // maio (0-indexado)
+  var msg = anual
+    ? "🎉 Feliz Aniversário de Namoro! Mais um ano de amor e cumplicidade juntos. Te amo! ♥"
+    : "💕 Mais um mês juntos! Cada dia 15 é um lembrete do quanto nosso amor cresce. ♥";
+  document.getElementById("aniv-popup-msg").textContent = msg;
+  document.getElementById("aniv-popup").classList.add("show");
+}
+
+function fecharPopupAniversario() {
+  document.getElementById("aniv-popup").classList.remove("show");
 }
 
 document.addEventListener("visibilitychange", function() {
   if (!document.hidden && session) {
     carregarPensamento();
+    verificarAniversario();
   }
 });
 
@@ -830,7 +873,9 @@ function renderGaleria() {
     renderHeroPhotos([]);
     return;
   }
-  renderHeroPhotos(midias.slice(0, 6));
+  heroSlideIndex = 0;
+  renderHeroPhotos(getHeroBatch());
+  iniciarHeroSlideshow();
   midias.forEach(function(m, idx) {
     var div = document.createElement("div");
     div.className = "photo-item" + (m.tipo === "video" ? " video" : "");
@@ -842,21 +887,47 @@ function renderGaleria() {
   });
 }
 
+// ===== SLIDESHOW DA TELA INICIAL =====
+var heroSlideIndex = 0;
+var heroSlideTimer = null;
+
+function getHeroBatch() {
+  var batch = [];
+  var total = Math.min(midias.length, 6);
+  for (var i = 0; i < total; i++) {
+    batch.push(midias[(heroSlideIndex + i) % midias.length]);
+  }
+  return batch;
+}
+
+function iniciarHeroSlideshow() {
+  clearInterval(heroSlideTimer);
+  if (midias.length <= 6) return;
+  heroSlideTimer = setInterval(function() {
+    heroSlideIndex = (heroSlideIndex + 6) % midias.length;
+    renderHeroPhotos(getHeroBatch());
+  }, 5000);
+}
+
 function renderHeroPhotos(items) {
   var hero = document.getElementById("hero-photos");
-  hero.innerHTML = "";
-  for (var i = 0; i < 6; i++) {
-    var div = document.createElement("div");
-    if (items[i]) {
-      if (items[i].tipo === "video") {
-        div.style.cssText = "display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:rgba(255,255,255,0.35);background:#1a1a1a";
-        div.textContent = "▶";
-      } else {
-        div.style.backgroundImage = "url(" + items[i].url + ")";
+  hero.style.opacity = "0";
+  setTimeout(function() {
+    hero.innerHTML = "";
+    for (var i = 0; i < 6; i++) {
+      var div = document.createElement("div");
+      if (items[i]) {
+        if (items[i].tipo === "video") {
+          div.style.cssText = "display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:rgba(255,255,255,0.35);background:#1a1a1a";
+          div.textContent = "▶";
+        } else {
+          div.style.backgroundImage = "url(" + items[i].url + ")";
+        }
       }
+      hero.appendChild(div);
     }
-    hero.appendChild(div);
-  }
+    hero.style.opacity = "0.45";
+  }, 250);
 }
 
 function previewFiles(input) {
