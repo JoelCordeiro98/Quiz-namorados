@@ -89,6 +89,26 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .desejo-item.prioridade{border-color:rgba(230,168,26,0.5);background:rgba(230,168,26,0.08)}
 .d-star{background:none;border:none;color:rgba(255,255,255,0.25);font-size:1.15rem;cursor:pointer;padding:0.25rem}
 .d-star.active{color:#e6a81a}
+.musica-section{padding:0 1.5rem 1.5rem}
+.musica-bar{display:flex;align-items:center;gap:0.6rem;padding:0.5rem;background:var(--blk3);border:1px solid rgba(255,255,255,0.07);border-radius:14px}
+.musica-thumb{position:relative;width:38px;height:38px;border-radius:8px;background-size:cover;background-position:center;background-color:var(--blk2);flex-shrink:0;overflow:hidden}
+#yt-player{position:absolute;inset:0;opacity:0;pointer-events:none}
+.musica-info{flex:1;min-width:0;cursor:pointer}
+.musica-titulo{font-size:0.78rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.musica-artista{font-size:0.66rem;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.musica-btn{background:none;border:none;color:rgba(255,255,255,0.6);font-size:1rem;cursor:pointer;padding:0.3rem;flex-shrink:0}
+.musica-play{color:var(--redl);font-size:1.2rem}
+.musica-add-row{display:flex;gap:0.6rem;margin-bottom:1rem}
+.musica-add-row input{flex:1}
+.musica-item{display:flex;align-items:center;gap:0.75rem;padding:0.6rem;border-radius:12px;cursor:pointer;transition:background 0.2s}
+.musica-item:active{background:rgba(255,255,255,0.05)}
+.musica-item.playing{background:rgba(192,57,43,0.14)}
+.musica-item-thumb{width:44px;height:44px;border-radius:8px;background-size:cover;background-position:center;background-color:var(--blk2);flex-shrink:0}
+.musica-item-info{flex:1;min-width:0}
+.musica-item-titulo{font-size:0.85rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.musica-item-artista{font-size:0.72rem;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.musica-item-del{background:none;border:none;color:rgba(255,255,255,0.2);font-size:1rem;cursor:pointer;padding:0.25rem;flex-shrink:0}
+.musica-list-wrap{max-height:45vh;overflow-y:auto}
 .home-cards{padding:1.5rem}
 .home-cards h3{font-family:"Playfair Display",serif;font-size:1.2rem;margin-bottom:1rem;color:rgba(255,255,255,0.8)}
 .cards-row{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem}
@@ -243,6 +263,22 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       <div class="diario-salvo" id="diario-salvo">Salvo ♥</div>
       <div class="diario-foto empty" id="diario-foto" onclick="abrirModalDestaque()">
         <div class="diario-foto-img" id="diario-foto-img"></div>
+      </div>
+    </div>
+
+    <div class="musica-section">
+      <div class="musica-bar">
+        <div class="musica-thumb" id="musica-thumb">
+          <div id="yt-player"></div>
+        </div>
+        <div class="musica-info" onclick="abrirModalMusicas()">
+          <div class="musica-titulo" id="musica-titulo">Nenhuma música ainda</div>
+          <div class="musica-artista" id="musica-artista">Toque em + pra adicionar</div>
+        </div>
+        <button class="musica-btn" onclick="musicaAnterior()" aria-label="Anterior">⏮</button>
+        <button class="musica-btn musica-play" id="musica-play-btn" onclick="toggleMusica()" aria-label="Tocar ou pausar">▶</button>
+        <button class="musica-btn" onclick="musicaProxima()" aria-label="Próxima">⏭</button>
+        <button class="musica-btn" onclick="abrirModalMusicas()" aria-label="Adicionar música">+</button>
       </div>
     </div>
 
@@ -434,6 +470,22 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   </div>
 </div>
 
+<!-- MODAL MÚSICAS -->
+<div class="modal-overlay" id="modal-musicas" onclick="fecharModal('modal-musicas')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🎵 Nossas Músicas</div>
+    <div class="musica-add-row">
+      <input type="text" id="musica-link" placeholder="Cole o link do YouTube...">
+      <button class="btn-save" style="flex:0 0 auto;padding:0.8rem 1.1rem" onclick="adicionarMusica()">+</button>
+    </div>
+    <div class="musica-list-wrap" id="musica-list"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="fecharModal('modal-musicas')">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL INDICAÇÃO -->
 <div class="modal-overlay" id="modal-indicacao" onclick="fecharModal('modal-indicacao')">
   <div class="modal-box" onclick="event.stopPropagation()">
@@ -498,6 +550,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 
 <div class="toast" id="toast"></div>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
 var SUPABASE_URL = "https://yokmbuheeqjbawrmpoco.supabase.co";
 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlva21idWhlZXFqYmF3cm1wb2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMDQ0OTksImV4cCI6MjA5OTU4MDQ5OX0.VOpiMOpG3669SSOXlp797akqh-ALUdVmGYKX3_5aRII";
@@ -606,6 +659,7 @@ function carregarTudo() {
   carregarPensamento();
   carregarFotoDestaque();
   carregarIndicacoes();
+  carregarMusicas();
 }
 
 document.addEventListener("visibilitychange", function() {
@@ -1270,6 +1324,184 @@ function deletarIndicacao(id) {
     mostrarToast("Excluído!");
     carregarIndicacoes();
   });
+}
+
+// ===== MÚSICAS (player minimalista via YouTube) =====
+var musicas = [];
+var musicaAtualIdx = -1;
+var ytPlayer = null;
+var ytReady = false;
+var tocando = false;
+
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player("yt-player", {
+    height: "2",
+    width: "2",
+    playerVars: { playsinline: 1 },
+    events: {
+      onReady: function() { ytReady = true; },
+      onStateChange: onYtStateChange
+    }
+  });
+}
+
+function onYtStateChange(e) {
+  if (typeof YT === "undefined") return;
+  if (e.data === YT.PlayerState.PLAYING) {
+    tocando = true;
+    atualizarBotaoPlay();
+  } else if (e.data === YT.PlayerState.PAUSED) {
+    tocando = false;
+    atualizarBotaoPlay();
+  } else if (e.data === YT.PlayerState.ENDED) {
+    musicaProxima();
+  }
+}
+
+function atualizarBotaoPlay() {
+  var btn = document.getElementById("musica-play-btn");
+  if (btn) btn.textContent = tocando ? "⏸" : "▶";
+}
+
+function extrairYoutubeId(url) {
+  var m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function carregarMusicas() {
+  api("/rest/v1/musicas?order=criado_em.asc&select=*")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!Array.isArray(data)) return;
+      musicas = data;
+      renderMusicaBar();
+      renderMusicaList();
+    });
+}
+
+function renderMusicaBar() {
+  var titulo = document.getElementById("musica-titulo");
+  var artista = document.getElementById("musica-artista");
+  var thumb = document.getElementById("musica-thumb");
+  if (musicaAtualIdx >= 0 && musicas[musicaAtualIdx]) {
+    var m = musicas[musicaAtualIdx];
+    titulo.textContent = m.titulo || "Música";
+    artista.textContent = m.artista || "";
+    thumb.style.backgroundImage = m.thumb ? "url(" + m.thumb + ")" : "";
+  } else if (musicas.length > 0) {
+    titulo.textContent = musicas.length + (musicas.length === 1 ? " música salva" : " músicas salvas");
+    artista.textContent = "Toque pra ver a lista";
+    thumb.style.backgroundImage = "";
+  } else {
+    titulo.textContent = "Nenhuma música ainda";
+    artista.textContent = "Toque em + pra adicionar";
+    thumb.style.backgroundImage = "";
+  }
+  atualizarBotaoPlay();
+}
+
+function renderMusicaList() {
+  var list = document.getElementById("musica-list");
+  if (!list) return;
+  list.innerHTML = "";
+  if (musicas.length === 0) {
+    list.innerHTML = '<div class="photo-empty">Nenhuma música salva ainda.</div>';
+    return;
+  }
+  musicas.forEach(function(m, idx) {
+    var div = document.createElement("div");
+    div.className = "musica-item" + (idx === musicaAtualIdx ? " playing" : "");
+    div.innerHTML = '<div class="musica-item-thumb" style="background-image:url(' + (m.thumb || "") + ')"></div>' +
+      '<div class="musica-item-info"><div class="musica-item-titulo">' + (m.titulo || "Música") + '</div>' +
+      '<div class="musica-item-artista">' + (m.artista || "") + '</div></div>' +
+      '<button class="musica-item-del" onclick="event.stopPropagation();deletarMusica(\'' + m.id + '\')">🗑</button>';
+    div.onclick = function(e) {
+      if (e.target.classList.contains("musica-item-del")) return;
+      tocarMusica(idx);
+      fecharModal("modal-musicas");
+    };
+    list.appendChild(div);
+  });
+}
+
+function abrirModalMusicas() {
+  renderMusicaList();
+  document.getElementById("modal-musicas").classList.add("show");
+}
+
+function adicionarMusica() {
+  var link = document.getElementById("musica-link").value.trim();
+  var videoId = extrairYoutubeId(link);
+  if (!videoId) { mostrarToast("Link do YouTube inválido!"); return; }
+
+  fetch("https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=" + videoId + "&format=json")
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .catch(function() { return null; })
+    .then(function(info) {
+      var titulo = (info && info.title) ? info.title : "Música";
+      var artista = (info && info.author_name) ? info.author_name : "";
+      var thumb = "https://img.youtube.com/vi/" + videoId + "/mqdefault.jpg";
+      return api("/rest/v1/musicas", {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + session.access_token,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify({ video_id: videoId, titulo: titulo, artista: artista, thumb: thumb })
+      });
+    })
+    .then(function() {
+      document.getElementById("musica-link").value = "";
+      mostrarToast("✓ Música adicionada!");
+      carregarMusicas();
+    })
+    .catch(function() {
+      mostrarToast("Erro ao adicionar música.");
+    });
+}
+
+function deletarMusica(id) {
+  if (!confirm("Excluir esta música?")) return;
+  api("/rest/v1/musicas?id=eq." + id, {
+    method: "DELETE",
+    headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + session.access_token }
+  }).then(function() {
+    if (musicas[musicaAtualIdx] && musicas[musicaAtualIdx].id === id) {
+      musicaAtualIdx = -1;
+      if (ytPlayer && ytReady) ytPlayer.stopVideo();
+    }
+    mostrarToast("Excluído!");
+    carregarMusicas();
+  });
+}
+
+function tocarMusica(idx) {
+  if (!musicas[idx] || !ytReady || !ytPlayer) { mostrarToast("Player ainda carregando, tenta de novo em instante."); return; }
+  musicaAtualIdx = idx;
+  ytPlayer.loadVideoById(musicas[idx].video_id);
+  renderMusicaBar();
+  renderMusicaList();
+}
+
+function toggleMusica() {
+  if (musicas.length === 0) { abrirModalMusicas(); return; }
+  if (musicaAtualIdx === -1) { tocarMusica(0); return; }
+  if (!ytReady || !ytPlayer) return;
+  if (tocando) { ytPlayer.pauseVideo(); } else { ytPlayer.playVideo(); }
+}
+
+function musicaProxima() {
+  if (musicas.length === 0) return;
+  var prox = (musicaAtualIdx + 1) % musicas.length;
+  tocarMusica(prox);
+}
+
+function musicaAnterior() {
+  if (musicas.length === 0) return;
+  var ant = (musicaAtualIdx - 1 + musicas.length) % musicas.length;
+  tocarMusica(ant);
 }
 
 // ===== MODAIS =====
