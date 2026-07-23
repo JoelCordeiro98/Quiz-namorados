@@ -1,5 +1,5 @@
-const CACHE = 'nosso-espaco-v2';
-const ASSETS = ['/index.html', '/manifest.json'];
+const CACHE = 'nosso-espaco-v3';
+const ASSETS = ['index.html', 'manifest.json'];
 self.addEventListener('install', function(e) {
   e.waitUntil(caches.open(CACHE).then(function(c) { return c.addAll(ASSETS); }));
   self.skipWaiting();
