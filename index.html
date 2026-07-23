@@ -132,7 +132,11 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .lbox-close{position:absolute;top:1rem;right:1rem;width:40px;height:40px;background:rgba(192,57,43,0.8);border:none;border-radius:50%;color:#fff;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .lbox-nav{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;background:rgba(192,57,43,0.7);border:none;border-radius:50%;color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .lbox-prev{left:0.5rem}.lbox-next{right:0.5rem}
-.lbox-del{position:absolute;bottom:2rem;right:1rem;background:rgba(192,57,43,0.85);border:none;color:#fff;padding:0.6rem 1.2rem;border-radius:50px;font-size:0.85rem;cursor:pointer;font-family:"Lato",sans-serif;font-weight:700}
+.lbox-caption{display:none;max-width:90vw;margin-top:0.7rem;text-align:center;padding:0 1rem}
+.lbox-caption-data{font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--redl);margin-bottom:0.3rem}
+.lbox-caption-texto{font-family:"Playfair Display",serif;font-style:italic;font-size:0.92rem;color:rgba(255,255,255,0.9);line-height:1.5}
+.lbox-actions{position:absolute;bottom:1.5rem;left:0;right:0;display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;padding:0 1rem}
+.lbox-btn{background:rgba(192,57,43,0.85);border:none;color:#fff;padding:0.6rem 1.1rem;border-radius:50px;font-size:0.8rem;cursor:pointer;font-family:"Lato",sans-serif;font-weight:700;white-space:nowrap}
 .texto-list{padding:1rem}
 .texto-card{background:var(--blk3);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:1.4rem;margin-bottom:0.75rem;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
 .texto-card::before{content:"";position:absolute;top:0;left:0;width:3px;height:100%;background:var(--red);transform:scaleY(0);transition:transform 0.2s;transform-origin:bottom}
@@ -177,9 +181,14 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .upload-area input{display:none}
 .upload-icon{font-size:2rem;margin-bottom:0.5rem}
 .upload-text{font-size:0.85rem;color:var(--gray)}
-.upload-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-top:0.75rem}
+.upload-preview{display:flex;flex-direction:column;gap:0.6rem;margin-top:0.75rem}
 .up-prev-item{aspect-ratio:1;border-radius:8px;background-size:cover;background-position:center;background-color:var(--blk3);position:relative}
 .up-prev-item button{position:absolute;top:2px;right:2px;width:20px;height:20px;background:rgba(192,57,43,0.9);border:none;border-radius:50%;color:#fff;font-size:0.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.up-item{display:flex;gap:0.6rem;align-items:flex-start;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:0.6rem;position:relative}
+.up-item-thumb{width:60px;height:60px;border-radius:8px;background-size:cover;background-position:center;background-color:var(--blk3);flex-shrink:0}
+.up-item-fields{flex:1;display:flex;flex-direction:column;gap:0.4rem;min-width:0}
+.up-item-fields input{width:100%;padding:0.5rem 0.7rem;border-radius:8px;border:1.5px solid rgba(192,57,43,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:0.8rem;font-family:"Lato",sans-serif;outline:none}
+.up-item-del{position:absolute;top:0.4rem;right:0.4rem;width:22px;height:22px;background:rgba(192,57,43,0.85);border:none;border-radius:50%;color:#fff;font-size:0.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .modal-btns{display:flex;gap:0.75rem;margin-top:1.2rem}
 .btn-cancel{flex:1;background:transparent;border:1.5px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);padding:0.85rem;border-radius:12px;font-size:0.9rem;font-family:"Lato",sans-serif;cursor:pointer}
 .btn-save{flex:2;background:var(--red);border:none;color:#fff;padding:0.85rem;border-radius:12px;font-size:0.9rem;font-family:"Lato",sans-serif;font-weight:700;cursor:pointer;transition:all 0.2s}
@@ -291,6 +300,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </div>
 
     <div class="musica-section">
+      <div class="plabel">Nossas Músicas</div>
       <div class="musica-bar" onclick="abrirModalMusicas()">
         <div class="musica-icon">🎵</div>
         <div class="musica-info">
@@ -545,8 +555,33 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   <button class="lbox-close" onclick="event.stopPropagation();fecharLightbox()">✕</button>
   <button class="lbox-nav lbox-prev" onclick="event.stopPropagation();navLightbox(-1)">‹</button>
   <div id="lbox-content"></div>
+  <div class="lbox-caption" id="lbox-caption" onclick="event.stopPropagation()"></div>
   <button class="lbox-nav lbox-next" onclick="event.stopPropagation();navLightbox(1)">›</button>
-  <button class="lbox-del" onclick="event.stopPropagation();deletarMidia()">🗑 Excluir</button>
+  <div class="lbox-actions" onclick="event.stopPropagation()">
+    <button class="lbox-btn" onclick="abrirModalLegenda()">✎ Legenda</button>
+    <button class="lbox-btn" onclick="salvarMidiaDispositivo()">💾 Salvar</button>
+    <button class="lbox-btn" onclick="deletarMidia()">🗑 Excluir</button>
+  </div>
+</div>
+
+<!-- MODAL LEGENDA -->
+<div class="modal-overlay" id="modal-legenda" onclick="fecharModal('modal-legenda')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✎ Editar legenda</div>
+    <div class="form-group">
+      <label>O que esse dia representa?</label>
+      <textarea id="leg-texto" placeholder="Ex: Nosso primeiro encontro..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Data desse momento</label>
+      <input type="date" id="leg-data">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="fecharModal('modal-legenda')">Cancelar</button>
+      <button class="btn-save" onclick="salvarLegenda()">Salvar</button>
+    </div>
+  </div>
 </div>
 
 <!-- POPUP TEXTO -->
@@ -586,7 +621,7 @@ var midias = [];
 var textos = [];
 var desejos = [];
 var curLbox = 0;
-var arquivosSelecionados = [];
+var itensSelecionados = [];
 
 var MIME_POR_EXT = {
   mp4: "video/mp4", mov: "video/quicktime", m4v: "video/x-m4v",
@@ -878,6 +913,27 @@ function mesmoDiaCalendario(d1, d2) {
 }
 
 function carregarRelembrando() {
+  api("/rest/v1/relembranca_dia?dia=eq." + hojeStr() + "&select=*")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var row = Array.isArray(data) ? data[0] : null;
+      if (row) {
+        var item = {
+          tipo: row.tipo,
+          data: new Date((row.origem_data || row.dia) + "T12:00:00"),
+          texto: row.conteudo,
+          url: row.foto_url
+        };
+        renderRelembrando(item, !!row.exato);
+        document.getElementById("relembrando-section").style.display = "block";
+      } else {
+        gerarRelembrandoDoDia();
+      }
+    })
+    .catch(function() { gerarRelembrandoDoDia(); });
+}
+
+function gerarRelembrandoDoDia() {
   Promise.all([
     api("/rest/v1/pensamentos?select=data,ele,ela&order=data.desc").then(function(r) { return r.json(); }),
     api("/rest/v1/textos?select=titulo,corpo,criado_em&order=criado_em.desc").then(function(r) { return r.json(); }),
@@ -889,6 +945,28 @@ function carregarRelembrando() {
       Array.isArray(res[2]) ? res[2] : []
     );
   }).catch(function() {});
+}
+
+function salvarRelembrancaDoDia(item, exato) {
+  var d = item.data;
+  var origemData = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  api("/rest/v1/relembranca_dia?on_conflict=dia", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "resolution=merge-duplicates,return=minimal"
+    },
+    body: JSON.stringify({
+      dia: hojeStr(),
+      tipo: item.tipo,
+      conteudo: item.tipo === "foto" ? null : item.texto,
+      foto_url: item.tipo === "foto" ? item.url : null,
+      origem_data: origemData,
+      exato: exato
+    })
+  });
 }
 
 function montarRelembrando(pensamentosHist, textosHist, midiasHist) {
@@ -929,7 +1007,9 @@ function montarRelembrando(pensamentosHist, textosHist, midiasHist) {
   if (pool.length === 0) { section.style.display = "none"; return; }
 
   var escolhido = pool[Math.floor(Math.random() * pool.length)];
-  renderRelembrando(escolhido, candidatos.length > 0);
+  var exato = candidatos.length > 0;
+  salvarRelembrancaDoDia(escolhido, exato);
+  renderRelembrando(escolhido, exato);
   section.style.display = "block";
 }
 
@@ -1041,46 +1121,70 @@ function renderHeroPhotos(items) {
 
 function previewFiles(input) {
   var todos = Array.from(input.files);
-  arquivosSelecionados = todos.filter(function(file) {
+  var validos = todos.filter(function(file) {
     var mime = tipoArquivo(file);
     return mime.startsWith("image/") || mime.startsWith("video/");
   });
-  var ignorados = todos.length - arquivosSelecionados.length;
+  var ignorados = todos.length - validos.length;
   if (ignorados > 0) {
     mostrarToast(ignorados === 1 ? "1 arquivo ignorado (não é foto/vídeo)" : ignorados + " arquivos ignorados (não são foto/vídeo)");
   }
-  var preview = document.getElementById("upload-preview");
-  preview.innerHTML = "";
-  arquivosSelecionados.forEach(function(file, i) {
+  itensSelecionados = validos.map(function(file) { return { file: file, thumb: null, legenda: "", data: "" }; });
+  var pendentes = itensSelecionados.length;
+  if (pendentes === 0) { renderUploadPreview(); return; }
+  itensSelecionados.forEach(function(item) {
     var reader = new FileReader();
     reader.onload = function(e) {
-      var div = document.createElement("div");
-      div.className = "up-prev-item";
-      div.style.backgroundImage = "url(" + e.target.result + ")";
-      var btn = document.createElement("button");
-      btn.textContent = "✕";
-      btn.onclick = function() { arquivosSelecionados.splice(i, 1); div.remove(); };
-      div.appendChild(btn);
-      preview.appendChild(div);
+      item.thumb = e.target.result;
+      pendentes--;
+      if (pendentes === 0) renderUploadPreview();
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(item.file);
+  });
+}
+
+function renderUploadPreview() {
+  var preview = document.getElementById("upload-preview");
+  preview.innerHTML = "";
+  itensSelecionados.forEach(function(item) {
+    var div = document.createElement("div");
+    div.className = "up-item";
+    div.innerHTML =
+      '<div class="up-item-thumb" style="background-image:url(' + (item.thumb || "") + ')"></div>' +
+      '<div class="up-item-fields">' +
+        '<input type="text" placeholder="Legenda (opcional)" class="up-item-legenda">' +
+        '<input type="date" class="up-item-data">' +
+      '</div>' +
+      '<button type="button" class="up-item-del">✕</button>';
+    var legendaInput = div.querySelector(".up-item-legenda");
+    var dataInput = div.querySelector(".up-item-data");
+    legendaInput.value = item.legenda;
+    dataInput.value = item.data;
+    legendaInput.oninput = function() { item.legenda = legendaInput.value; };
+    dataInput.oninput = function() { item.data = dataInput.value; };
+    div.querySelector(".up-item-del").onclick = function() {
+      var i = itensSelecionados.indexOf(item);
+      if (i >= 0) itensSelecionados.splice(i, 1);
+      renderUploadPreview();
+    };
+    preview.appendChild(div);
   });
 }
 
 function salvarFotos() {
-  if (arquivosSelecionados.length === 0) { mostrarToast("Selecione pelo menos um arquivo!"); return; }
+  if (itensSelecionados.length === 0) { mostrarToast("Selecione pelo menos um arquivo!"); return; }
   var btn = document.getElementById("btn-salvar-foto");
   btn.disabled = true;
   fecharModal("modal-foto");
-  var arquivos = arquivosSelecionados.slice();
-  var total = arquivos.length;
+  var itens = itensSelecionados.slice();
+  var total = itens.length;
   var feitos = 0;
   mostrarProgresso(true, 0);
 
   function finalizar() {
     mostrarProgresso(false);
     btn.disabled = false;
-    arquivosSelecionados = [];
+    itensSelecionados = [];
     document.getElementById("upload-preview").innerHTML = "";
     document.getElementById("file-input").value = "";
     mostrarToast("✓ Adicionado com sucesso!");
@@ -1089,7 +1193,8 @@ function salvarFotos() {
 
   function processar(i) {
     if (i >= total) { finalizar(); return; }
-    var file = arquivos[i];
+    var item = itens[i];
+    var file = item.file;
     var mime = tipoArquivo(file);
     var isVideo = mime.startsWith("video/");
     var extOriginal = (file.name.split(".").pop() || "bin").toLowerCase();
@@ -1132,7 +1237,13 @@ function salvarFotos() {
             "Content-Type": "application/json",
             "Prefer": "return=minimal"
           },
-          body: JSON.stringify({ url: publicUrl, tipo: isVideo ? "video" : "foto", path: "midias/" + path })
+          body: JSON.stringify({
+            url: publicUrl,
+            tipo: isVideo ? "video" : "foto",
+            path: "midias/" + path,
+            legenda: item.legenda ? item.legenda.trim() : null,
+            data_evento: item.data || null
+          })
         });
       })
       .then(function() {
@@ -1175,6 +1286,76 @@ function renderLboxItem() {
     img.style.cssText = "max-width:95vw;max-height:80vh;object-fit:contain;border-radius:8px";
     cont.appendChild(img);
   }
+  atualizarLboxCaption(m);
+}
+
+function formatarDataBR(dataStr) {
+  if (!dataStr) return "";
+  var d = dataStr.length === 10 ? new Date(dataStr + "T12:00:00") : new Date(dataStr);
+  if (isNaN(d.getTime())) return "";
+  var meses = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+  return d.getDate() + " de " + meses[d.getMonth()] + " de " + d.getFullYear();
+}
+
+function atualizarLboxCaption(m) {
+  var cap = document.getElementById("lbox-caption");
+  var dataStr = formatarDataBR(m.data_evento || m.criado_em);
+  var temLegenda = m.legenda && m.legenda.trim();
+  if (!temLegenda && !dataStr) { cap.style.display = "none"; cap.innerHTML = ""; return; }
+  cap.innerHTML =
+    (dataStr ? '<div class="lbox-caption-data">' + dataStr + '</div>' : '') +
+    (temLegenda ? '<div class="lbox-caption-texto">"' + m.legenda + '"</div>' : '');
+  cap.style.display = "block";
+}
+
+function abrirModalLegenda() {
+  var m = midias[curLbox];
+  document.getElementById("leg-texto").value = m.legenda || "";
+  document.getElementById("leg-data").value = m.data_evento || "";
+  document.getElementById("modal-legenda").classList.add("show");
+}
+
+function salvarLegenda() {
+  var m = midias[curLbox];
+  var legenda = document.getElementById("leg-texto").value.trim();
+  var data = document.getElementById("leg-data").value || null;
+  api("/rest/v1/midias?id=eq." + m.id, {
+    method: "PATCH",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal"
+    },
+    body: JSON.stringify({ legenda: legenda || null, data_evento: data })
+  }).then(function() {
+    m.legenda = legenda || null;
+    m.data_evento = data;
+    fecharModal("modal-legenda");
+    atualizarLboxCaption(m);
+    mostrarToast("✓ Legenda atualizada!");
+  });
+}
+
+function salvarMidiaDispositivo() {
+  var m = midias[curLbox];
+  mostrarToast("Baixando...");
+  fetch(m.url)
+    .then(function(r) { return r.blob(); })
+    .then(function(blob) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      var ext = (m.path || m.url).split(".").pop().split("?")[0];
+      a.download = "nosso-espaco-" + m.id + "." + ext;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function() { URL.revokeObjectURL(url); }, 3000);
+    })
+    .catch(function() {
+      mostrarToast("Não foi possível baixar. Tente segurar a imagem pra salvar.");
+    });
 }
 
 function fecharLightbox() {
