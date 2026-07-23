@@ -126,16 +126,16 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .photo-item{aspect-ratio:1;background-size:cover;background-position:center;cursor:pointer;background-color:var(--blk3);position:relative;overflow:hidden}
 .photo-item.video::after{content:"▶";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#fff;background:rgba(0,0,0,0.3)}
 .photo-empty{grid-column:1/-1;padding:3rem;text-align:center;color:var(--gray);font-size:0.9rem;line-height:1.8}
-.lightbox{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.97);align-items:center;justify-content:center;flex-direction:column}
+.lightbox{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.97);flex-direction:column;align-items:center;overflow-y:auto;padding:3.5rem 0 1.5rem}
 .lightbox.show{display:flex}
-.lightbox img,.lightbox video{max-width:95vw;max-height:80vh;object-fit:contain;border-radius:8px}
-.lbox-close{position:absolute;top:1rem;right:1rem;width:40px;height:40px;background:rgba(192,57,43,0.8);border:none;border-radius:50%;color:#fff;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.lbox-nav{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;background:rgba(192,57,43,0.7);border:none;border-radius:50%;color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lightbox img,.lightbox video{max-width:95vw;max-height:62vh;object-fit:contain;border-radius:8px;margin:auto 0}
+.lbox-close{position:fixed;top:1rem;right:1rem;width:40px;height:40px;background:rgba(192,57,43,0.8);border:none;border-radius:50%;color:#fff;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
+.lbox-nav{position:fixed;top:45%;transform:translateY(-50%);width:42px;height:42px;background:rgba(192,57,43,0.7);border:none;border-radius:50%;color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
 .lbox-prev{left:0.5rem}.lbox-next{right:0.5rem}
-.lbox-caption{display:none;max-width:90vw;margin-top:0.7rem;text-align:center;padding:0 1rem}
+.lbox-caption{display:none;max-width:90vw;margin:0.9rem 0;text-align:center;padding:0 1rem}
 .lbox-caption-data{font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--redl);margin-bottom:0.3rem}
 .lbox-caption-texto{font-family:"Playfair Display",serif;font-style:italic;font-size:0.92rem;color:rgba(255,255,255,0.9);line-height:1.5}
-.lbox-actions{position:absolute;bottom:1.5rem;left:0;right:0;display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;padding:0 1rem}
+.lbox-actions{display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;padding:0 1rem;margin-top:0.5rem}
 .lbox-btn{background:rgba(192,57,43,0.85);border:none;color:#fff;padding:0.6rem 1.1rem;border-radius:50px;font-size:0.8rem;cursor:pointer;font-family:"Lato",sans-serif;font-weight:700;white-space:nowrap}
 .texto-list{padding:1rem}
 .texto-card{background:var(--blk3);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:1.4rem;margin-bottom:0.75rem;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
@@ -926,7 +926,8 @@ function carregarRelembrando() {
           tipo: row.tipo,
           data: new Date((row.origem_data || row.dia) + "T12:00:00"),
           texto: row.conteudo,
-          url: row.foto_url
+          url: row.foto_url,
+          id: row.ref_id
         };
         renderRelembrando(item, !!row.exato);
         document.getElementById("relembrando-section").style.display = "block";
@@ -940,7 +941,7 @@ function carregarRelembrando() {
 function gerarRelembrandoDoDia() {
   Promise.all([
     api("/rest/v1/pensamentos?select=data,ele,ela&order=data.desc").then(function(r) { return r.json(); }),
-    api("/rest/v1/textos?select=titulo,corpo,criado_em&order=criado_em.desc").then(function(r) { return r.json(); }),
+    api("/rest/v1/textos?select=id,titulo,corpo,criado_em&order=criado_em.desc").then(function(r) { return r.json(); }),
     api("/rest/v1/midias?select=url,tipo,criado_em&order=criado_em.desc").then(function(r) { return r.json(); })
   ]).then(function(res) {
     montarRelembrando(
@@ -968,7 +969,8 @@ function salvarRelembrancaDoDia(item, exato) {
       conteudo: item.tipo === "foto" ? null : item.texto,
       foto_url: item.tipo === "foto" ? item.url : null,
       origem_data: origemData,
-      exato: exato
+      exato: exato,
+      ref_id: item.tipo === "texto" ? item.id : null
     })
   });
 }
@@ -992,7 +994,7 @@ function montarRelembrando(pensamentosHist, textosHist, midiasHist) {
     if (!t.criado_em) return;
     var d = new Date(t.criado_em);
     if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
-    var item = { tipo: "texto", data: d, texto: t.titulo || t.corpo || "" };
+    var item = { tipo: "texto", data: d, texto: t.titulo || t.corpo || "", id: t.id };
     geral.push(item);
     if (d.getMonth() === hoje.getMonth() && d.getDate() === hoje.getDate() && d.getFullYear() < hoje.getFullYear()) candidatos.push(item);
   });
@@ -1035,6 +1037,17 @@ function renderRelembrando(item, exato) {
     card.onclick = function() {
       var idx = midias.findIndex(function(x) { return x.url === item.url; });
       if (idx >= 0) abrirLightbox(idx);
+    };
+  } else if (item.tipo === "texto") {
+    thumbEl.style.display = "none";
+    thumbEl.style.backgroundImage = "";
+    var txtTexto = item.texto.length > 90 ? item.texto.substring(0, 90) + "…" : item.texto;
+    textoEl.textContent = '"' + txtTexto + '"';
+    card.style.cursor = "pointer";
+    card.onclick = function() {
+      var idx = textos.findIndex(function(x) { return x.id === item.id; });
+      if (idx >= 0) { goTo("textos"); abrirTexto(idx); }
+      else { mostrarToast("Esse texto não existe mais."); }
     };
   } else {
     thumbEl.style.display = "none";
