@@ -56,7 +56,8 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .hero-photos div{background-size:cover;background-position:center}
 .hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(13,13,13,0.3) 0%,rgba(13,13,13,0.75) 100%)}
 .hero-content{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1rem}
-.hero-tag{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--redl);border:1px solid rgba(192,57,43,0.4);padding:0.25rem 0.9rem;border-radius:50px;margin-bottom:0.6rem}
+.hero-tag{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--redl);border:1px solid rgba(192,57,43,0.4);padding:0.25rem 0.9rem;border-radius:50px;margin-bottom:0.5rem}
+.hero-contador{font-size:0.72rem;color:rgba(255,255,255,0.55);letter-spacing:0.3px;margin-bottom:0.7rem;font-variant-numeric:tabular-nums}
 .hero-title{font-family:"Playfair Display",serif;font-size:clamp(1.8rem,6vw,2.8rem);line-height:1.2}
 .hero-title em{color:var(--redl);font-style:italic}
 .diario-section{padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);text-align:center}
@@ -257,7 +258,8 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       <div class="hero-photos" id="hero-photos"></div>
       <div class="hero-overlay"></div>
       <div class="hero-content">
-        <div class="hero-tag">♥ 2 Anos Juntos</div>
+        <div class="hero-tag" id="hero-anos">♥ Anos Juntos</div>
+        <div class="hero-contador" id="hero-contador"></div>
         <h1 class="hero-title">Nosso<br><em>Espaço</em></h1>
       </div>
     </div>
@@ -706,6 +708,7 @@ function fazerLogout() {
   session = null;
   localStorage.removeItem("sb_session");
   clearInterval(heroSlideTimer);
+  clearInterval(contadorNamoroTimer);
   midias = []; textos = []; desejos = [];
   mostrarLogin();
 }
@@ -729,6 +732,51 @@ function carregarTudo() {
   carregarMusicas();
   carregarRelembrando();
   verificarAniversario();
+  iniciarContadorNamoro();
+}
+
+// ===== CONTADOR DE NAMORO (anos, meses, dias e relógio ao vivo) =====
+var DATA_INICIO_NAMORO = new Date(2024, 4, 15, 0, 0, 0); // 15 de maio de 2024
+var contadorNamoroTimer = null;
+
+function iniciarContadorNamoro() {
+  atualizarContadorNamoro();
+  clearInterval(contadorNamoroTimer);
+  contadorNamoroTimer = setInterval(atualizarContadorNamoro, 1000);
+}
+
+function atualizarContadorNamoro() {
+  var tagEl = document.getElementById("hero-anos");
+  var contEl = document.getElementById("hero-contador");
+  if (!tagEl || !contEl) return;
+
+  var agora = new Date();
+  var inicio = DATA_INICIO_NAMORO;
+
+  var anos = agora.getFullYear() - inicio.getFullYear();
+  var meses = agora.getMonth() - inicio.getMonth();
+  var dias = agora.getDate() - inicio.getDate();
+  var horas = agora.getHours() - inicio.getHours();
+  var minutos = agora.getMinutes() - inicio.getMinutes();
+  var segundos = agora.getSeconds() - inicio.getSeconds();
+
+  if (segundos < 0) { segundos += 60; minutos--; }
+  if (minutos < 0) { minutos += 60; horas--; }
+  if (horas < 0) { horas += 24; dias--; }
+  if (dias < 0) {
+    var diasMesAnterior = new Date(agora.getFullYear(), agora.getMonth(), 0).getDate();
+    dias += diasMesAnterior;
+    meses--;
+  }
+  if (meses < 0) { meses += 12; anos--; }
+
+  tagEl.textContent = "♥ " + anos + (anos === 1 ? " Ano Junto" : " Anos Juntos");
+
+  var partes = [];
+  if (meses > 0) partes.push(meses + (meses === 1 ? " mês" : " meses"));
+  partes.push(dias + (dias === 1 ? " dia" : " dias"));
+  var relogio = String(horas).padStart(2, "0") + ":" + String(minutos).padStart(2, "0") + ":" + String(segundos).padStart(2, "0");
+  contEl.textContent = partes.join(", ") + " · " + relogio;
 }
 
 // ===== ANIVERSÁRIO (todo dia 15, anual em 15/05) =====
