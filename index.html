@@ -207,6 +207,9 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .tp-body{font-size:0.92rem;line-height:1.9;color:rgba(255,255,255,0.85);white-space:pre-line}
 .tp-actions{display:flex;gap:0.6rem;margin-top:1.5rem;flex-wrap:wrap}
 .tp-del{background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.3);color:var(--redl);padding:0.6rem 1.2rem;border-radius:50px;font-size:0.82rem;cursor:pointer;font-family:"Lato",sans-serif;display:inline-block}
+.md-traducao{display:none;font-size:0.88rem;line-height:1.8;color:rgba(255,255,255,0.6);white-space:pre-line;margin-top:1rem;padding-top:1rem;border-top:1px dashed rgba(255,255,255,0.12)}
+.md-credito{margin-top:1.3rem;font-size:0.68rem;color:rgba(255,255,255,0.3)}
+.md-credito a{color:rgba(255,255,255,0.5)}
 .upload-progress{display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,0.9);align-items:center;justify-content:center;flex-direction:column;gap:1rem}
 .upload-progress.show{display:flex}
 .up-heart{font-size:2.5rem;animation:heartbeat 0.6s infinite}
@@ -607,6 +610,22 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   </div>
 </div>
 
+<!-- POPUP DETALHE MÚSICA -->
+<div class="texto-popup" id="musica-detalhe" onclick="fecharMusicaDetalhe()">
+  <div class="texto-popup-box" onclick="event.stopPropagation()">
+    <button class="tp-close" onclick="fecharMusicaDetalhe()">✕</button>
+    <div class="tp-tipo" id="md-artista"></div>
+    <div class="tp-titulo" id="md-titulo"></div>
+    <div class="tp-body" id="md-letra"></div>
+    <div class="md-traducao" id="md-traducao"></div>
+    <div class="tp-actions">
+      <button class="tp-del" id="md-toggle-traducao" style="display:none" onclick="alternarTraducao()">🌐 Ver tradução</button>
+      <button class="tp-del" onclick="abrirYoutubeMusica()">▶ Ouvir no YouTube</button>
+    </div>
+    <div class="md-credito" id="md-credito"></div>
+  </div>
+</div>
+
 <!-- UPLOAD PROGRESS -->
 <div class="upload-progress" id="upload-progress">
   <div class="up-heart">♥</div>
@@ -628,6 +647,9 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 <script>
 var SUPABASE_URL = "https://yokmbuheeqjbawrmpoco.supabase.co";
 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlva21idWhlZXFqYmF3cm1wb2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMDQ0OTksImV4cCI6MjA5OTU4MDQ5OX0.VOpiMOpG3669SSOXlp797akqh-ALUdVmGYKX3_5aRII";
+// Cole aqui sua apikey gratuita da Vagalume (gerada em https://auth.vagalume.com.br/settings/api/)
+// Enquanto estiver vazia, o app funciona normal, só sem buscar letra/tradução.
+var VAGALUME_API_KEY = "";
 var session = null;
 var midias = [];
 var textos = [];
@@ -1120,7 +1142,7 @@ function carregarMidias() {
     .then(function(data) {
       if (!Array.isArray(data)) return;
       midias = data;
-      if (galeriaOrdemAsc) midias.reverse();
+      ordenarMidias();
       renderGaleria();
       document.getElementById("count-fotos").textContent = midias.length + (midias.length === 1 ? " item" : " itens");
     });
@@ -1129,13 +1151,23 @@ function carregarMidias() {
 var galeriaOrdemAsc = false;
 var galeriaObserver = null;
 
-function alternarOrdemGaleria() {
-  galeriaOrdemAsc = !galeriaOrdemAsc;
+// Usa a data marcada na legenda (data_evento) quando existir; senão cai pra data de upload
+function dataOrdenacaoMidia(m) {
+  var d = m.data_evento || m.criado_em;
+  return d ? new Date(d).getTime() : 0;
+}
+
+function ordenarMidias() {
   midias.sort(function(a, b) {
-    var da = new Date(a.criado_em).getTime();
-    var db = new Date(b.criado_em).getTime();
+    var da = dataOrdenacaoMidia(a);
+    var db = dataOrdenacaoMidia(b);
     return galeriaOrdemAsc ? da - db : db - da;
   });
+}
+
+function alternarOrdemGaleria() {
+  galeriaOrdemAsc = !galeriaOrdemAsc;
+  ordenarMidias();
   var btn = document.getElementById("btn-sort-galeria");
   if (btn) btn.textContent = galeriaOrdemAsc ? "↑ Antigas" : "↓ Recentes";
   renderGaleria();
@@ -1956,7 +1988,7 @@ function renderMusicaList() {
       '<button class="musica-item-del" onclick="event.stopPropagation();deletarMusica(\'' + m.id + '\')">🗑</button>';
     div.onclick = function(e) {
       if (e.target.classList.contains("musica-item-del")) return;
-      window.open("https://www.youtube.com/watch?v=" + m.video_id, "_blank");
+      abrirMusicaDetalhe(m);
     };
     list.appendChild(div);
   });
@@ -1965,6 +1997,33 @@ function renderMusicaList() {
 function abrirModalMusicas() {
   renderMusicaList();
   document.getElementById("modal-musicas").classList.add("show");
+}
+
+// ===== LETRA E TRADUÇÃO (via Vagalume) =====
+function extrairArtistaMusica(titulo, autor) {
+  var partes = titulo.split(/\s+-\s+|\s+–\s+|\s+\|\s+/);
+  if (partes.length >= 2) {
+    return { artista: partes[0].trim(), musica: partes.slice(1).join(" - ").trim() };
+  }
+  return { artista: autor || "", musica: titulo };
+}
+
+function buscarLetraVagalume(artista, musica) {
+  if (!VAGALUME_API_KEY || !artista || !musica) return Promise.resolve(null);
+  var url = "https://api.vagalume.com.br/search.php?art=" + encodeURIComponent(artista) +
+    "&mus=" + encodeURIComponent(musica) + "&apikey=" + VAGALUME_API_KEY;
+  return fetch(url)
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) {
+      if (!data || data.type === "notfound" || !data.mus || !data.mus[0]) return null;
+      var m = data.mus[0];
+      return {
+        letra: m.text || null,
+        traducao: (m.translate && m.translate[0] && m.translate[0].text) || null,
+        vagalume_url: m.url || null
+      };
+    })
+    .catch(function() { return null; });
 }
 
 function adicionarMusica() {
@@ -1979,15 +2038,27 @@ function adicionarMusica() {
       var titulo = (info && info.title) ? info.title : "Música";
       var artista = (info && info.author_name) ? info.author_name : "";
       var thumb = "https://img.youtube.com/vi/" + videoId + "/mqdefault.jpg";
-      return api("/rest/v1/musicas", {
-        method: "POST",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": "Bearer " + session.access_token,
-          "Content-Type": "application/json",
-          "Prefer": "return=minimal"
-        },
-        body: JSON.stringify({ video_id: videoId, titulo: titulo, artista: artista, thumb: thumb })
+      var busca = extrairArtistaMusica(titulo, artista);
+
+      return buscarLetraVagalume(busca.artista, busca.musica).then(function(letraInfo) {
+        return api("/rest/v1/musicas", {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": "Bearer " + session.access_token,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify({
+            video_id: videoId,
+            titulo: titulo,
+            artista: artista,
+            thumb: thumb,
+            letra: letraInfo ? letraInfo.letra : null,
+            traducao: letraInfo ? letraInfo.traducao : null,
+            vagalume_url: letraInfo ? letraInfo.vagalume_url : null
+          })
+        });
       });
     })
     .then(function() {
@@ -1998,6 +2069,47 @@ function adicionarMusica() {
     .catch(function() {
       mostrarToast("Erro ao adicionar música.");
     });
+}
+
+var musicaAtual = null;
+
+function abrirMusicaDetalhe(m) {
+  musicaAtual = m;
+  document.getElementById("md-artista").textContent = m.artista || "";
+  document.getElementById("md-titulo").textContent = m.titulo || "Música";
+
+  var letraEl = document.getElementById("md-letra");
+  letraEl.textContent = m.letra || "Letra não disponível ainda.";
+
+  var traducaoEl = document.getElementById("md-traducao");
+  var toggleBtn = document.getElementById("md-toggle-traducao");
+  traducaoEl.textContent = m.traducao || "";
+  traducaoEl.style.display = "none";
+  toggleBtn.style.display = m.traducao ? "inline-block" : "none";
+  toggleBtn.textContent = "🌐 Ver tradução";
+
+  var creditoEl = document.getElementById("md-credito");
+  creditoEl.innerHTML = m.vagalume_url
+    ? 'Letra via <a href="' + m.vagalume_url + '" target="_blank" rel="noopener">Vagalume</a>'
+    : "";
+
+  document.getElementById("musica-detalhe").classList.add("show");
+}
+
+function fecharMusicaDetalhe() {
+  document.getElementById("musica-detalhe").classList.remove("show");
+}
+
+function alternarTraducao() {
+  var traducaoEl = document.getElementById("md-traducao");
+  var toggleBtn = document.getElementById("md-toggle-traducao");
+  var mostrando = traducaoEl.style.display === "block";
+  traducaoEl.style.display = mostrando ? "none" : "block";
+  toggleBtn.textContent = mostrando ? "🌐 Ver tradução" : "🌐 Ocultar tradução";
+}
+
+function abrirYoutubeMusica() {
+  if (musicaAtual) window.open("https://www.youtube.com/watch?v=" + musicaAtual.video_id, "_blank");
 }
 
 function deletarMusica(id) {
