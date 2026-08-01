@@ -124,12 +124,15 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .hcard-title{font-family:"Playfair Display",serif;font-size:0.95rem;line-height:1.3}
 .hcard-count{font-size:0.75rem;color:var(--gray);margin-top:0.25rem}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px}
-.photo-item{aspect-ratio:1;background-size:cover;background-position:center;cursor:pointer;background-color:var(--blk3);position:relative;overflow:hidden}
+.photo-item{aspect-ratio:1;background-size:cover;background-position:center;cursor:pointer;background-color:var(--blk3);position:relative;overflow:hidden;opacity:0;transition:opacity 0.35s ease}
+.photo-item.loaded{opacity:1}
 .photo-item.video::after{content:"▶";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#fff;background:rgba(0,0,0,0.3)}
+.btn-sort{background:rgba(255,255,255,0.05);border:1.5px solid rgba(192,57,43,0.25);color:rgba(255,255,255,0.7);padding:0.55rem 0.85rem;border-radius:50px;font-size:0.7rem;cursor:pointer;font-family:"Lato",sans-serif;white-space:nowrap;flex-shrink:0}
 .photo-empty{grid-column:1/-1;padding:3rem;text-align:center;color:var(--gray);font-size:0.9rem;line-height:1.8}
-.lightbox{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.97);flex-direction:column;align-items:center;overflow-y:auto;padding:3.5rem 0 1.5rem}
+.lightbox{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.97);flex-direction:column;align-items:center;overflow-y:auto;overflow-x:hidden;padding:3.5rem 0 1.5rem}
 .lightbox.show{display:flex}
 .lightbox img,.lightbox video{max-width:95vw;max-height:62vh;object-fit:contain;border-radius:8px;margin:auto 0}
+.lightbox img{cursor:zoom-in;touch-action:none;user-select:none;-webkit-user-drag:none}
 .lbox-close{position:fixed;top:1rem;right:1rem;width:40px;height:40px;background:rgba(192,57,43,0.8);border:none;border-radius:50%;color:#fff;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
 .lbox-nav{position:fixed;top:45%;transform:translateY(-50%);width:42px;height:42px;background:rgba(192,57,43,0.7);border:none;border-radius:50%;color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
 .lbox-prev{left:0.5rem}.lbox-next{right:0.5rem}
@@ -352,7 +355,10 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
         <h2>Nossa Galeria</h2>
         <p>Fotos e vídeos de nós</p>
       </div>
-      <button class="btn-add" onclick="abrirModalFoto()">+</button>
+      <div style="display:flex;gap:0.5rem;align-items:center">
+        <button class="btn-sort" id="btn-sort-galeria" onclick="alternarOrdemGaleria()">↓ Recentes</button>
+        <button class="btn-add" onclick="abrirModalFoto()">+</button>
+      </div>
     </div>
     <div class="photo-grid" id="photo-grid">
       <div class="photo-empty">Nenhuma foto ainda.<br>Toque em + para adicionar!</div>
@@ -1114,9 +1120,25 @@ function carregarMidias() {
     .then(function(data) {
       if (!Array.isArray(data)) return;
       midias = data;
+      if (galeriaOrdemAsc) midias.reverse();
       renderGaleria();
       document.getElementById("count-fotos").textContent = midias.length + (midias.length === 1 ? " item" : " itens");
     });
+}
+
+var galeriaOrdemAsc = false;
+var galeriaObserver = null;
+
+function alternarOrdemGaleria() {
+  galeriaOrdemAsc = !galeriaOrdemAsc;
+  midias.sort(function(a, b) {
+    var da = new Date(a.criado_em).getTime();
+    var db = new Date(b.criado_em).getTime();
+    return galeriaOrdemAsc ? da - db : db - da;
+  });
+  var btn = document.getElementById("btn-sort-galeria");
+  if (btn) btn.textContent = galeriaOrdemAsc ? "↑ Antigas" : "↓ Recentes";
+  renderGaleria();
 }
 
 function renderGaleria() {
@@ -1130,11 +1152,35 @@ function renderGaleria() {
   heroSlideIndex = 0;
   renderHeroPhotos(getHeroBatch());
   iniciarHeroSlideshow();
+
+  if (galeriaObserver) galeriaObserver.disconnect();
+  galeriaObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (!entry.isIntersecting) return;
+      var div = entry.target;
+      var url = div.getAttribute("data-src");
+      if (url) {
+        var img = new Image();
+        img.onload = function() {
+          div.style.backgroundImage = "url(" + url + ")";
+          div.classList.add("loaded");
+        };
+        img.onerror = function() { div.classList.add("loaded"); };
+        img.src = url;
+        div.removeAttribute("data-src");
+      }
+      galeriaObserver.unobserve(div);
+    });
+  }, { rootMargin: "200px", threshold: 0.01 });
+
   midias.forEach(function(m, idx) {
     var div = document.createElement("div");
     div.className = "photo-item" + (m.tipo === "video" ? " video" : "");
-    if (m.tipo !== "video") {
-      div.style.backgroundImage = "url(" + m.url + ")";
+    if (m.tipo === "video") {
+      div.classList.add("loaded");
+    } else {
+      div.setAttribute("data-src", m.url);
+      galeriaObserver.observe(div);
     }
     div.onclick = function() { abrirLightbox(idx); };
     grid.appendChild(div);
@@ -1337,21 +1383,112 @@ function renderLboxItem() {
   var m = midias[curLbox];
   var cont = document.getElementById("lbox-content");
   cont.innerHTML = "";
+  resetZoom();
   if (m.tipo === "video") {
     var v = document.createElement("video");
     v.src = m.url; v.controls = true;
     v.setAttribute("playsinline", "");
     v.setAttribute("webkit-playsinline", "");
     v.preload = "metadata";
-    v.style.cssText = "max-width:95vw;max-height:80vh;border-radius:8px";
+    v.onclick = function(e) { e.stopPropagation(); };
     cont.appendChild(v);
   } else {
     var img = document.createElement("img");
     img.src = m.url;
-    img.style.cssText = "max-width:95vw;max-height:80vh;object-fit:contain;border-radius:8px";
+    img.onclick = function(e) { e.stopPropagation(); };
     cont.appendChild(img);
+    ativarZoomImagem(img);
   }
   atualizarLboxCaption(m);
+}
+
+// ===== ZOOM DA FOTO NO LIGHTBOX (pinça, duplo toque e arrastar) =====
+var zoomState = { scale: 1, x: 0, y: 0, pointers: {}, startDist: 0, startScale: 1, dragging: false, lastX: 0, lastY: 0 };
+
+function resetZoom() {
+  zoomState.scale = 1;
+  zoomState.x = 0;
+  zoomState.y = 0;
+  zoomState.pointers = {};
+  zoomState.dragging = false;
+}
+
+function aplicarZoom(img) {
+  img.style.transform = "translate(" + zoomState.x + "px," + zoomState.y + "px) scale(" + zoomState.scale + ")";
+  img.style.cursor = zoomState.scale > 1 ? "grab" : "zoom-in";
+}
+
+function ativarZoomImagem(img) {
+  aplicarZoom(img);
+  var ultimoTap = 0;
+
+  img.addEventListener("pointerdown", function(e) {
+    zoomState.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+    var ids = Object.keys(zoomState.pointers);
+    if (ids.length === 1) {
+      zoomState.dragging = zoomState.scale > 1;
+      zoomState.lastX = e.clientX;
+      zoomState.lastY = e.clientY;
+    } else if (ids.length === 2) {
+      zoomState.dragging = false;
+      var pts = Object.keys(zoomState.pointers).map(function(k) { return zoomState.pointers[k]; });
+      zoomState.startDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      zoomState.startScale = zoomState.scale;
+    }
+  });
+
+  img.addEventListener("pointermove", function(e) {
+    if (!zoomState.pointers[e.pointerId]) return;
+    zoomState.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+    var ids = Object.keys(zoomState.pointers);
+    img.style.transition = "none";
+    if (ids.length === 2) {
+      var pts = ids.map(function(k) { return zoomState.pointers[k]; });
+      var dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      if (zoomState.startDist > 0) {
+        var novaEscala = zoomState.startScale * (dist / zoomState.startDist);
+        zoomState.scale = Math.min(4, Math.max(1, novaEscala));
+        aplicarZoom(img);
+      }
+    } else if (ids.length === 1 && zoomState.dragging) {
+      var dx = e.clientX - zoomState.lastX;
+      var dy = e.clientY - zoomState.lastY;
+      zoomState.lastX = e.clientX;
+      zoomState.lastY = e.clientY;
+      zoomState.x += dx;
+      zoomState.y += dy;
+      aplicarZoom(img);
+    }
+  });
+
+  function soltarPointer(e) {
+    delete zoomState.pointers[e.pointerId];
+    img.style.transition = "transform 0.15s ease";
+    if (zoomState.scale <= 1) {
+      zoomState.scale = 1;
+      zoomState.x = 0;
+      zoomState.y = 0;
+      aplicarZoom(img);
+    }
+    zoomState.dragging = false;
+  }
+  img.addEventListener("pointerup", soltarPointer);
+  img.addEventListener("pointercancel", soltarPointer);
+  img.addEventListener("pointerleave", soltarPointer);
+
+  img.addEventListener("pointerup", function() {
+    var agora = Date.now();
+    if (agora - ultimoTap < 300 && Object.keys(zoomState.pointers).length === 0) {
+      img.style.transition = "transform 0.2s ease";
+      if (zoomState.scale > 1) {
+        zoomState.scale = 1; zoomState.x = 0; zoomState.y = 0;
+      } else {
+        zoomState.scale = 2.2;
+      }
+      aplicarZoom(img);
+    }
+    ultimoTap = agora;
+  });
 }
 
 function formatarDataBR(dataStr) {
