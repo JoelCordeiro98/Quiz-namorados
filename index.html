@@ -109,7 +109,17 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .musica-item-titulo{font-size:0.85rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .musica-item-artista{font-size:0.72rem;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .musica-item-del{background:none;border:none;color:rgba(255,255,255,0.2);font-size:1rem;cursor:pointer;padding:0.25rem;flex-shrink:0}
+.musica-item-star{background:none;border:none;color:rgba(255,255,255,0.2);font-size:1.1rem;cursor:pointer;padding:0.25rem;flex-shrink:0}
+.musica-item-star.active{color:#e6a81a}
 .musica-list-wrap{max-height:45vh;overflow-y:auto}
+.musica-page-list{padding:0.5rem 1.5rem 1.5rem}
+.musica-do-dia{margin:0 1.5rem 1.2rem;padding:1rem 1.1rem;background:linear-gradient(135deg,rgba(230,168,26,0.12),rgba(192,57,43,0.1));border:1px solid rgba(230,168,26,0.35);border-radius:16px;cursor:pointer}
+.mdd-label{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:#e6a81a;margin-bottom:0.6rem}
+.mdd-linha{display:flex;align-items:center;gap:0.75rem}
+.mdd-thumb{width:52px;height:52px;border-radius:10px;background-size:cover;background-position:center;background-color:var(--blk2);flex-shrink:0}
+.mdd-info{flex:1;min-width:0}
+.mdd-titulo{font-family:"Playfair Display",serif;font-size:1.05rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mdd-artista{font-size:0.78rem;color:rgba(255,255,255,0.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .relembrando-section{padding:0 1.5rem 1.5rem}
 .relembrando-section .plabel{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--redl);margin-bottom:0.5rem}
 .relembrando-card{display:flex;align-items:center;gap:0.85rem;padding:0.85rem 1rem;background:var(--blk3);border:1px solid rgba(255,255,255,0.07);border-radius:14px}
@@ -313,7 +323,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 
     <div class="musica-section">
       <div class="plabel">Nossas Músicas</div>
-      <div class="musica-bar" onclick="abrirModalMusicas()">
+      <div class="musica-bar" onclick="goTo('musicas')">
         <div class="musica-icon">🎵</div>
         <div class="musica-info">
           <div class="musica-titulo" id="musica-titulo">Nenhuma música ainda</div>
@@ -429,6 +439,30 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </div>
   </div>
 
+  <div class="page" id="page-musicas">
+    <div class="phdr">
+      <div class="phdr-left">
+        <div class="plabel">Trilha sonora</div>
+        <h2>Nossas Músicas</h2>
+        <p>Letras e traduções, tudo aqui</p>
+      </div>
+      <button class="btn-add" onclick="abrirModalMusicas()">+</button>
+    </div>
+    <div class="musica-do-dia" id="musica-do-dia-card" style="display:none" onclick="abrirMusicaDetalheDoDia()">
+      <div class="mdd-label">☀ Música do dia</div>
+      <div class="mdd-linha">
+        <div class="mdd-thumb" id="mdd-thumb"></div>
+        <div class="mdd-info">
+          <div class="mdd-titulo" id="mdd-titulo"></div>
+          <div class="mdd-artista" id="mdd-artista"></div>
+        </div>
+      </div>
+    </div>
+    <div class="musica-page-list" id="musica-page-list">
+      <div class="photo-empty">Nenhuma música salva ainda.<br>Toque em + para adicionar!</div>
+    </div>
+  </div>
+
   <nav class="bnav">
     <button class="bitem active" onclick="goTo('home')" data-page="home">
       <span class="bitem-icon">🏠</span><span class="bitem-label">Início</span>
@@ -444,6 +478,9 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </button>
     <button class="bitem" onclick="goTo('indicacoes')" data-page="indicacoes">
       <span class="bitem-icon">🎬</span><span class="bitem-label">Filmes</span>
+    </button>
+    <button class="bitem" onclick="goTo('musicas')" data-page="musicas">
+      <span class="bitem-icon">🎵</span><span class="bitem-label">Músicas</span>
     </button>
   </nav>
 </div>
@@ -518,12 +555,14 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 <div class="modal-overlay" id="modal-musicas" onclick="fecharModal('modal-musicas')">
   <div class="modal-box" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
-    <div class="modal-title">🎵 Nossas Músicas</div>
-    <div class="musica-add-row">
-      <input type="text" id="musica-link" placeholder="Cole o link do YouTube...">
-      <button class="btn-save" style="flex:0 0 auto;padding:0.8rem 1.1rem" onclick="adicionarMusica()">+</button>
+    <div class="modal-title">🎵 Adicionar Música</div>
+    <div class="form-group">
+      <label>Link do YouTube</label>
+      <div class="musica-add-row">
+        <input type="text" id="musica-link" placeholder="Cole o link do YouTube...">
+        <button class="btn-save" style="flex:0 0 auto;padding:0.8rem 1.1rem" onclick="adicionarMusica()">+</button>
+      </div>
     </div>
-    <div class="musica-list-wrap" id="musica-list"></div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="fecharModal('modal-musicas')">Fechar</button>
     </div>
@@ -2022,14 +2061,19 @@ function carregarMusicas() {
       if (!Array.isArray(data)) return;
       musicas = data;
       renderMusicaBar();
-      renderMusicaList();
+      renderMusicaDoDia();
+      renderMusicaPagina();
     });
 }
 
 function renderMusicaBar() {
   var titulo = document.getElementById("musica-titulo");
   var artista = document.getElementById("musica-artista");
-  if (musicas.length > 0) {
+  var doDia = musicas.find(function(m) { return m.do_dia; });
+  if (doDia) {
+    titulo.textContent = doDia.titulo || "Música";
+    artista.textContent = "☀ Música do dia";
+  } else if (musicas.length > 0) {
     titulo.textContent = musicas.length + (musicas.length === 1 ? " música salva" : " músicas salvas");
     artista.textContent = "Toque para ver a lista";
   } else {
@@ -2038,12 +2082,28 @@ function renderMusicaBar() {
   }
 }
 
-function renderMusicaList() {
-  var list = document.getElementById("musica-list");
+function renderMusicaDoDia() {
+  var card = document.getElementById("musica-do-dia-card");
+  if (!card) return;
+  var doDia = musicas.find(function(m) { return m.do_dia; });
+  if (!doDia) { card.style.display = "none"; return; }
+  document.getElementById("mdd-thumb").style.backgroundImage = "url(" + (doDia.thumb || "") + ")";
+  document.getElementById("mdd-titulo").textContent = doDia.titulo || "Música";
+  document.getElementById("mdd-artista").textContent = doDia.artista || "";
+  card.style.display = "block";
+}
+
+function abrirMusicaDetalheDoDia() {
+  var doDia = musicas.find(function(m) { return m.do_dia; });
+  if (doDia) abrirMusicaDetalhe(doDia);
+}
+
+function renderMusicaPagina() {
+  var list = document.getElementById("musica-page-list");
   if (!list) return;
   list.innerHTML = "";
   if (musicas.length === 0) {
-    list.innerHTML = '<div class="photo-empty">Nenhuma música salva ainda.</div>';
+    list.innerHTML = '<div class="photo-empty">Nenhuma música salva ainda.<br>Toque em + para adicionar!</div>';
     return;
   }
   musicas.forEach(function(m) {
@@ -2052,17 +2112,51 @@ function renderMusicaList() {
     div.innerHTML = '<div class="musica-item-thumb" style="background-image:url(' + (m.thumb || "") + ')"></div>' +
       '<div class="musica-item-info"><div class="musica-item-titulo">' + (m.titulo || "Música") + '</div>' +
       '<div class="musica-item-artista">' + (m.artista || "") + '</div></div>' +
+      '<button class="musica-item-star' + (m.do_dia ? ' active' : '') + '" onclick="event.stopPropagation();marcarMusicaDoDia(\'' + m.id + '\',' + (m.do_dia ? "true" : "false") + ')" aria-label="Música do dia">☀</button>' +
       '<button class="musica-item-del" onclick="event.stopPropagation();deletarMusica(\'' + m.id + '\')">🗑</button>';
     div.onclick = function(e) {
-      if (e.target.classList.contains("musica-item-del")) return;
+      if (e.target.closest("button")) return;
       abrirMusicaDetalhe(m);
     };
     list.appendChild(div);
   });
 }
 
+function marcarMusicaDoDia(id, atual) {
+  var novoValor = !atual;
+  var anterior = musicas.find(function(m) { return m.do_dia && m.id !== id; });
+
+  var pedidos = [];
+  if (anterior) {
+    pedidos.push(api("/rest/v1/musicas?id=eq." + anterior.id, {
+      method: "PATCH",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + session.access_token,
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify({ do_dia: false })
+    }));
+  }
+  pedidos.push(api("/rest/v1/musicas?id=eq." + id, {
+    method: "PATCH",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal"
+    },
+    body: JSON.stringify({ do_dia: novoValor })
+  }));
+
+  Promise.all(pedidos).then(function() {
+    mostrarToast(novoValor ? "☀ Música do dia marcada!" : "Música do dia removida.");
+    carregarMusicas();
+  });
+}
+
 function abrirModalMusicas() {
-  renderMusicaList();
   document.getElementById("modal-musicas").classList.add("show");
 }
 
@@ -2191,6 +2285,7 @@ function adicionarMusica() {
     })
     .then(function() {
       document.getElementById("musica-link").value = "";
+      fecharModal("modal-musicas");
       mostrarToast("✓ Música adicionada!");
       carregarMusicas();
     })
