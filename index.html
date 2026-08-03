@@ -90,6 +90,9 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .desejo-item.prioridade{border-color:rgba(230,168,26,0.5);background:rgba(230,168,26,0.08)}
 .d-star{background:none;border:none;color:rgba(255,255,255,0.25);font-size:1.15rem;cursor:pointer;padding:0.25rem}
 .d-star.active{color:#e6a81a}
+.d-comment{background:none;border:none;color:rgba(255,255,255,0.25);font-size:1.15rem;cursor:pointer;padding:0.25rem}
+.d-comment.tem{color:var(--redl)}
+.d-comentario{font-size:0.72rem;font-style:italic;color:rgba(255,255,255,0.45);margin-top:0.3rem;line-height:1.4}
 .musica-section{padding:0 1.5rem 1.5rem}
 .musica-bar{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1rem;background:var(--blk3);border:1px solid rgba(255,255,255,0.07);border-radius:14px;cursor:pointer}
 .musica-icon{font-size:1.3rem;flex-shrink:0}
@@ -550,6 +553,22 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   </div>
 </div>
 
+<!-- MODAL COMENTÁRIO INDICAÇÃO -->
+<div class="modal-overlay" id="modal-comentario" onclick="fecharModal('modal-comentario')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💬 O que vocês acharam?</div>
+    <div class="form-group">
+      <label>Comentário</label>
+      <textarea id="com-texto" placeholder="Escreva o que acharam..."></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="fecharModal('modal-comentario')">Cancelar</button>
+      <button class="btn-save" onclick="salvarComentarioIndicacao()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL DESTAQUE (foto do casal) -->
 <div class="modal-overlay" id="modal-destaque" onclick="fecharModal('modal-destaque')">
   <div class="modal-box" onclick="event.stopPropagation()">
@@ -647,9 +666,9 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 <script>
 var SUPABASE_URL = "https://yokmbuheeqjbawrmpoco.supabase.co";
 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlva21idWhlZXFqYmF3cm1wb2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMDQ0OTksImV4cCI6MjA5OTU4MDQ5OX0.VOpiMOpG3669SSOXlp797akqh-ALUdVmGYKX3_5aRII";
-// Cole aqui sua apikey gratuita da Vagalume (gerada em https://auth.vagalume.com.br/settings/api/)
-// Enquanto estiver vazia, o app funciona normal, só sem buscar letra/tradução.
-var VAGALUME_API_KEY = "";
+// Letra vem do LRCLIB e tradução do MyMemory — ambos gratuitos e sem cadastro
+// Usar um e-mail no MyMemory (sem precisar de conta) aumenta o limite gratuito de 5.000 para 50.000 caracteres/dia
+var MYMEMORY_EMAIL = "viajaaibolso@gmail.com";
 var session = null;
 var midias = [];
 var textos = [];
@@ -1130,9 +1149,20 @@ function renderRelembrando(item, exato) {
     thumbEl.style.backgroundImage = "";
     var txt = item.texto.length > 90 ? item.texto.substring(0, 90) + "…" : item.texto;
     textoEl.textContent = '"' + txt + '"';
-    card.style.cursor = "default";
-    card.onclick = null;
+    card.style.cursor = "pointer";
+    card.onclick = function() { abrirRelembrandoPensamento(item); };
   }
+}
+
+function abrirRelembrandoPensamento(item) {
+  var d = item.data;
+  var dataStr = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  document.getElementById("tp-tipo").textContent = "Pensamento do dia";
+  document.getElementById("tp-titulo").textContent = formatarDataBR(dataStr);
+  document.getElementById("tp-body").textContent = item.texto || "";
+  document.getElementById("tp-edit").style.display = "none";
+  document.getElementById("tp-del").style.display = "none";
+  document.getElementById("texto-popup").classList.add("show");
 }
 
 // ===== GALERIA =====
@@ -1661,6 +1691,8 @@ function abrirTexto(idx) {
   document.getElementById("tp-tipo").textContent = t.tipo || "Texto";
   document.getElementById("tp-titulo").textContent = t.titulo || "";
   document.getElementById("tp-body").textContent = t.corpo || "";
+  document.getElementById("tp-del").style.display = "";
+  document.getElementById("tp-edit").style.display = "";
   document.getElementById("tp-del").onclick = function() { deletarTexto(t.id); };
   document.getElementById("tp-edit").onclick = function() { fecharTextoPopup(); abrirModalTextoEdicao(t); };
   document.getElementById("texto-popup").classList.add("show");
@@ -1835,16 +1867,51 @@ function renderIndicacaoItem(i) {
   var div = document.createElement("div");
   div.className = "desejo-item" + (i.assistido ? " done" : "") + (i.prioridade ? " prioridade" : "");
   var status = i.assistido ? "Assistido! ✓" : (i.prioridade ? "★ Prioridade" : "Pra ver");
+  var comentarioHtml = (i.assistido && i.comentario) ? '<div class="d-comentario">"' + i.comentario + '"</div>' : "";
+  var btnComentario = i.assistido
+    ? '<button class="d-comment' + (i.comentario ? ' tem' : '') + '" onclick="event.stopPropagation();abrirModalComentario(\'' + i.id + '\')" aria-label="Comentário">💬</button>'
+    : "";
   div.innerHTML = '<div class="d-check">' + (i.assistido ? "✓" : "") + '</div>' +
     '<div class="d-txt"><div class="d-titulo">' + i.titulo + '</div>' +
-    '<div class="d-status">' + status + '</div></div>' +
+    '<div class="d-status">' + status + '</div>' + comentarioHtml + '</div>' +
+    btnComentario +
     '<button class="d-star' + (i.prioridade ? ' active' : '') + '" onclick="event.stopPropagation();togglePrioridade(\'' + i.id + '\',' + (i.prioridade ? "true" : "false") + ')" aria-label="Marcar como prioridade">★</button>' +
     '<button class="d-del" onclick="event.stopPropagation();deletarIndicacao(\'' + i.id + '\')">🗑</button>';
   div.onclick = function(e) {
-    if (e.target.classList.contains("d-del") || e.target.classList.contains("d-star")) return;
+    if (e.target.closest("button")) return;
     toggleIndicacao(i.id, i.assistido);
   };
   return div;
+}
+
+var indicacaoComentandoId = null;
+
+function abrirModalComentario(id) {
+  var item = indicacoes.find(function(x) { return x.id === id; });
+  if (!item) return;
+  indicacaoComentandoId = id;
+  document.getElementById("com-texto").value = item.comentario || "";
+  document.getElementById("modal-comentario").classList.add("show");
+}
+
+function salvarComentarioIndicacao() {
+  if (!indicacaoComentandoId) return;
+  var texto = document.getElementById("com-texto").value.trim();
+  api("/rest/v1/indicacoes?id=eq." + indicacaoComentandoId, {
+    method: "PATCH",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal"
+    },
+    body: JSON.stringify({ comentario: texto || null })
+  }).then(function() {
+    indicacaoComentandoId = null;
+    fecharModal("modal-comentario");
+    mostrarToast("✓ Comentário salvo!");
+    carregarIndicacoes();
+  });
 }
 
 function renderIndicacoes() {
@@ -1999,7 +2066,7 @@ function abrirModalMusicas() {
   document.getElementById("modal-musicas").classList.add("show");
 }
 
-// ===== LETRA E TRADUÇÃO (via Vagalume) =====
+// ===== LETRA (LRCLIB) E TRADUÇÃO (MyMemory) — gratuitos, sem cadastro =====
 function extrairArtistaMusica(titulo, autor) {
   var partes = titulo.split(/\s+-\s+|\s+–\s+|\s+\|\s+/);
   if (partes.length >= 2) {
@@ -2008,22 +2075,82 @@ function extrairArtistaMusica(titulo, autor) {
   return { artista: autor || "", musica: titulo };
 }
 
-function buscarLetraVagalume(artista, musica) {
-  if (!VAGALUME_API_KEY || !artista || !musica) return Promise.resolve(null);
-  var url = "https://api.vagalume.com.br/search.php?art=" + encodeURIComponent(artista) +
-    "&mus=" + encodeURIComponent(musica) + "&apikey=" + VAGALUME_API_KEY;
+function buscarLetraLRCLIB(artista, musica) {
+  if (!artista || !musica) return Promise.resolve(null);
+  var url = "https://lrclib.net/api/get?track_name=" + encodeURIComponent(musica) + "&artist_name=" + encodeURIComponent(artista);
   return fetch(url)
     .then(function(r) { return r.ok ? r.json() : null; })
     .then(function(data) {
-      if (!data || data.type === "notfound" || !data.mus || !data.mus[0]) return null;
-      var m = data.mus[0];
-      return {
-        letra: m.text || null,
-        traducao: (m.translate && m.translate[0] && m.translate[0].text) || null,
-        vagalume_url: m.url || null
-      };
+      if (data && data.plainLyrics) return data.plainLyrics;
+      var urlBusca = "https://lrclib.net/api/search?track_name=" + encodeURIComponent(musica) + "&artist_name=" + encodeURIComponent(artista);
+      return fetch(urlBusca)
+        .then(function(r2) { return r2.ok ? r2.json() : null; })
+        .then(function(lista) {
+          if (Array.isArray(lista)) {
+            var achado = lista.find(function(x) { return x.plainLyrics; });
+            if (achado) return achado.plainLyrics;
+          }
+          return null;
+        });
     })
     .catch(function() { return null; });
+}
+
+function dividirEmPedacos(texto, tamanho) {
+  var paragrafos = texto.split(/\n\n+/);
+  var brutos = [];
+  var atual = "";
+  paragrafos.forEach(function(p) {
+    if (atual && (atual + "\n\n" + p).length > tamanho) {
+      brutos.push(atual);
+      atual = p;
+    } else {
+      atual = atual ? atual + "\n\n" + p : p;
+    }
+  });
+  if (atual) brutos.push(atual);
+
+  var pedacos = [];
+  brutos.forEach(function(p) {
+    if (p.length <= tamanho) { pedacos.push(p); return; }
+    var linhas = p.split("\n");
+    var buf = "";
+    linhas.forEach(function(l) {
+      if (buf && (buf + "\n" + l).length > tamanho) {
+        pedacos.push(buf);
+        buf = l;
+      } else {
+        buf = buf ? buf + "\n" + l : l;
+      }
+    });
+    if (buf) pedacos.push(buf);
+  });
+  return pedacos;
+}
+
+function traduzirPedaco(texto) {
+  var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(texto) +
+    "&langpair=en|pt-BR&de=" + encodeURIComponent(MYMEMORY_EMAIL);
+  return fetch(url)
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) {
+      return (data && data.responseData && data.responseData.translatedText) || "";
+    })
+    .catch(function() { return ""; });
+}
+
+function traduzirLetra(texto) {
+  if (!texto) return Promise.resolve(null);
+  var pedacos = dividirEmPedacos(texto, 400);
+  var resultado = [];
+  function proximo(i) {
+    if (i >= pedacos.length) return Promise.resolve(resultado.join("\n\n"));
+    return traduzirPedaco(pedacos[i]).then(function(traduzido) {
+      resultado.push(traduzido);
+      return proximo(i + 1);
+    });
+  }
+  return proximo(0);
 }
 
 function adicionarMusica() {
@@ -2040,24 +2167,25 @@ function adicionarMusica() {
       var thumb = "https://img.youtube.com/vi/" + videoId + "/mqdefault.jpg";
       var busca = extrairArtistaMusica(titulo, artista);
 
-      return buscarLetraVagalume(busca.artista, busca.musica).then(function(letraInfo) {
-        return api("/rest/v1/musicas", {
-          method: "POST",
-          headers: {
-            "apikey": SUPABASE_KEY,
-            "Authorization": "Bearer " + session.access_token,
-            "Content-Type": "application/json",
-            "Prefer": "return=minimal"
-          },
-          body: JSON.stringify({
-            video_id: videoId,
-            titulo: titulo,
-            artista: artista,
-            thumb: thumb,
-            letra: letraInfo ? letraInfo.letra : null,
-            traducao: letraInfo ? letraInfo.traducao : null,
-            vagalume_url: letraInfo ? letraInfo.vagalume_url : null
-          })
+      return buscarLetraLRCLIB(busca.artista, busca.musica).then(function(letra) {
+        return traduzirLetra(letra).then(function(traducao) {
+          return api("/rest/v1/musicas", {
+            method: "POST",
+            headers: {
+              "apikey": SUPABASE_KEY,
+              "Authorization": "Bearer " + session.access_token,
+              "Content-Type": "application/json",
+              "Prefer": "return=minimal"
+            },
+            body: JSON.stringify({
+              video_id: videoId,
+              titulo: titulo,
+              artista: artista,
+              thumb: thumb,
+              letra: letra || null,
+              traducao: traducao || null
+            })
+          });
         });
       });
     })
@@ -2089,8 +2217,8 @@ function abrirMusicaDetalhe(m) {
   toggleBtn.textContent = "🌐 Ver tradução";
 
   var creditoEl = document.getElementById("md-credito");
-  creditoEl.innerHTML = m.vagalume_url
-    ? 'Letra via <a href="' + m.vagalume_url + '" target="_blank" rel="noopener">Vagalume</a>'
+  creditoEl.textContent = m.letra
+    ? "Letra via LRCLIB" + (m.traducao ? " · tradução automática (MyMemory)" : "")
     : "";
 
   document.getElementById("musica-detalhe").classList.add("show");

@@ -53,6 +53,9 @@ create table if not exists indicacoes (
 
 alter table indicacoes add column if not exists prioridade boolean default false;
 
+-- Comentário sobre o filme/série depois de assistido
+alter table indicacoes add column if not exists comentario text;
+
 alter table indicacoes enable row level security;
 
 drop policy if exists "authenticated full access indicacoes" on indicacoes;
