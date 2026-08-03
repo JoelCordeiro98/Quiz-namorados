@@ -678,9 +678,30 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div class="md-traducao" id="md-traducao"></div>
     <div class="tp-actions">
       <button class="tp-del" id="md-toggle-traducao" style="display:none" onclick="alternarTraducao()">🌐 Ver tradução</button>
+      <button class="tp-del" onclick="abrirModalLetraMusica()">✎ Editar letra</button>
       <button class="tp-del" onclick="abrirYoutubeMusica()">▶ Ouvir no YouTube</button>
     </div>
     <div class="md-credito" id="md-credito"></div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR LETRA -->
+<div class="modal-overlay" id="modal-letra-musica" onclick="fecharModal('modal-letra-musica')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✎ Letra da música</div>
+    <div class="form-group">
+      <label>Letra</label>
+      <textarea id="ml-letra" placeholder="Cole ou escreva a letra aqui..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Tradução (opcional)</label>
+      <textarea id="ml-traducao" placeholder="Tradução, se quiser..."></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="fecharModal('modal-letra-musica')">Cancelar</button>
+      <button class="btn-save" onclick="salvarLetraMusica()">Salvar</button>
+    </div>
   </div>
 </div>
 
@@ -2312,9 +2333,13 @@ function abrirMusicaDetalhe(m) {
   toggleBtn.textContent = "🌐 Ver tradução";
 
   var creditoEl = document.getElementById("md-credito");
-  creditoEl.textContent = m.letra
-    ? "Letra via LRCLIB" + (m.traducao ? " · tradução automática (MyMemory)" : "")
-    : "";
+  if (!m.letra) {
+    creditoEl.textContent = "";
+  } else if (m.letra_manual) {
+    creditoEl.textContent = "Letra adicionada por vocês ♥";
+  } else {
+    creditoEl.textContent = "Letra via LRCLIB" + (m.traducao ? " · tradução automática (MyMemory)" : "");
+  }
 
   document.getElementById("musica-detalhe").classList.add("show");
 }
@@ -2333,6 +2358,37 @@ function alternarTraducao() {
 
 function abrirYoutubeMusica() {
   if (musicaAtual) window.open("https://www.youtube.com/watch?v=" + musicaAtual.video_id, "_blank");
+}
+
+function abrirModalLetraMusica() {
+  if (!musicaAtual) return;
+  document.getElementById("ml-letra").value = musicaAtual.letra || "";
+  document.getElementById("ml-traducao").value = musicaAtual.traducao || "";
+  document.getElementById("modal-letra-musica").classList.add("show");
+}
+
+function salvarLetraMusica() {
+  if (!musicaAtual) return;
+  var letra = document.getElementById("ml-letra").value.trim();
+  var traducao = document.getElementById("ml-traducao").value.trim();
+  api("/rest/v1/musicas?id=eq." + musicaAtual.id, {
+    method: "PATCH",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal"
+    },
+    body: JSON.stringify({ letra: letra || null, traducao: traducao || null, letra_manual: true })
+  }).then(function() {
+    musicaAtual.letra = letra || null;
+    musicaAtual.traducao = traducao || null;
+    musicaAtual.letra_manual = true;
+    fecharModal("modal-letra-musica");
+    abrirMusicaDetalhe(musicaAtual);
+    mostrarToast("✓ Letra salva!");
+    carregarMusicas();
+  });
 }
 
 function deletarMusica(id) {

@@ -92,6 +92,9 @@ alter table musicas add column if not exists vagalume_url text;
 -- Música do dia (destaque manual, uma por vez)
 alter table musicas add column if not exists do_dia boolean default false;
 
+-- Marca se a letra/tradução foi escrita manualmente (em vez de buscada automaticamente)
+alter table musicas add column if not exists letra_manual boolean default false;
+
 -- Legenda e data do momento nas fotos/vídeos da galeria
 alter table midias add column if not exists legenda text;
 alter table midias add column if not exists data_evento date;
