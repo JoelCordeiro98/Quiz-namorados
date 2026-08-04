@@ -32,6 +32,10 @@ create table if not exists foto_destaque (
   atualizado_em timestamptz default now()
 );
 
+-- Posição do enquadramento dentro do coração (0-100%, padrão 50/50 = centro)
+alter table foto_destaque add column if not exists pos_x numeric default 50;
+alter table foto_destaque add column if not exists pos_y numeric default 50;
+
 alter table foto_destaque enable row level security;
 
 drop policy if exists "authenticated full access foto_destaque" on foto_destaque;

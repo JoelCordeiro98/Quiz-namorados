@@ -81,6 +81,9 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .diario-foto.empty::after{content:"+";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2rem;color:rgba(255,255,255,0.3)}
 .destaque-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;max-height:50vh;overflow-y:auto;margin-bottom:0.5rem}
 .destaque-item{aspect-ratio:1;border-radius:10px;background-size:cover;background-position:center;cursor:pointer;background-color:var(--blk3);border:2px solid transparent}
+.destaque-ajustar{width:100%;background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.3);color:var(--redl);padding:0.65rem;border-radius:12px;font-size:0.8rem;cursor:pointer;font-family:"Lato",sans-serif;margin-bottom:0.9rem}
+.enquadrar-dica{font-size:0.78rem;color:var(--gray);text-align:center;margin-bottom:1.2rem}
+.enquadrar-preview{width:170px;height:153px;margin:0 auto 1.2rem;background-color:var(--blk3);background-size:cover;clip-path:path("M85,150 C35.7,112.2 0,76.5 0,45.9 C0,20.4 20.4,0 45.9,0 C64.6,0 78.2,10.2 85,27.2 C91.8,10.2 105.4,0 124.1,0 C149.6,0 170,20.4 170,45.9 C170,76.5 134.3,112.2 85,150 Z");touch-action:none;cursor:grab;user-select:none}
 .destaque-item:active{border-color:var(--redl)}
 .indic-list{padding:0.5rem 1rem 1rem}
 .indic-subhdr{font-family:"Playfair Display",serif;font-size:1rem;padding:1rem 0 0.6rem;color:rgba(255,255,255,0.8)}
@@ -613,9 +616,24 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   <div class="modal-box" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
     <div class="modal-title">♥ Escolher foto do casal</div>
+    <button type="button" class="destaque-ajustar" id="btn-ajustar-atual" style="display:none" onclick="abrirEnquadramentoAtual()">🎯 Ajustar enquadramento da foto atual</button>
     <div class="destaque-grid" id="destaque-grid"></div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="fecharModal('modal-destaque')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AJUSTAR ENQUADRAMENTO -->
+<div class="modal-overlay" id="modal-enquadrar" onclick="fecharModal('modal-enquadrar')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🎯 Ajustar enquadramento</div>
+    <p class="enquadrar-dica">Arraste a foto pra escolher o melhor encaixe</p>
+    <div class="enquadrar-preview" id="enquadrar-preview"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="fecharModal('modal-enquadrar')">Cancelar</button>
+      <button class="btn-save" onclick="salvarEnquadramento()">Salvar</button>
     </div>
   </div>
 </div>
@@ -1013,19 +1031,24 @@ function salvarPensamento() {
 }
 
 // ===== FOTO DE DESTAQUE (foto do casal) =====
+var fotoDestaqueAtual = null;
+
 function carregarFotoDestaque() {
   api("/rest/v1/foto_destaque?id=eq.1&select=*")
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (!Array.isArray(data)) return;
       var row = data[0] || null;
+      fotoDestaqueAtual = row;
       var img = document.getElementById("diario-foto-img");
       var foto = document.getElementById("diario-foto");
       if (row && row.url) {
         img.style.backgroundImage = "url(" + row.url + ")";
+        img.style.backgroundPosition = (row.pos_x != null ? row.pos_x : 50) + "% " + (row.pos_y != null ? row.pos_y : 50) + "%";
         foto.classList.remove("empty");
       } else {
         img.style.backgroundImage = "";
+        img.style.backgroundPosition = "";
         foto.classList.add("empty");
       }
     });
@@ -1046,10 +1069,64 @@ function abrirModalDestaque() {
       grid.appendChild(div);
     });
   }
+  var btnAjustar = document.getElementById("btn-ajustar-atual");
+  btnAjustar.style.display = (fotoDestaqueAtual && fotoDestaqueAtual.url) ? "block" : "none";
   document.getElementById("modal-destaque").classList.add("show");
 }
 
 function selecionarFotoDestaque(m) {
+  abrirModalEnquadrar(m.url, m.id, 50, 50);
+}
+
+function abrirEnquadramentoAtual() {
+  if (!fotoDestaqueAtual || !fotoDestaqueAtual.url) return;
+  abrirModalEnquadrar(fotoDestaqueAtual.url, fotoDestaqueAtual.midia_id, fotoDestaqueAtual.pos_x, fotoDestaqueAtual.pos_y);
+}
+
+var enquadrarState = { url: "", midiaId: null, posX: 50, posY: 50, arrastando: false, lastX: 0, lastY: 0 };
+
+function abrirModalEnquadrar(url, midiaId, posX, posY) {
+  enquadrarState.url = url;
+  enquadrarState.midiaId = midiaId;
+  enquadrarState.posX = (posX != null) ? posX : 50;
+  enquadrarState.posY = (posY != null) ? posY : 50;
+  var preview = document.getElementById("enquadrar-preview");
+  preview.style.backgroundImage = "url(" + url + ")";
+  atualizarPosicaoEnquadramento();
+  document.getElementById("modal-enquadrar").classList.add("show");
+}
+
+function atualizarPosicaoEnquadramento() {
+  document.getElementById("enquadrar-preview").style.backgroundPosition = enquadrarState.posX + "% " + enquadrarState.posY + "%";
+}
+
+function ativarArrasteEnquadramento() {
+  var area = document.getElementById("enquadrar-preview");
+  if (!area) return;
+  area.addEventListener("pointerdown", function(e) {
+    enquadrarState.arrastando = true;
+    enquadrarState.lastX = e.clientX;
+    enquadrarState.lastY = e.clientY;
+    area.style.cursor = "grabbing";
+    if (area.setPointerCapture) area.setPointerCapture(e.pointerId);
+  });
+  area.addEventListener("pointermove", function(e) {
+    if (!enquadrarState.arrastando) return;
+    var dx = e.clientX - enquadrarState.lastX;
+    var dy = e.clientY - enquadrarState.lastY;
+    enquadrarState.lastX = e.clientX;
+    enquadrarState.lastY = e.clientY;
+    enquadrarState.posX = Math.min(100, Math.max(0, enquadrarState.posX - dx * 0.5));
+    enquadrarState.posY = Math.min(100, Math.max(0, enquadrarState.posY - dy * 0.5));
+    atualizarPosicaoEnquadramento();
+  });
+  function soltar() { enquadrarState.arrastando = false; area.style.cursor = "grab"; }
+  area.addEventListener("pointerup", soltar);
+  area.addEventListener("pointercancel", soltar);
+  area.addEventListener("pointerleave", soltar);
+}
+
+function salvarEnquadramento() {
   api("/rest/v1/foto_destaque?on_conflict=id", {
     method: "POST",
     headers: {
@@ -1058,8 +1135,9 @@ function selecionarFotoDestaque(m) {
       "Content-Type": "application/json",
       "Prefer": "resolution=merge-duplicates,return=minimal"
     },
-    body: JSON.stringify({ id: 1, url: m.url, midia_id: m.id })
+    body: JSON.stringify({ id: 1, url: enquadrarState.url, midia_id: enquadrarState.midiaId, pos_x: enquadrarState.posX, pos_y: enquadrarState.posY })
   }).then(function() {
+    fecharModal("modal-enquadrar");
     fecharModal("modal-destaque");
     carregarFotoDestaque();
     mostrarToast("✓ Foto do casal atualizada!");
@@ -2431,6 +2509,8 @@ function mostrarToast(msg) {
 document.getElementById("login-senha").addEventListener("keydown", function(e) {
   if (e.key === "Enter") fazerLogin();
 });
+
+ativarArrasteEnquadramento();
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(function(){});
