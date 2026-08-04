@@ -103,6 +103,9 @@ alter table musicas add column if not exists letra_manual boolean default false;
 alter table midias add column if not exists legenda text;
 alter table midias add column if not exists data_evento date;
 
+-- Capa gerada automaticamente pra vídeos (thumbnail)
+alter table midias add column if not exists thumb_url text;
+
 -- Guarda a "memória do dia" (Relembrando) pra não trocar toda vez que abrir o app
 create table if not exists relembranca_dia (
   dia date primary key,

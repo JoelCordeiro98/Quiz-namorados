@@ -1378,6 +1378,11 @@ function renderGaleria() {
     div.className = "photo-item" + (m.tipo === "video" ? " video" : "");
     if (m.tipo === "video") {
       div.classList.add("loaded");
+      if (m.thumb_url) {
+        div.style.backgroundImage = "url(" + m.thumb_url + ")";
+      } else {
+        gerarCapaVideo(m, div);
+      }
     } else {
       div.setAttribute("data-src", m.url);
       galeriaObserver.observe(div);
@@ -1385,6 +1390,88 @@ function renderGaleria() {
     div.onclick = function() { abrirLightbox(idx); };
     grid.appendChild(div);
   });
+}
+
+// ===== CAPA AUTOMÁTICA DE VÍDEO (captura um frame com <video>+<canvas>) =====
+var thumbsGerando = {};
+
+function capturarFrameVideo(url) {
+  return new Promise(function(resolve, reject) {
+    var video = document.createElement("video");
+    video.preload = "auto";
+    video.muted = true;
+    video.playsInline = true;
+    video.crossOrigin = "anonymous";
+    video.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px";
+    var acabou = false;
+    function finalizar(fn, arg) {
+      if (acabou) return;
+      acabou = true;
+      clearTimeout(timer);
+      try { video.pause(); video.removeAttribute("src"); video.load(); } catch (e) {}
+      video.remove();
+      fn(arg);
+    }
+    var timer = setTimeout(function() { finalizar(reject, new Error("timeout")); }, 8000);
+    video.addEventListener("loadedmetadata", function() {
+      var dur = video.duration;
+      var alvo = (dur && isFinite(dur)) ? Math.min(1, dur / 3) : 0.1;
+      try { video.currentTime = alvo; } catch (e) { finalizar(reject, e); }
+    });
+    video.addEventListener("seeked", function() {
+      try {
+        var canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth || 320;
+        canvas.height = video.videoHeight || 240;
+        canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(function(blob) {
+          if (blob) finalizar(resolve, blob); else finalizar(reject, new Error("sem blob"));
+        }, "image/jpeg", 0.8);
+      } catch (e) { finalizar(reject, e); }
+    });
+    video.addEventListener("error", function() { finalizar(reject, new Error("erro ao carregar vídeo")); });
+    document.body.appendChild(video);
+    video.src = url;
+    video.load();
+  });
+}
+
+function gerarCapaVideo(m, divAlvo) {
+  if (thumbsGerando[m.id]) return;
+  thumbsGerando[m.id] = true;
+  capturarFrameVideo(m.url)
+    .then(function(blob) {
+      var path = "midias/thumbs/" + m.id + ".jpg";
+      return fetch(SUPABASE_URL + "/storage/v1/object/" + path, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + session.access_token,
+          "Content-Type": "image/jpeg",
+          "x-upsert": "true"
+        },
+        body: blob
+      }).then(function(r) {
+        if (!r.ok) throw new Error("upload da capa falhou");
+        var thumbUrl = SUPABASE_URL + "/storage/v1/object/public/" + path;
+        return api("/rest/v1/midias?id=eq." + m.id, {
+          method: "PATCH",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": "Bearer " + session.access_token,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify({ thumb_url: thumbUrl })
+        }).then(function() {
+          m.thumb_url = thumbUrl;
+          if (divAlvo) divAlvo.style.backgroundImage = "url(" + thumbUrl + ")";
+        });
+      });
+    })
+    .catch(function() {
+      delete thumbsGerando[m.id];
+    });
 }
 
 // ===== SLIDESHOW DA TELA INICIAL =====
@@ -1418,7 +1505,16 @@ function renderHeroPhotos(items) {
       var div = document.createElement("div");
       if (items[i]) {
         if (items[i].tipo === "video") {
-          div.style.cssText = "display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:rgba(255,255,255,0.35);background:#1a1a1a";
+          div.style.cssText = "display:flex;align-items:center;justify-content:center;font-size:1.4rem;text-shadow:0 1px 3px rgba(0,0,0,0.8)";
+          if (items[i].thumb_url) {
+            div.style.backgroundImage = "url(" + items[i].thumb_url + ")";
+            div.style.backgroundSize = "cover";
+            div.style.backgroundPosition = "center";
+            div.style.color = "#fff";
+          } else {
+            div.style.background = "#1a1a1a";
+            div.style.color = "rgba(255,255,255,0.35)";
+          }
           div.textContent = "▶";
         } else {
           div.style.backgroundImage = "url(" + items[i].url + ")";
