@@ -849,7 +849,6 @@ function fazerLogin() {
 function fazerLogout() {
   session = null;
   localStorage.removeItem("sb_session");
-  clearInterval(heroSlideTimer);
   clearInterval(contadorNamoroTimer);
   midias = []; textos = []; desejos = [];
   mostrarLogin();
@@ -1366,9 +1365,7 @@ function renderGaleria() {
     renderHeroPhotos([]);
     return;
   }
-  heroSlideIndex = 0;
   renderHeroPhotos(getHeroBatch());
-  iniciarHeroSlideshow();
 
   if (galeriaObserver) galeriaObserver.disconnect();
   galeriaObserver = new IntersectionObserver(function(entries) {
@@ -1397,7 +1394,7 @@ function renderGaleria() {
       div.classList.add("loaded");
       if (m.thumb_url) {
         div.style.backgroundImage = "url(" + m.thumb_url + ")";
-      } else {
+      } else if (!m.thumb_tentado) {
         gerarCapaVideo(m, div);
       }
     } else {
@@ -1453,64 +1450,63 @@ function capturarFrameVideo(url) {
   });
 }
 
+function marcarThumbTentado(id) {
+  return api("/rest/v1/midias?id=eq." + id, {
+    method: "PATCH",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal"
+    },
+    body: JSON.stringify({ thumb_tentado: true })
+  }).catch(function() {});
+}
+
 function gerarCapaVideo(m, divAlvo) {
   if (thumbsGerando[m.id]) return;
   thumbsGerando[m.id] = true;
-  capturarFrameVideo(m.url)
-    .then(function(blob) {
-      var path = "midias/thumbs/" + m.id + ".jpg";
-      return fetch(SUPABASE_URL + "/storage/v1/object/" + path, {
-        method: "POST",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": "Bearer " + session.access_token,
-          "Content-Type": "image/jpeg",
-          "x-upsert": "true"
-        },
-        body: blob
-      }).then(function(r) {
-        if (!r.ok) throw new Error("upload da capa falhou");
-        var thumbUrl = SUPABASE_URL + "/storage/v1/object/public/" + path;
-        return api("/rest/v1/midias?id=eq." + m.id, {
-          method: "PATCH",
+  m.thumb_tentado = true;
+  // Marca a tentativa ANTES de baixar o vídeo, pra nunca tentar de novo mesmo se falhar/travar no meio do caminho
+  marcarThumbTentado(m.id).then(function() {
+    return capturarFrameVideo(m.url)
+      .then(function(blob) {
+        var path = "midias/thumbs/" + m.id + ".jpg";
+        return fetch(SUPABASE_URL + "/storage/v1/object/" + path, {
+          method: "POST",
           headers: {
             "apikey": SUPABASE_KEY,
             "Authorization": "Bearer " + session.access_token,
-            "Content-Type": "application/json",
-            "Prefer": "return=minimal"
+            "Content-Type": "image/jpeg",
+            "x-upsert": "true"
           },
-          body: JSON.stringify({ thumb_url: thumbUrl })
-        }).then(function() {
-          m.thumb_url = thumbUrl;
-          if (divAlvo) divAlvo.style.backgroundImage = "url(" + thumbUrl + ")";
+          body: blob
+        }).then(function(r) {
+          if (!r.ok) throw new Error("upload da capa falhou");
+          var thumbUrl = SUPABASE_URL + "/storage/v1/object/public/" + path;
+          return api("/rest/v1/midias?id=eq." + m.id, {
+            method: "PATCH",
+            headers: {
+              "apikey": SUPABASE_KEY,
+              "Authorization": "Bearer " + session.access_token,
+              "Content-Type": "application/json",
+              "Prefer": "return=minimal"
+            },
+            body: JSON.stringify({ thumb_url: thumbUrl })
+          }).then(function() {
+            m.thumb_url = thumbUrl;
+            if (divAlvo) divAlvo.style.backgroundImage = "url(" + thumbUrl + ")";
+          });
         });
       });
-    })
-    .catch(function() {
-      delete thumbsGerando[m.id];
-    });
+  })
+    .catch(function() {})
+    .then(function() { delete thumbsGerando[m.id]; });
 }
 
-// ===== SLIDESHOW DA TELA INICIAL =====
-var heroSlideIndex = 0;
-var heroSlideTimer = null;
-
+// ===== FOTOS DA TELA INICIAL (estático — sem rotação, pra economizar tráfego) =====
 function getHeroBatch() {
-  var batch = [];
-  var total = Math.min(midias.length, 6);
-  for (var i = 0; i < total; i++) {
-    batch.push(midias[(heroSlideIndex + i) % midias.length]);
-  }
-  return batch;
-}
-
-function iniciarHeroSlideshow() {
-  clearInterval(heroSlideTimer);
-  if (midias.length <= 6) return;
-  heroSlideTimer = setInterval(function() {
-    heroSlideIndex = (heroSlideIndex + 6) % midias.length;
-    renderHeroPhotos(getHeroBatch());
-  }, 5000);
+  return midias.slice(0, 6);
 }
 
 function renderHeroPhotos(items) {

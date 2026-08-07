@@ -109,6 +109,9 @@ alter table midias add column if not exists data_evento date;
 -- Capa gerada automaticamente pra vídeos (thumbnail)
 alter table midias add column if not exists thumb_url text;
 
+-- Marca se já tentamos gerar a capa (mesmo se falhou), pra não tentar de novo toda hora
+alter table midias add column if not exists thumb_tentado boolean default false;
+
 -- Guarda a "memória do dia" (Relembrando) pra não trocar toda vez que abrir o app
 create table if not exists relembranca_dia (
   dia date primary key,
