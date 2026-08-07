@@ -60,6 +60,9 @@ alter table indicacoes add column if not exists prioridade boolean default false
 -- Comentário sobre o filme/série depois de assistido
 alter table indicacoes add column if not exists comentario text;
 
+-- Nota de 0 a 10 depois de assistido
+alter table indicacoes add column if not exists nota integer check (nota >= 0 and nota <= 10);
+
 alter table indicacoes enable row level security;
 
 drop policy if exists "authenticated full access indicacoes" on indicacoes;

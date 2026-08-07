@@ -90,6 +90,11 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .quem-toggle{display:flex;gap:0.75rem}
 .quem-btn{flex:1;padding:0.75rem;border-radius:12px;border:1.5px solid rgba(192,57,43,0.25);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);font-size:0.9rem;font-family:"Lato",sans-serif;cursor:pointer;transition:all 0.2s}
 .quem-btn.active{border-color:var(--redl);background:rgba(192,57,43,0.18);color:#fff}
+.indic-filtro{display:flex;gap:0.5rem;padding:0.9rem 1rem 0}
+.indic-filtro .quem-btn{padding:0.55rem;font-size:0.72rem}
+.nota-slider-row{display:flex;align-items:center;gap:0.9rem}
+.nota-slider-row input[type=range]{flex:1;accent-color:var(--redl)}
+.nota-valor{font-family:"Playfair Display",serif;font-size:1.15rem;color:var(--redl);min-width:2.6rem;text-align:center}
 .desejo-item.prioridade{border-color:rgba(230,168,26,0.5);background:rgba(230,168,26,0.08)}
 .d-star{background:none;border:none;color:rgba(255,255,255,0.25);font-size:1.15rem;cursor:pointer;padding:0.25rem}
 .d-star.active{color:#e6a81a}
@@ -430,6 +435,11 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       </div>
       <button class="btn-add" onclick="abrirModalIndicacao()">+</button>
     </div>
+    <div class="indic-filtro">
+      <button type="button" class="quem-btn active" id="ind-filtro-todos" onclick="filtrarIndicacoes('todos')">Todos</button>
+      <button type="button" class="quem-btn" id="ind-filtro-pendente" onclick="filtrarIndicacoes('pendente')">Não assistidos</button>
+      <button type="button" class="quem-btn" id="ind-filtro-assistido" onclick="filtrarIndicacoes('assistido')">Assistidos</button>
+    </div>
     <div class="indic-list">
       <h3 class="indic-subhdr">☀️ Indicações dele</h3>
       <div id="indic-list-ele">
@@ -600,6 +610,13 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   <div class="modal-box" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
     <div class="modal-title">💬 O que vocês acharam?</div>
+    <div class="form-group">
+      <label>Nota</label>
+      <div class="nota-slider-row">
+        <input type="range" id="com-nota" min="0" max="10" step="1" value="0" oninput="atualizarNotaLabel()">
+        <span class="nota-valor" id="com-nota-valor">0/10</span>
+      </div>
+    </div>
     <div class="form-group">
       <label>Comentário</label>
       <textarea id="com-texto" placeholder="Escreva o que acharam..."></textarea>
@@ -2100,7 +2117,9 @@ function carregarIndicacoes() {
 function renderIndicacaoItem(i) {
   var div = document.createElement("div");
   div.className = "desejo-item" + (i.assistido ? " done" : "") + (i.prioridade ? " prioridade" : "");
-  var status = i.assistido ? "Assistido! ✓" : (i.prioridade ? "★ Prioridade" : "Pra ver");
+  var status = i.assistido
+    ? "Assistido! ✓" + (i.nota != null ? " · Nota " + i.nota + "/10" : "")
+    : (i.prioridade ? "★ Prioridade" : "Pra ver");
   var comentarioHtml = (i.assistido && i.comentario) ? '<div class="d-comentario">"' + i.comentario + '"</div>' : "";
   var btnComentario = i.assistido
     ? '<button class="d-comment' + (i.comentario ? ' tem' : '') + '" onclick="event.stopPropagation();abrirModalComentario(\'' + i.id + '\')" aria-label="Comentário">💬</button>'
@@ -2125,12 +2144,20 @@ function abrirModalComentario(id) {
   if (!item) return;
   indicacaoComentandoId = id;
   document.getElementById("com-texto").value = item.comentario || "";
+  document.getElementById("com-nota").value = item.nota != null ? item.nota : 0;
+  atualizarNotaLabel();
   document.getElementById("modal-comentario").classList.add("show");
+}
+
+function atualizarNotaLabel() {
+  var v = document.getElementById("com-nota").value;
+  document.getElementById("com-nota-valor").textContent = v + "/10";
 }
 
 function salvarComentarioIndicacao() {
   if (!indicacaoComentandoId) return;
   var texto = document.getElementById("com-texto").value.trim();
+  var nota = parseInt(document.getElementById("com-nota").value, 10);
   api("/rest/v1/indicacoes?id=eq." + indicacaoComentandoId, {
     method: "PATCH",
     headers: {
@@ -2139,7 +2166,7 @@ function salvarComentarioIndicacao() {
       "Content-Type": "application/json",
       "Prefer": "return=minimal"
     },
-    body: JSON.stringify({ comentario: texto || null })
+    body: JSON.stringify({ comentario: texto || null, nota: isNaN(nota) ? null : nota })
   }).then(function() {
     indicacaoComentandoId = null;
     fecharModal("modal-comentario");
@@ -2148,23 +2175,41 @@ function salvarComentarioIndicacao() {
   });
 }
 
+var indicacaoFiltro = "todos";
+
+function filtrarIndicacoes(f) {
+  indicacaoFiltro = f;
+  ["todos", "pendente", "assistido"].forEach(function(nome) {
+    document.getElementById("ind-filtro-" + nome).classList.toggle("active", nome === f);
+  });
+  renderIndicacoes();
+}
+
 function renderIndicacoes() {
   var listaEle = document.getElementById("indic-list-ele");
   var listaEla = document.getElementById("indic-list-ela");
   var porPrioridade = function(a, b) { return (b.prioridade ? 1 : 0) - (a.prioridade ? 1 : 0); };
-  var itensEle = indicacoes.filter(function(i) { return i.quem === "ele"; }).sort(porPrioridade);
-  var itensEla = indicacoes.filter(function(i) { return i.quem === "ela"; }).sort(porPrioridade);
+  var porFiltro = function(i) {
+    if (indicacaoFiltro === "pendente") return !i.assistido;
+    if (indicacaoFiltro === "assistido") return i.assistido;
+    return true;
+  };
+  var itensEle = indicacoes.filter(function(i) { return i.quem === "ele"; }).filter(porFiltro).sort(porPrioridade);
+  var itensEla = indicacoes.filter(function(i) { return i.quem === "ela"; }).filter(porFiltro).sort(porPrioridade);
+  var msgVazio = indicacaoFiltro === "pendente" ? "Nenhuma indicação pendente."
+    : indicacaoFiltro === "assistido" ? "Nenhuma indicação assistida ainda."
+    : "Nenhuma indicação ainda.";
 
   listaEle.innerHTML = "";
   if (itensEle.length === 0) {
-    listaEle.innerHTML = '<div class="photo-empty">Nenhuma indicação ainda.</div>';
+    listaEle.innerHTML = '<div class="photo-empty">' + msgVazio + '</div>';
   } else {
     itensEle.forEach(function(i) { listaEle.appendChild(renderIndicacaoItem(i)); });
   }
 
   listaEla.innerHTML = "";
   if (itensEla.length === 0) {
-    listaEla.innerHTML = '<div class="photo-empty">Nenhuma indicação ainda.</div>';
+    listaEla.innerHTML = '<div class="photo-empty">' + msgVazio + '</div>';
   } else {
     itensEla.forEach(function(i) { listaEla.appendChild(renderIndicacaoItem(i)); });
   }
