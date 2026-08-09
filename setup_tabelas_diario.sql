@@ -106,6 +106,10 @@ alter table musicas add column if not exists letra_manual boolean default false;
 alter table midias add column if not exists legenda text;
 alter table midias add column if not exists data_evento date;
 
+-- Legenda separada por pessoa (J e R)
+alter table midias add column if not exists legenda_j text;
+alter table midias add column if not exists legenda_r text;
+
 -- Capa gerada automaticamente pra vídeos (thumbnail)
 alter table midias add column if not exists thumb_url text;
 
