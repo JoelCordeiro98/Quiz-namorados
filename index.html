@@ -840,8 +840,10 @@ function fazerLogin() {
         session = data;
         mostrarApp();
         carregarTudo();
-      } else {
+      } else if (data.error_code === "invalid_credentials" || data.error_description === "Invalid login credentials") {
         err.textContent = "E-mail ou senha incorretos.";
+      } else {
+        err.textContent = "Erro: " + (data.msg || data.error_description || data.error || "não foi possível entrar. Verifique se o Supabase está acessível.");
       }
       btn.disabled = false; btn.textContent = "Entrar ♥";
     })
