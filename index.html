@@ -810,13 +810,50 @@ function tipoArquivo(file) {
   return mime;
 }
 
+// Se o token de acesso expirar (app ficou aberto em segundo plano por muito tempo),
+// tenta renovar com o refresh_token antes de desistir. Sem isso, requisições com
+// token vencido voltavam 401 mas o app mostrava "salvo com sucesso" mesmo assim.
+var renovandoSessao = null;
+
+function renovarSessao() {
+  if (!session || !session.refresh_token) return Promise.reject(new Error("sem refresh_token"));
+  if (renovandoSessao) return renovandoSessao;
+  renovandoSessao = authApi("/token?grant_type=refresh_token", { refresh_token: session.refresh_token })
+    .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
+    .then(function(res) {
+      renovandoSessao = null;
+      if (!res.ok || !res.data.access_token) throw new Error("refresh falhou");
+      session = res.data;
+      return session;
+    })
+    .catch(function(e) {
+      renovandoSessao = null;
+      throw e;
+    });
+  return renovandoSessao;
+}
+
+function sessaoExpirada() {
+  session = null;
+  mostrarToast("⚠ Sua sessão expirou. Faça login novamente.");
+  mostrarLogin();
+}
+
 function api(path, opts) {
-  var headers = {
-    "apikey": SUPABASE_KEY,
-    "Content-Type": "application/json"
-  };
-  if (session) headers["Authorization"] = "Bearer " + session.access_token;
-  return fetch(SUPABASE_URL + path, Object.assign({ headers: headers }, opts));
+  opts = opts || {};
+  function doFetch() {
+    var headers = Object.assign({ "apikey": SUPABASE_KEY, "Content-Type": "application/json" }, opts.headers);
+    if (session) headers["Authorization"] = "Bearer " + session.access_token;
+    return fetch(SUPABASE_URL + path, Object.assign({}, opts, { headers: headers }));
+  }
+  return doFetch().then(function(r) {
+    if (r.status === 401 && session) {
+      return renovarSessao()
+        .then(function() { return doFetch(); })
+        .catch(function() { sessaoExpirada(); return r; });
+    }
+    return r;
+  });
 }
 
 function authApi(path, body) {
