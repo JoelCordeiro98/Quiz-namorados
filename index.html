@@ -66,7 +66,11 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .hero-contador{font-size:0.72rem;color:rgba(255,255,255,0.55);letter-spacing:0.3px;margin-bottom:0.7rem;font-variant-numeric:tabular-nums}
 .hero-title{font-family:"Playfair Display",serif;font-size:clamp(1.8rem,6vw,2.8rem);line-height:1.2}
 .hero-title em{color:var(--redl);font-style:italic}
-.diario-section{padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);text-align:center}
+.diario-section{padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);text-align:center;position:relative}
+.mascote{position:absolute;pointer-events:none;mix-blend-mode:screen;z-index:1;-webkit-user-drag:none;user-select:none}
+.mascote-ele{bottom:-8px;left:0.1rem;width:60px}
+.mascote-ela{bottom:-8px;right:0.1rem;width:60px}
+.mascote-cards{bottom:-16px;right:-8px;width:86px;opacity:0.92}
 .diario-section .plabel{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--redl);margin-bottom:0.3rem}
 .diario-title{font-family:"Playfair Display",serif;font-size:1.15rem;margin-bottom:1.2rem}
 .diario-campos{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;text-align:left}
@@ -141,7 +145,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .relembrando-info{flex:1;min-width:0}
 .relembrando-tempo{font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--redl);margin-bottom:0.25rem}
 .relembrando-texto{font-family:"Playfair Display",serif;font-style:italic;font-size:0.88rem;color:rgba(255,255,255,0.85);line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.home-cards{padding:1.5rem}
+.home-cards{padding:1.5rem;position:relative}
 .home-cards h3{font-family:"Playfair Display",serif;font-size:1.2rem;margin-bottom:1rem;color:rgba(255,255,255,0.8)}
 .cards-row{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem}
 .hcard{background:var(--blk3);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:1.2rem;cursor:pointer;transition:all 0.2s}
@@ -335,6 +339,8 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       <div class="diario-foto empty" id="diario-foto" onclick="abrirModalDestaque()">
         <div class="diario-foto-img" id="diario-foto-img"></div>
       </div>
+      <img class="mascote mascote-ele" src="mascote-menino-aceno.png" alt="">
+      <img class="mascote mascote-ela" src="mascote-menina-aceno.png" alt="">
     </div>
 
     <div class="relembrando-section" id="relembrando-section" style="display:none">
@@ -388,6 +394,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
           <div class="hcard-count">Jogar agora</div>
         </div>
       </div>
+      <img class="mascote mascote-cards" src="mascote-sentados.png" alt="">
     </div>
   </div>
 
