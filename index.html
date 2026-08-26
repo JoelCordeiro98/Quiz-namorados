@@ -944,6 +944,47 @@ function goTo(page) {
   window.scrollTo(0, 0);
 }
 
+// ===== GESTOS: deslizar o dedo pra trocar de aba (mesma ordem do menu inferior) =====
+var ORDEM_ABAS = ["home", "galeria", "textos", "desejos", "indicacoes", "musicas"];
+var swipeStartX = null, swipeStartY = null, swipeAtivo = false;
+
+function paginaAtualAba() {
+  var ativo = document.querySelector(".bitem.active");
+  return ativo ? ativo.getAttribute("data-page") : "home";
+}
+
+function trocarAbaSwipe(direcao) {
+  var idx = ORDEM_ABAS.indexOf(paginaAtualAba());
+  if (idx === -1) return;
+  var novoIdx = idx + direcao;
+  if (novoIdx < 0 || novoIdx >= ORDEM_ABAS.length) return;
+  goTo(ORDEM_ABAS[novoIdx]);
+}
+
+// Ignora o gesto se começar em cima de algo que já tem seu próprio arrastar/rolagem
+function alvoIgnoraSwipe(el) {
+  return !!(el.closest && el.closest(".lightbox.show, .modal-overlay.show, .enquadrar-preview, input[type=range], textarea, input, select"));
+}
+
+document.addEventListener("pointerdown", function(e) {
+  if (e.pointerType === "mouse") return;
+  if (!document.getElementById("app").classList.contains("show")) { swipeAtivo = false; return; }
+  if (alvoIgnoraSwipe(e.target)) { swipeAtivo = false; return; }
+  swipeStartX = e.clientX;
+  swipeStartY = e.clientY;
+  swipeAtivo = true;
+}, { passive: true });
+
+document.addEventListener("pointerup", function(e) {
+  if (!swipeAtivo || swipeStartX === null) return;
+  swipeAtivo = false;
+  var dx = e.clientX - swipeStartX;
+  var dy = e.clientY - swipeStartY;
+  swipeStartX = null;
+  if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
+  trocarAbaSwipe(dx < 0 ? 1 : -1);
+}, { passive: true });
+
 function carregarTudo() {
   carregarMidias();
   carregarTextos();
