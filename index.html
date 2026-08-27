@@ -50,12 +50,12 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .bitem-label{font-size:0.6rem;letter-spacing:0.5px;text-transform:uppercase;font-weight:700}
 .page{display:none;min-height:calc(100vh - 80px);animation:fadeIn 0.25s ease;position:relative}
 .mascote-textos{bottom:8px;right:-2px;width:66px;opacity:0.85}
-.mascote-desejos{bottom:8px;right:-2px;width:62px;opacity:0.85}
-.mascote-indicacoes{bottom:8px;right:-2px;width:64px;opacity:0.85}
+.mascote-desejos{top:-4px;right:0.8rem;width:52px;opacity:0.85}
+.mascote-indicacoes{top:-4px;right:0.8rem;width:54px;opacity:0.85}
 .ptr-indicator{height:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:0.72rem;letter-spacing:0.5px;color:var(--redl);opacity:0;transition:height 0.2s ease,opacity 0.2s ease}
 .page.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.phdr{padding:3rem 1.5rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:flex-end;justify-content:space-between}
+.phdr{padding:3rem 1.5rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:flex-end;justify-content:space-between;position:relative}
 .phdr-left .plabel{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--redl);margin-bottom:0.3rem}
 .phdr-left h2{font-family:"Playfair Display",serif;font-size:1.8rem}
 .phdr-left p{color:var(--gray);font-size:0.82rem;margin-top:0.3rem}
@@ -454,6 +454,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
         <p>Toque pra marcar como feito · arraste pra favoritar</p>
       </div>
       <button class="btn-add" onclick="abrirModalDesejo()">+</button>
+      <img class="mascote mascote-desejos" src="mascote-beijo-bochecha.png" alt="">
     </div>
     <div class="desejos-list">
       <div class="dprog-bar">
@@ -467,7 +468,6 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
         <div class="photo-empty">Nenhum desejo ainda.<br>Toque em + para adicionar!</div>
       </div>
     </div>
-    <img class="mascote mascote-desejos" src="mascote-beijo-bochecha.png" alt="">
   </div>
 
   <div class="page" id="page-indicacoes">
@@ -478,6 +478,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
         <p>Filmes e séries pra ver juntos</p>
       </div>
       <button class="btn-add" onclick="abrirModalIndicacao()">+</button>
+      <img class="mascote mascote-indicacoes" src="mascote-beijo-bochecha2.png" alt="">
     </div>
     <div class="indic-filtro">
       <button type="button" class="quem-btn active" id="ind-filtro-todos" onclick="filtrarIndicacoes('todos')">Todos</button>
@@ -494,7 +495,6 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
         <div class="photo-empty">Nenhuma indicação ainda.</div>
       </div>
     </div>
-    <img class="mascote mascote-indicacoes" src="mascote-beijo-bochecha2.png" alt="">
   </div>
 
   <div class="page" id="page-musicas">
