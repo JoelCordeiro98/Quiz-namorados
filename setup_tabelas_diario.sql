@@ -138,3 +138,6 @@ on relembranca_dia for all
 to authenticated
 using (true)
 with check (true);
+
+-- Favorito nos Desejos (arrastar o item pra marcar/desmarcar)
+alter table desejos add column if not exists favorito boolean default false;
