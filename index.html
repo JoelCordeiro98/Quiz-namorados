@@ -280,15 +280,17 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .jg-player-nome{font-size:0.75rem;color:rgba(255,255,255,0.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .jg-player-pontos{font-family:"Playfair Display",serif;font-size:1.4rem;font-weight:700;color:#fff}
 .jg-vs{font-size:0.75rem;color:rgba(255,255,255,0.3);font-weight:700}
-.jg-turno{text-align:center;font-size:0.78rem;color:var(--redl);letter-spacing:0.5px;margin-bottom:0.9rem;background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.25);border-radius:50px;padding:0.45rem;font-weight:700}
+.jg-turno{text-align:center;font-size:0.78rem;color:var(--redl);letter-spacing:0.5px;margin-bottom:0.5rem;background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.25);border-radius:50px;padding:0.45rem;font-weight:700}
+.jg-dica{text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.35);margin-bottom:0.9rem}
 .jg-dado-row{display:flex;align-items:center;justify-content:center;gap:0.75rem;margin-bottom:0.9rem}
 .jg-dado-btn{background:var(--red);border:none;color:#fff;padding:0.6rem 1.1rem;border-radius:50px;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:"Lato",sans-serif}
 .jg-dado-btn:disabled{opacity:0.4;cursor:default}
 .jg-dado-resultado{font-family:"Playfair Display",serif;font-size:1.1rem;color:#fff}
 .jg-board-wrap{overflow-x:auto;display:flex;justify-content:center;padding:0.5rem 0 1rem}
 .jg-board{position:relative;flex-shrink:0}
-.jg-dot{position:absolute;width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.6);transform:translate(-50%,-50%);pointer-events:none}
-.jg-edge{position:absolute;cursor:pointer}
+.jg-dot{position:absolute;width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.6);transform:translate(-50%,-50%);pointer-events:none;transition:transform 0.15s,background 0.15s}
+.jg-dot.ativo{background:var(--redl);transform:translate(-50%,-50%) scale(1.9)}
+.jg-edge{position:absolute;pointer-events:none}
 .jg-edge::after{content:"";position:absolute;border-radius:3px;background:rgba(255,255,255,0.12);transition:background 0.15s}
 .jg-edge.jg-h{transform:translate(-50%,-50%)}
 .jg-edge.jg-h::after{left:0;right:0;top:50%;height:5px;transform:translateY(-50%)}
@@ -910,6 +912,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       </div>
     </div>
     <div class="jg-turno" id="jg-turno">Vez de Jogador 1</div>
+    <div class="jg-dica">Arraste de um ponto até o vizinho pra desenhar o traço</div>
     <div class="jg-dado-row" id="jg-dado-row" style="display:none">
       <button class="jg-dado-btn" id="jg-dado-btn" onclick="rolarDado()">🎲 Rolar dado</button>
       <div class="jg-dado-resultado" id="jg-dado-resultado"></div>
@@ -1342,6 +1345,7 @@ function renderTabuleiro() {
 
   var larguraDisp = wrap.clientWidth || 320;
   var cell = Math.max(26, Math.min(58, Math.floor((larguraDisp - 24) / jogo.colunas)));
+  jgTabuleiroCell = cell;
   board.style.width = (cell * jogo.colunas) + "px";
   board.style.height = (cell * jogo.linhas) + "px";
 
@@ -1349,6 +1353,7 @@ function renderTabuleiro() {
     for (var c = 0; c <= jogo.colunas; c++) {
       var dot = document.createElement("div");
       dot.className = "jg-dot";
+      dot.dataset.r = r; dot.dataset.c = c;
       dot.style.left = (c * cell) + "px";
       dot.style.top = (r * cell) + "px";
       board.appendChild(dot);
@@ -1366,7 +1371,6 @@ function renderTabuleiro() {
       eh.style.width = cell + "px";
       eh.style.height = margemToque + "px";
       eh.dataset.tipo = "h"; eh.dataset.r = rh; eh.dataset.c = ch;
-      eh.onclick = function() { marcarBorda(this.dataset.tipo, +this.dataset.r, +this.dataset.c); };
       board.appendChild(eh);
     }
   }
@@ -1380,7 +1384,6 @@ function renderTabuleiro() {
       ev.style.height = cell + "px";
       ev.style.width = margemToque + "px";
       ev.dataset.tipo = "v"; ev.dataset.r = rv; ev.dataset.c = cv;
-      ev.onclick = function() { marcarBorda(this.dataset.tipo, +this.dataset.r, +this.dataset.c); };
       board.appendChild(ev);
     }
   }
@@ -1433,6 +1436,64 @@ function atualizarVisualBordas() {
 
 function caixaCompleta(r, c) {
   return !!(jogo.bordasH[r][c] && jogo.bordasH[r + 1][c] && jogo.bordasV[r][c] && jogo.bordasV[r][c + 1]);
+}
+
+// ===== Interação: arrastar de um ponto pro ponto vizinho pra desenhar o traço =====
+// (mais preciso do que tocar direto na linha fina entre os pontos)
+var jgTabuleiroCell = 40;
+var jgArrastoOrigem = null;
+var jgArrastoAtivo = false;
+
+function jgPontoMaisProximo(clientX, clientY, board) {
+  var rect = board.getBoundingClientRect();
+  var x = clientX - rect.left, y = clientY - rect.top;
+  var cell = jgTabuleiroCell;
+  var c = Math.round(x / cell), r = Math.round(y / cell);
+  if (r < 0 || r > jogo.linhas || c < 0 || c > jogo.colunas) return null;
+  if (Math.abs(x - c * cell) > cell * 0.48 || Math.abs(y - r * cell) > cell * 0.48) return null;
+  return { r: r, c: c };
+}
+
+function jgDestacarDot(r, c, ligar) {
+  var dot = document.querySelector('.jg-dot[data-r="' + r + '"][data-c="' + c + '"]');
+  if (dot) dot.classList.toggle("ativo", ligar);
+}
+
+function ativarArrasteJogo() {
+  var board = document.getElementById("jg-board");
+  if (!board) return;
+
+  board.addEventListener("pointerdown", function(e) {
+    if (!jogo || jogo.finalizado) return;
+    if (jogo.modoDado && jogo.dadoRestante <= 0) { mostrarToast("Role o dado primeiro!"); return; }
+    var dot = jgPontoMaisProximo(e.clientX, e.clientY, board);
+    if (!dot) return;
+    jgArrastoOrigem = dot;
+    jgArrastoAtivo = true;
+    jgDestacarDot(dot.r, dot.c, true);
+    if (board.setPointerCapture) { try { board.setPointerCapture(e.pointerId); } catch (err) {} }
+  }, { passive: true });
+
+  board.addEventListener("pointerup", function(e) {
+    if (!jgArrastoAtivo) return;
+    jgArrastoAtivo = false;
+    var origem = jgArrastoOrigem;
+    jgArrastoOrigem = null;
+    if (origem) jgDestacarDot(origem.r, origem.c, false);
+    if (!origem) return;
+    var destino = jgPontoMaisProximo(e.clientX, e.clientY, board);
+    if (!destino) return;
+    var dr = destino.r - origem.r, dc = destino.c - origem.c;
+    if (Math.abs(dr) + Math.abs(dc) !== 1) return; // só entre pontos vizinhos (sem diagonal, sem pular)
+    if (dr === 0) marcarBorda("h", origem.r, Math.min(origem.c, destino.c));
+    else marcarBorda("v", Math.min(origem.r, destino.r), origem.c);
+  }, { passive: true });
+
+  board.addEventListener("pointercancel", function() {
+    if (jgArrastoOrigem) jgDestacarDot(jgArrastoOrigem.r, jgArrastoOrigem.c, false);
+    jgArrastoAtivo = false;
+    jgArrastoOrigem = null;
+  }, { passive: true });
 }
 
 function marcarBorda(tipo, r, c) {
@@ -3490,6 +3551,7 @@ document.getElementById("login-senha").addEventListener("keydown", function(e) {
 
 ativarArrasteEnquadramento();
 ativarPullToRefreshGaleria();
+ativarArrasteJogo();
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(function(){});
