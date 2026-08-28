@@ -141,3 +141,19 @@ with check (true);
 
 -- Favorito nos Desejos (arrastar o item pra marcar/desmarcar)
 alter table desejos add column if not exists favorito boolean default false;
+
+-- Estado do jogo "Pontos e Caixas" (linha única, sincronizada entre os dois aparelhos)
+create table if not exists jogo_pontos (
+  id int primary key default 1 check (id = 1),
+  estado jsonb,
+  atualizado_em timestamptz default now()
+);
+
+alter table jogo_pontos enable row level security;
+
+drop policy if exists "authenticated full access jogo_pontos" on jogo_pontos;
+create policy "authenticated full access jogo_pontos"
+on jogo_pontos for all
+to authenticated
+using (true)
+with check (true);

@@ -855,6 +855,8 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <button class="leitura-acao" onclick="mostrarConfigJogo()" aria-label="Configurações">⚙</button>
   </div>
 
+  <div class="jg-conteudo" id="jg-carregando" style="text-align:center;padding-top:3rem;color:rgba(255,255,255,0.5);display:none">Carregando...</div>
+
   <div class="jg-conteudo" id="jg-setup">
     <div class="jg-field">
       <label>Nome do Jogador 1</label>
@@ -1166,25 +1168,107 @@ function alvoIgnoraSwipe(el) {
   return !!(el.closest && el.closest(".lightbox.show, .modal-overlay.show, .enquadrar-preview, input[type=range], textarea, input, select, .desejo-item, .leitura-view.show"));
 }
 
-// ===== JOGO: PONTOS E CAIXAS =====
+// ===== JOGO: PONTOS E CAIXAS (sincronizado entre os dois aparelhos via Supabase) =====
 var jogoConfig = { colunas: 5, linhas: 5 };
 var jogo = null; // estado da partida ativa
+var jogoPollingTimer = null;
+
+// Salva o estado inteiro do jogo como JSON numa única linha (upsert), pra o outro aparelho ler.
+// Custo bem baixo: é só texto/números, nada parecido com o tráfego de fotos/vídeos.
+function sincronizarEstadoJogo() {
+  if (!jogo) return;
+  jogo.rev = (jogo.rev || 0) + 1;
+  api("/rest/v1/jogo_pontos?on_conflict=id", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "resolution=merge-duplicates,return=minimal"
+    },
+    body: JSON.stringify({ id: 1, estado: jogo })
+  }).catch(function() {});
+}
+
+function buscarEstadoJogoRemoto() {
+  return api("/rest/v1/jogo_pontos?id=eq.1&select=estado")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (Array.isArray(data) && data[0] && data[0].estado) return data[0].estado;
+      return null;
+    })
+    .catch(function() { return null; });
+}
+
+function iniciarPollingJogo() {
+  clearInterval(jogoPollingTimer);
+  jogoPollingTimer = setInterval(function() {
+    if (!document.getElementById("jogo-view").classList.contains("show")) return;
+    buscarEstadoJogoRemoto().then(function(remoto) {
+      if (!remoto) return;
+      if (!jogo || (remoto.rev || 0) > (jogo.rev || 0)) {
+        jogo = remoto;
+        mostrarTelaJogoAtiva();
+        renderTabuleiro();
+        atualizarPlacar();
+        atualizarTurnoUI();
+        atualizarUIDado();
+        if (jogo.finalizado) exibirTelaVencedor();
+      }
+    });
+  }, 2500);
+}
+
+function pararPollingJogo() { clearInterval(jogoPollingTimer); }
 
 function abrirJogo() {
   document.getElementById("jogo-view").classList.add("show");
-  if (!jogo) mostrarConfigJogo();
+  mostrarCarregandoJogo();
+  buscarEstadoJogoRemoto().then(function(remoto) {
+    if (remoto && (!jogo || (remoto.rev || 0) > (jogo.rev || 0))) jogo = remoto;
+    if (jogo && !jogo.finalizado) {
+      mostrarTelaJogoAtiva();
+      renderTabuleiro();
+      atualizarPlacar();
+      atualizarTurnoUI();
+      atualizarUIDado();
+    } else {
+      jogo = null;
+      mostrarConfigJogo();
+    }
+    iniciarPollingJogo();
+  });
 }
 
 function fecharJogo() {
   if (jogo && !jogo.finalizado) {
-    if (!confirm("Sair agora perde o progresso da partida. Sair mesmo assim?")) return;
+    if (!confirm("Sair agora não apaga a partida — ela continua salva pra você (ou seu par) continuar depois. Fechar mesmo assim?")) return;
   }
+  pararPollingJogo();
   document.getElementById("jogo-view").classList.remove("show");
 }
 
+function mostrarCarregandoJogo() {
+  document.getElementById("jg-carregando").style.display = "block";
+  document.getElementById("jg-setup").style.display = "none";
+  document.getElementById("jg-jogo").style.display = "none";
+}
+
 function mostrarConfigJogo() {
+  document.getElementById("jg-carregando").style.display = "none";
   document.getElementById("jg-setup").style.display = "block";
   document.getElementById("jg-jogo").style.display = "none";
+}
+
+function mostrarTelaJogoAtiva() {
+  document.getElementById("jg-carregando").style.display = "none";
+  document.getElementById("jg-setup").style.display = "none";
+  document.getElementById("jg-jogo").style.display = "block";
+  document.getElementById("jg-score-nome-a").textContent = jogo.nomeA;
+  document.getElementById("jg-score-nome-b").textContent = jogo.nomeB;
+  document.getElementById("jg-legenda-a").textContent = jogo.nomeA;
+  document.getElementById("jg-legenda-b").textContent = jogo.nomeB;
+  document.getElementById("jg-dado-row").style.display = jogo.modoDado ? "flex" : "none";
 }
 
 function ajustarGrade(campo, delta) {
@@ -1212,23 +1296,14 @@ function iniciarJogo() {
     bordasH: bordasH, bordasV: bordasV, caixas: caixas,
     turno: "a", pontosA: 0, pontosB: 0,
     historico: [], finalizado: false,
-    dadoRestante: 0
+    dadoRestante: 0, rev: 0
   };
 
-  document.getElementById("jg-score-nome-a").textContent = nomeA;
-  document.getElementById("jg-score-nome-b").textContent = nomeB;
-  document.getElementById("jg-legenda-a").textContent = nomeA;
-  document.getElementById("jg-legenda-b").textContent = nomeB;
-  document.getElementById("jg-score-a").textContent = "0";
-  document.getElementById("jg-score-b").textContent = "0";
-  document.getElementById("jg-dado-row").style.display = modoDado ? "flex" : "none";
-
-  document.getElementById("jg-setup").style.display = "none";
-  document.getElementById("jg-jogo").style.display = "block";
-
+  mostrarTelaJogoAtiva();
   renderTabuleiro();
   atualizarTurnoUI();
   if (modoDado) prepararRodadaDado();
+  sincronizarEstadoJogo();
 }
 
 function prepararRodadaDado() {
@@ -1238,6 +1313,18 @@ function prepararRodadaDado() {
   document.getElementById("jg-dado-resultado").textContent = "";
 }
 
+// Atualiza a fileira do dado depois de abrir o jogo ou receber uma atualização do outro aparelho
+function atualizarUIDado() {
+  document.getElementById("jg-dado-row").style.display = jogo.modoDado ? "flex" : "none";
+  if (!jogo.modoDado) return;
+  var podeRolar = jogo.dadoRestante <= 0;
+  document.getElementById("jg-dado-btn").disabled = !podeRolar;
+  document.getElementById("jg-dado-btn").textContent = "🎲 Rolar dado";
+  document.getElementById("jg-dado-resultado").textContent = jogo.dadoRestante > 0
+    ? ("🎲 " + jogo.dadoRestante + " restante" + (jogo.dadoRestante === 1 ? "" : "s"))
+    : "";
+}
+
 function rolarDado() {
   if (!jogo || jogo.dadoRestante > 0) return;
   var valor = 1 + Math.floor(Math.random() * 6);
@@ -1245,6 +1332,7 @@ function rolarDado() {
   vibrar();
   document.getElementById("jg-dado-btn").disabled = true;
   document.getElementById("jg-dado-resultado").textContent = "🎲 " + valor + " — faça " + valor + (valor === 1 ? " traço" : " traços");
+  sincronizarEstadoJogo();
 }
 
 function renderTabuleiro() {
@@ -1398,6 +1486,7 @@ function marcarBorda(tipo, r, c) {
   atualizarTurnoUI();
 
   if (jogoTerminou) terminarJogo();
+  else sincronizarEstadoJogo();
 }
 
 function atualizarPlacar() {
@@ -1424,13 +1513,11 @@ function desfazerJogada() {
   });
   jogo.turno = mov.turnoAntes;
   jogo.dadoRestante = mov.dadoRestanteAntes;
-  if (jogo.modoDado) {
-    document.getElementById("jg-dado-btn").disabled = jogo.dadoRestante > 0;
-    document.getElementById("jg-dado-resultado").textContent = jogo.dadoRestante > 0 ? ("🎲 " + jogo.dadoRestante + " restante(s)") : "";
-  }
+  atualizarUIDado();
   atualizarVisualBordas();
   atualizarPlacar();
   atualizarTurnoUI();
+  sincronizarEstadoJogo();
 }
 
 function finalizarJogo() {
@@ -1441,6 +1528,11 @@ function finalizarJogo() {
 
 function terminarJogo() {
   jogo.finalizado = true;
+  sincronizarEstadoJogo();
+  exibirTelaVencedor();
+}
+
+function exibirTelaVencedor() {
   var titulo, emoji;
   if (jogo.pontosA === jogo.pontosB) {
     titulo = "Empate!"; emoji = "🤝";
@@ -1458,6 +1550,12 @@ function terminarJogo() {
 function fecharVencedor() {
   document.getElementById("jg-vencedor-overlay").classList.remove("show");
   jogo = null;
+  // Limpa o estado remoto pra não reaparecer a tela de vencedor no próximo poll
+  api("/rest/v1/jogo_pontos?id=eq.1", {
+    method: "PATCH",
+    headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + session.access_token, "Content-Type": "application/json", "Prefer": "return=minimal" },
+    body: JSON.stringify({ estado: null })
+  }).catch(function() {});
   mostrarConfigJogo();
 }
 
