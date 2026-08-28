@@ -287,7 +287,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .jg-dado-btn:disabled{opacity:0.4;cursor:default}
 .jg-dado-resultado{font-family:"Playfair Display",serif;font-size:1.1rem;color:#fff}
 .jg-board-wrap{overflow-x:auto;display:flex;justify-content:center;padding:0.5rem 0 1rem}
-.jg-board{position:relative;flex-shrink:0}
+.jg-board{position:relative;flex-shrink:0;touch-action:none}
 .jg-dot{position:absolute;width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.6);transform:translate(-50%,-50%);pointer-events:none;transition:transform 0.15s,background 0.15s}
 .jg-dot.ativo{background:var(--redl);transform:translate(-50%,-50%) scale(1.9)}
 .jg-edge{position:absolute;pointer-events:none}
@@ -896,7 +896,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   <div class="jg-conteudo" id="jg-jogo" style="display:none">
     <div class="jg-scoreboard">
       <div class="jg-player-chip a" id="jg-chip-a">
-        <div class="jg-player-letra">A</div>
+        <div class="jg-player-letra" id="jg-letra-a">A</div>
         <div class="jg-player-info">
           <div class="jg-player-nome" id="jg-score-nome-a">Jogador 1</div>
           <div class="jg-player-pontos" id="jg-score-a">0</div>
@@ -908,7 +908,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
           <div class="jg-player-nome" id="jg-score-nome-b">Jogador 2</div>
           <div class="jg-player-pontos" id="jg-score-b">0</div>
         </div>
-        <div class="jg-player-letra">B</div>
+        <div class="jg-player-letra" id="jg-letra-b">B</div>
       </div>
     </div>
     <div class="jg-turno" id="jg-turno">Vez de Jogador 1</div>
@@ -1271,6 +1271,8 @@ function mostrarTelaJogoAtiva() {
   document.getElementById("jg-score-nome-b").textContent = jogo.nomeB;
   document.getElementById("jg-legenda-a").textContent = jogo.nomeA;
   document.getElementById("jg-legenda-b").textContent = jogo.nomeB;
+  document.getElementById("jg-letra-a").textContent = jogo.nomeA.charAt(0).toUpperCase();
+  document.getElementById("jg-letra-b").textContent = jogo.nomeB.charAt(0).toUpperCase();
   document.getElementById("jg-dado-row").style.display = jogo.modoDado ? "flex" : "none";
 }
 
