@@ -255,6 +255,65 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .leitura-tipo{font-size:0.68rem;letter-spacing:3px;text-transform:uppercase;color:var(--redl);margin-bottom:0.9rem}
 .leitura-titulo{font-family:"Playfair Display",serif;font-size:1.9rem;line-height:1.3;margin-bottom:2rem}
 .leitura-corpo{font-family:"Playfair Display",serif;font-size:1.12rem;line-height:1.9;color:rgba(255,255,255,0.88);white-space:pre-wrap;text-align:left}
+
+/* ===== JOGO: PONTOS E CAIXAS ===== */
+.jg-hdr{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.2rem;background:linear-gradient(to bottom,rgba(13,13,13,0.92),rgba(13,13,13,0.7))}
+.jg-hdr-titulo{flex:1;text-align:center;font-family:"Playfair Display",serif;font-size:1.15rem;color:#fff}
+.jg-conteudo{padding:0 1.3rem 2.5rem;max-width:520px;margin:0 auto}
+.jg-field{margin-bottom:1rem;text-align:left}
+.jg-field label{font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--redl);margin-bottom:0.4rem;display:block}
+.jg-field input[type=text]{width:100%;padding:0.75rem 1rem;border-radius:12px;border:1.5px solid rgba(192,57,43,0.3);background:rgba(255,255,255,0.05);color:#fff;font-size:0.95rem;font-family:"Lato",sans-serif;outline:none}
+.jg-field-row{display:flex;gap:1rem}
+.jg-field-row .jg-field{flex:1}
+.jg-stepper{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.05);border:1.5px solid rgba(192,57,43,0.3);border-radius:12px;padding:0.4rem 0.6rem}
+.jg-stepper button{background:rgba(192,57,43,0.2);border:none;color:var(--redl);width:32px;height:32px;border-radius:8px;font-size:1.2rem;cursor:pointer}
+.jg-stepper span{font-family:"Playfair Display",serif;font-size:1.1rem;min-width:2ch;text-align:center}
+.jg-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:0.85rem 1rem;margin-bottom:1.4rem;font-size:0.85rem;color:rgba(255,255,255,0.8);cursor:pointer}
+.jg-toggle-row input{accent-color:var(--redl);width:20px;height:20px;flex-shrink:0}
+.jg-scoreboard{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;margin-bottom:0.8rem}
+.jg-player-chip{flex:1;display:flex;align-items:center;gap:0.6rem;background:var(--blk3);border:1.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:0.7rem 0.9rem;transition:border-color 0.2s}
+.jg-player-chip.a{--jg-cor:var(--redl)}
+.jg-player-chip.b{--jg-cor:#e6a81a}
+.jg-player-chip.vez{border-color:var(--jg-cor)}
+.jg-player-letra{width:34px;height:34px;min-width:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:"Playfair Display",serif;font-weight:700;font-size:1rem;background:rgba(255,255,255,0.08);color:var(--jg-cor);border:1.5px solid var(--jg-cor)}
+.jg-player-info{flex:1;min-width:0}
+.jg-player-nome{font-size:0.75rem;color:rgba(255,255,255,0.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jg-player-pontos{font-family:"Playfair Display",serif;font-size:1.4rem;font-weight:700;color:#fff}
+.jg-vs{font-size:0.75rem;color:rgba(255,255,255,0.3);font-weight:700}
+.jg-turno{text-align:center;font-size:0.78rem;color:var(--redl);letter-spacing:0.5px;margin-bottom:0.9rem;background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.25);border-radius:50px;padding:0.45rem;font-weight:700}
+.jg-dado-row{display:flex;align-items:center;justify-content:center;gap:0.75rem;margin-bottom:0.9rem}
+.jg-dado-btn{background:var(--red);border:none;color:#fff;padding:0.6rem 1.1rem;border-radius:50px;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:"Lato",sans-serif}
+.jg-dado-btn:disabled{opacity:0.4;cursor:default}
+.jg-dado-resultado{font-family:"Playfair Display",serif;font-size:1.1rem;color:#fff}
+.jg-board-wrap{overflow-x:auto;display:flex;justify-content:center;padding:0.5rem 0 1rem}
+.jg-board{position:relative;flex-shrink:0}
+.jg-dot{position:absolute;width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.6);transform:translate(-50%,-50%);pointer-events:none}
+.jg-edge{position:absolute;cursor:pointer}
+.jg-edge::after{content:"";position:absolute;border-radius:3px;background:rgba(255,255,255,0.12);transition:background 0.15s}
+.jg-edge.jg-h{transform:translate(-50%,-50%)}
+.jg-edge.jg-h::after{left:0;right:0;top:50%;height:5px;transform:translateY(-50%)}
+.jg-edge.jg-v{transform:translate(-50%,-50%)}
+.jg-edge.jg-v::after{top:0;bottom:0;left:50%;width:5px;transform:translateX(-50%)}
+.jg-edge.marked-a::after{background:var(--redl)}
+.jg-edge.marked-b::after{background:#e6a81a}
+.jg-edge.marked{cursor:default}
+.jg-box{position:absolute;display:flex;align-items:center;justify-content:center;font-family:"Playfair Display",serif;font-weight:700;border-radius:6px;background:transparent;transition:background 0.25s,color 0.25s;color:transparent;transform:translate(-50%,-50%)}
+.jg-box.a{background:rgba(231,76,60,0.16);color:var(--redl)}
+.jg-box.b{background:rgba(230,168,26,0.16);color:#e6a81a}
+.jg-legenda{display:flex;justify-content:center;gap:1.5rem;font-size:0.72rem;color:rgba(255,255,255,0.5);margin-bottom:1.2rem}
+.jg-legenda span{display:flex;align-items:center;gap:0.4rem}
+.jg-dot-cor{width:10px;height:10px;border-radius:50%;display:inline-block}
+.jg-dot-cor.a{background:var(--redl)}
+.jg-dot-cor.b{background:#e6a81a}
+.jg-controles{display:flex;gap:0.75rem}
+.jg-btn{flex:1;padding:0.8rem;border-radius:12px;border:1.5px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.75);font-size:0.82rem;font-weight:700;cursor:pointer;font-family:"Lato",sans-serif}
+.jg-btn-fim{border-color:rgba(192,57,43,0.4);background:rgba(192,57,43,0.12);color:var(--redl)}
+.jg-vencedor-overlay{display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;padding:1.5rem}
+.jg-vencedor-overlay.show{display:flex}
+.jg-vencedor-box{background:var(--blk2);border:1.5px solid rgba(192,57,43,0.4);border-radius:24px;padding:2.2rem 1.8rem;text-align:center;max-width:340px;width:100%;box-shadow:0 0 60px rgba(192,57,43,0.25)}
+.jg-vencedor-emoji{font-size:2.6rem;margin-bottom:0.8rem}
+.jg-vencedor-titulo{font-family:"Playfair Display",serif;font-size:1.4rem;margin-bottom:0.5rem}
+.jg-vencedor-placar{color:rgba(255,255,255,0.6);font-size:0.9rem;margin-bottom:1.5rem}
 .tp-close{position:absolute;top:1rem;right:1rem;width:34px;height:34px;background:rgba(192,57,43,0.7);border:none;border-radius:50%;color:#fff;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .tp-tipo{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--redl);margin-bottom:0.4rem}
 .tp-titulo{font-family:"Playfair Display",serif;font-size:1.4rem;margin-bottom:1.2rem;line-height:1.3}
@@ -404,11 +463,17 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
           <div class="hcard-title">Poemas & Mensagens</div>
           <div class="hcard-count" id="count-textos">0 itens</div>
         </div>
-        <div class="hcard" style="grid-column:1/-1" onclick="goTo('desejos')">
+        <div class="hcard" onclick="goTo('desejos')">
           <div class="hcard-icon">✨</div>
           <div class="hcard-label">Desejos</div>
           <div class="hcard-title">Nossa Lista</div>
           <div class="hcard-count" id="count-desejos">0 itens</div>
+        </div>
+        <div class="hcard" onclick="abrirJogo()">
+          <div class="hcard-icon">🎮</div>
+          <div class="hcard-label">Jogo</div>
+          <div class="hcard-title">Pontos e Caixas</div>
+          <div class="hcard-count">Jogar a dois</div>
         </div>
       </div>
       <div class="hcard-mini" onclick="window.open('https://joelcordeiro98.github.io/Quiz-namorados/quiz-namorados-1.html?portal=true','_blank')">
@@ -782,6 +847,94 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   </div>
 </div>
 
+<!-- JOGO: PONTOS E CAIXAS -->
+<div class="leitura-view" id="jogo-view">
+  <div class="jg-hdr">
+    <button class="leitura-fechar" onclick="fecharJogo()" aria-label="Fechar">✕</button>
+    <div class="jg-hdr-titulo">Pontos e Caixas</div>
+    <button class="leitura-acao" onclick="mostrarConfigJogo()" aria-label="Configurações">⚙</button>
+  </div>
+
+  <div class="jg-conteudo" id="jg-setup">
+    <div class="jg-field">
+      <label>Nome do Jogador 1</label>
+      <input type="text" id="jg-nome-a" placeholder="Jogador 1" maxlength="14">
+    </div>
+    <div class="jg-field">
+      <label>Nome do Jogador 2</label>
+      <input type="text" id="jg-nome-b" placeholder="Jogador 2" maxlength="14">
+    </div>
+    <div class="jg-field-row">
+      <div class="jg-field">
+        <label>Colunas</label>
+        <div class="jg-stepper">
+          <button type="button" onclick="ajustarGrade('colunas',-1)">−</button>
+          <span id="jg-colunas">5</span>
+          <button type="button" onclick="ajustarGrade('colunas',1)">+</button>
+        </div>
+      </div>
+      <div class="jg-field">
+        <label>Linhas</label>
+        <div class="jg-stepper">
+          <button type="button" onclick="ajustarGrade('linhas',-1)">−</button>
+          <span id="jg-linhas">5</span>
+          <button type="button" onclick="ajustarGrade('linhas',1)">+</button>
+        </div>
+      </div>
+    </div>
+    <label class="jg-toggle-row">
+      <span>🎲 Modo dado (o dado define quantos traços dá pra fazer por vez)</span>
+      <input type="checkbox" id="jg-modo-dado">
+    </label>
+    <button class="btn-primary" onclick="iniciarJogo()">Começar jogo ♥</button>
+  </div>
+
+  <div class="jg-conteudo" id="jg-jogo" style="display:none">
+    <div class="jg-scoreboard">
+      <div class="jg-player-chip a" id="jg-chip-a">
+        <div class="jg-player-letra">A</div>
+        <div class="jg-player-info">
+          <div class="jg-player-nome" id="jg-score-nome-a">Jogador 1</div>
+          <div class="jg-player-pontos" id="jg-score-a">0</div>
+        </div>
+      </div>
+      <div class="jg-vs">×</div>
+      <div class="jg-player-chip b" id="jg-chip-b">
+        <div class="jg-player-info" style="text-align:right">
+          <div class="jg-player-nome" id="jg-score-nome-b">Jogador 2</div>
+          <div class="jg-player-pontos" id="jg-score-b">0</div>
+        </div>
+        <div class="jg-player-letra">B</div>
+      </div>
+    </div>
+    <div class="jg-turno" id="jg-turno">Vez de Jogador 1</div>
+    <div class="jg-dado-row" id="jg-dado-row" style="display:none">
+      <button class="jg-dado-btn" id="jg-dado-btn" onclick="rolarDado()">🎲 Rolar dado</button>
+      <div class="jg-dado-resultado" id="jg-dado-resultado"></div>
+    </div>
+    <div class="jg-board-wrap" id="jg-board-wrap">
+      <div class="jg-board" id="jg-board"></div>
+    </div>
+    <div class="jg-legenda">
+      <span><i class="jg-dot-cor a"></i><span id="jg-legenda-a">Jogador 1</span></span>
+      <span><i class="jg-dot-cor b"></i><span id="jg-legenda-b">Jogador 2</span></span>
+    </div>
+    <div class="jg-controles">
+      <button class="jg-btn" onclick="desfazerJogada()">↺ Desfazer</button>
+      <button class="jg-btn jg-btn-fim" onclick="finalizarJogo()">🏁 Finalizar jogo</button>
+    </div>
+  </div>
+</div>
+
+<div class="jg-vencedor-overlay" id="jg-vencedor-overlay">
+  <div class="jg-vencedor-box">
+    <div class="jg-vencedor-emoji">🏆</div>
+    <div class="jg-vencedor-titulo" id="jg-vencedor-titulo"></div>
+    <div class="jg-vencedor-placar" id="jg-vencedor-placar"></div>
+    <button class="btn-primary" onclick="fecharVencedor()">Jogar de novo</button>
+  </div>
+</div>
+
 <!-- POPUP DETALHE MÚSICA -->
 <div class="texto-popup" id="musica-detalhe" onclick="fecharMusicaDetalhe()">
   <div class="texto-popup-box" onclick="event.stopPropagation()">
@@ -1010,7 +1163,302 @@ function trocarAbaSwipe(direcao) {
 
 // Ignora o gesto se começar em cima de algo que já tem seu próprio arrastar/rolagem
 function alvoIgnoraSwipe(el) {
-  return !!(el.closest && el.closest(".lightbox.show, .modal-overlay.show, .enquadrar-preview, input[type=range], textarea, input, select, .desejo-item"));
+  return !!(el.closest && el.closest(".lightbox.show, .modal-overlay.show, .enquadrar-preview, input[type=range], textarea, input, select, .desejo-item, .leitura-view.show"));
+}
+
+// ===== JOGO: PONTOS E CAIXAS =====
+var jogoConfig = { colunas: 5, linhas: 5 };
+var jogo = null; // estado da partida ativa
+
+function abrirJogo() {
+  document.getElementById("jogo-view").classList.add("show");
+  if (!jogo) mostrarConfigJogo();
+}
+
+function fecharJogo() {
+  if (jogo && !jogo.finalizado) {
+    if (!confirm("Sair agora perde o progresso da partida. Sair mesmo assim?")) return;
+  }
+  document.getElementById("jogo-view").classList.remove("show");
+}
+
+function mostrarConfigJogo() {
+  document.getElementById("jg-setup").style.display = "block";
+  document.getElementById("jg-jogo").style.display = "none";
+}
+
+function ajustarGrade(campo, delta) {
+  var novo = jogoConfig[campo] + delta;
+  if (novo < 2 || novo > 9) return;
+  jogoConfig[campo] = novo;
+  document.getElementById(campo === "colunas" ? "jg-colunas" : "jg-linhas").textContent = novo;
+}
+
+function iniciarJogo() {
+  var nomeA = document.getElementById("jg-nome-a").value.trim() || "Jogador 1";
+  var nomeB = document.getElementById("jg-nome-b").value.trim() || "Jogador 2";
+  var modoDado = document.getElementById("jg-modo-dado").checked;
+  var linhas = jogoConfig.linhas, colunas = jogoConfig.colunas;
+
+  var bordasH = [], bordasV = [], caixas = [];
+  for (var r = 0; r <= linhas; r++) bordasH.push(new Array(colunas).fill(null));
+  for (var r2 = 0; r2 < linhas; r2++) bordasV.push(new Array(colunas + 1).fill(null));
+  for (var r3 = 0; r3 < linhas; r3++) caixas.push(new Array(colunas).fill(null));
+
+  jogo = {
+    linhas: linhas, colunas: colunas,
+    nomeA: nomeA, nomeB: nomeB,
+    modoDado: modoDado,
+    bordasH: bordasH, bordasV: bordasV, caixas: caixas,
+    turno: "a", pontosA: 0, pontosB: 0,
+    historico: [], finalizado: false,
+    dadoRestante: 0
+  };
+
+  document.getElementById("jg-score-nome-a").textContent = nomeA;
+  document.getElementById("jg-score-nome-b").textContent = nomeB;
+  document.getElementById("jg-legenda-a").textContent = nomeA;
+  document.getElementById("jg-legenda-b").textContent = nomeB;
+  document.getElementById("jg-score-a").textContent = "0";
+  document.getElementById("jg-score-b").textContent = "0";
+  document.getElementById("jg-dado-row").style.display = modoDado ? "flex" : "none";
+
+  document.getElementById("jg-setup").style.display = "none";
+  document.getElementById("jg-jogo").style.display = "block";
+
+  renderTabuleiro();
+  atualizarTurnoUI();
+  if (modoDado) prepararRodadaDado();
+}
+
+function prepararRodadaDado() {
+  jogo.dadoRestante = 0;
+  document.getElementById("jg-dado-btn").disabled = false;
+  document.getElementById("jg-dado-btn").textContent = "🎲 Rolar dado";
+  document.getElementById("jg-dado-resultado").textContent = "";
+}
+
+function rolarDado() {
+  if (!jogo || jogo.dadoRestante > 0) return;
+  var valor = 1 + Math.floor(Math.random() * 6);
+  jogo.dadoRestante = valor;
+  vibrar();
+  document.getElementById("jg-dado-btn").disabled = true;
+  document.getElementById("jg-dado-resultado").textContent = "🎲 " + valor + " — faça " + valor + (valor === 1 ? " traço" : " traços");
+}
+
+function renderTabuleiro() {
+  var wrap = document.getElementById("jg-board-wrap");
+  var board = document.getElementById("jg-board");
+  board.innerHTML = "";
+
+  var larguraDisp = wrap.clientWidth || 320;
+  var cell = Math.max(26, Math.min(58, Math.floor((larguraDisp - 24) / jogo.colunas)));
+  board.style.width = (cell * jogo.colunas) + "px";
+  board.style.height = (cell * jogo.linhas) + "px";
+
+  for (var r = 0; r <= jogo.linhas; r++) {
+    for (var c = 0; c <= jogo.colunas; c++) {
+      var dot = document.createElement("div");
+      dot.className = "jg-dot";
+      dot.style.left = (c * cell) + "px";
+      dot.style.top = (r * cell) + "px";
+      board.appendChild(dot);
+    }
+  }
+
+  var margemToque = Math.max(14, Math.floor(cell * 0.32));
+
+  for (var rh = 0; rh <= jogo.linhas; rh++) {
+    for (var ch = 0; ch < jogo.colunas; ch++) {
+      var eh = document.createElement("div");
+      eh.className = "jg-edge jg-h";
+      eh.style.left = (ch * cell + cell / 2) + "px";
+      eh.style.top = (rh * cell) + "px";
+      eh.style.width = cell + "px";
+      eh.style.height = margemToque + "px";
+      eh.dataset.tipo = "h"; eh.dataset.r = rh; eh.dataset.c = ch;
+      eh.onclick = function() { marcarBorda(this.dataset.tipo, +this.dataset.r, +this.dataset.c); };
+      board.appendChild(eh);
+    }
+  }
+
+  for (var rv = 0; rv < jogo.linhas; rv++) {
+    for (var cv = 0; cv <= jogo.colunas; cv++) {
+      var ev = document.createElement("div");
+      ev.className = "jg-edge jg-v";
+      ev.style.left = (cv * cell) + "px";
+      ev.style.top = (rv * cell + cell / 2) + "px";
+      ev.style.height = cell + "px";
+      ev.style.width = margemToque + "px";
+      ev.dataset.tipo = "v"; ev.dataset.r = rv; ev.dataset.c = cv;
+      ev.onclick = function() { marcarBorda(this.dataset.tipo, +this.dataset.r, +this.dataset.c); };
+      board.appendChild(ev);
+    }
+  }
+
+  for (var rb = 0; rb < jogo.linhas; rb++) {
+    for (var cb = 0; cb < jogo.colunas; cb++) {
+      var box = document.createElement("div");
+      box.className = "jg-box";
+      box.id = "jg-box-" + rb + "-" + cb;
+      box.style.left = (cb * cell + cell / 2) + "px";
+      box.style.top = (rb * cell + cell / 2) + "px";
+      box.style.width = (cell - 6) + "px";
+      box.style.height = (cell - 6) + "px";
+      box.style.fontSize = Math.max(11, Math.floor(cell * 0.4)) + "px";
+      board.appendChild(box);
+    }
+  }
+
+  atualizarVisualBordas();
+}
+
+function atualizarVisualBordas() {
+  jogo.bordasH.forEach(function(linha, r) {
+    linha.forEach(function(dono, c) {
+      var el = document.querySelector('.jg-edge.jg-h[data-r="' + r + '"][data-c="' + c + '"]');
+      if (!el) return;
+      el.classList.toggle("marked", !!dono);
+      el.classList.toggle("marked-a", dono === "a");
+      el.classList.toggle("marked-b", dono === "b");
+    });
+  });
+  jogo.bordasV.forEach(function(linha, r) {
+    linha.forEach(function(dono, c) {
+      var el = document.querySelector('.jg-edge.jg-v[data-r="' + r + '"][data-c="' + c + '"]');
+      if (!el) return;
+      el.classList.toggle("marked", !!dono);
+      el.classList.toggle("marked-a", dono === "a");
+      el.classList.toggle("marked-b", dono === "b");
+    });
+  });
+  jogo.caixas.forEach(function(linha, r) {
+    linha.forEach(function(dono, c) {
+      var el = document.getElementById("jg-box-" + r + "-" + c);
+      if (!el) return;
+      el.className = "jg-box" + (dono ? " " + dono : "");
+      el.textContent = dono ? (dono === "a" ? jogo.nomeA : jogo.nomeB).charAt(0).toUpperCase() : "";
+    });
+  });
+}
+
+function caixaCompleta(r, c) {
+  return !!(jogo.bordasH[r][c] && jogo.bordasH[r + 1][c] && jogo.bordasV[r][c] && jogo.bordasV[r][c + 1]);
+}
+
+function marcarBorda(tipo, r, c) {
+  if (!jogo || jogo.finalizado) return;
+  if (jogo.modoDado && jogo.dadoRestante <= 0) { mostrarToast("Role o dado primeiro!"); return; }
+  var atual = tipo === "h" ? jogo.bordasH[r][c] : jogo.bordasV[r][c];
+  if (atual) return;
+
+  var jogador = jogo.turno;
+  if (tipo === "h") jogo.bordasH[r][c] = jogador; else jogo.bordasV[r][c] = jogador;
+
+  var caixasAntes = [];
+  var afetadas = tipo === "h" ? [[r - 1, c], [r, c]] : [[r, c - 1], [r, c]];
+  var completouAlguma = false;
+  afetadas.forEach(function(pos) {
+    var rr = pos[0], cc = pos[1];
+    if (rr < 0 || cc < 0 || rr >= jogo.linhas || cc >= jogo.colunas) return;
+    if (jogo.caixas[rr][cc]) return;
+    if (caixaCompleta(rr, cc)) {
+      jogo.caixas[rr][cc] = jogador;
+      if (jogador === "a") jogo.pontosA++; else jogo.pontosB++;
+      completouAlguma = true;
+      caixasAntes.push([rr, cc]);
+    }
+  });
+
+  jogo.historico.push({
+    tipo: tipo, r: r, c: c, jogador: jogador,
+    caixasCompletadas: caixasAntes,
+    turnoAntes: jogo.turno,
+    dadoRestanteAntes: jogo.dadoRestante
+  });
+
+  if (completouAlguma) vibrar();
+
+  var totalCaixas = jogo.linhas * jogo.colunas;
+  var jogoTerminou = (jogo.pontosA + jogo.pontosB) >= totalCaixas;
+
+  if (jogo.modoDado) {
+    jogo.dadoRestante--;
+    if (jogo.dadoRestante <= 0 && !jogoTerminou) {
+      jogo.turno = jogo.turno === "a" ? "b" : "a";
+      prepararRodadaDado();
+    }
+  } else if (!completouAlguma && !jogoTerminou) {
+    jogo.turno = jogo.turno === "a" ? "b" : "a";
+  }
+
+  atualizarVisualBordas();
+  atualizarPlacar();
+  atualizarTurnoUI();
+
+  if (jogoTerminou) terminarJogo();
+}
+
+function atualizarPlacar() {
+  document.getElementById("jg-score-a").textContent = jogo.pontosA;
+  document.getElementById("jg-score-b").textContent = jogo.pontosB;
+}
+
+function atualizarTurnoUI() {
+  var nome = jogo.turno === "a" ? jogo.nomeA : jogo.nomeB;
+  document.getElementById("jg-turno").textContent = "Vez de " + nome;
+  document.getElementById("jg-chip-a").classList.toggle("vez", jogo.turno === "a");
+  document.getElementById("jg-chip-b").classList.toggle("vez", jogo.turno === "b");
+}
+
+function desfazerJogada() {
+  if (!jogo || jogo.historico.length === 0 || jogo.finalizado) return;
+  var mov = jogo.historico.pop();
+  if (mov.tipo === "h") jogo.bordasH[mov.r][mov.c] = null; else jogo.bordasV[mov.r][mov.c] = null;
+  mov.caixasCompletadas.forEach(function(pos) {
+    var rr = pos[0], cc = pos[1];
+    var dono = jogo.caixas[rr][cc];
+    if (dono === "a") jogo.pontosA--; else if (dono === "b") jogo.pontosB--;
+    jogo.caixas[rr][cc] = null;
+  });
+  jogo.turno = mov.turnoAntes;
+  jogo.dadoRestante = mov.dadoRestanteAntes;
+  if (jogo.modoDado) {
+    document.getElementById("jg-dado-btn").disabled = jogo.dadoRestante > 0;
+    document.getElementById("jg-dado-resultado").textContent = jogo.dadoRestante > 0 ? ("🎲 " + jogo.dadoRestante + " restante(s)") : "";
+  }
+  atualizarVisualBordas();
+  atualizarPlacar();
+  atualizarTurnoUI();
+}
+
+function finalizarJogo() {
+  if (!jogo || jogo.finalizado) return;
+  if (!confirm("Finalizar a partida agora e ver o resultado?")) return;
+  terminarJogo();
+}
+
+function terminarJogo() {
+  jogo.finalizado = true;
+  var titulo, emoji;
+  if (jogo.pontosA === jogo.pontosB) {
+    titulo = "Empate!"; emoji = "🤝";
+  } else {
+    var vencedor = jogo.pontosA > jogo.pontosB ? jogo.nomeA : jogo.nomeB;
+    titulo = vencedor + " venceu! 🏆"; emoji = "🏆";
+  }
+  document.querySelector(".jg-vencedor-emoji").textContent = emoji;
+  document.getElementById("jg-vencedor-titulo").textContent = titulo;
+  document.getElementById("jg-vencedor-placar").textContent = jogo.nomeA + " " + jogo.pontosA + " × " + jogo.pontosB + " " + jogo.nomeB;
+  document.getElementById("jg-vencedor-overlay").classList.add("show");
+  vibrar(40);
+}
+
+function fecharVencedor() {
+  document.getElementById("jg-vencedor-overlay").classList.remove("show");
+  jogo = null;
+  mostrarConfigJogo();
 }
 
 document.addEventListener("pointerdown", function(e) {
