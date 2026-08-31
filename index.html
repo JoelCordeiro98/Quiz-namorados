@@ -164,6 +164,12 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .hcard-mini-title{font-family:"Playfair Display",serif;font-size:0.9rem;color:#fff}
 .hcard-mini-sub{font-size:0.72rem;color:var(--gray)}
 .hcard-mini-arrow{color:rgba(255,255,255,0.3);font-size:1.3rem;flex-shrink:0}
+.hcard-arvore{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1rem;margin-top:0.75rem;background:linear-gradient(135deg,#0e1f11,#132b17);border:1px solid rgba(112,191,120,0.3);border-radius:14px;cursor:pointer}
+.hcard-arvore-icon{font-size:1.25rem;flex-shrink:0}
+.hcard-arvore-info{flex:1;min-width:0}
+.hcard-arvore-title{font-family:"Playfair Display",serif;font-size:0.9rem;color:#fff}
+.hcard-arvore-sub{font-size:0.72rem;color:#8fc98f}
+.hcard-arvore-arrow{color:rgba(255,255,255,0.3);font-size:1.3rem;flex-shrink:0}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px}
 .photo-item{aspect-ratio:1;background-size:cover;background-position:center;cursor:pointer;background-color:var(--blk3);position:relative;overflow:hidden;opacity:0;transition:opacity 0.35s ease}
 .photo-item.loaded{opacity:1}
@@ -319,6 +325,21 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .jg-vencedor-emoji{font-size:2.6rem;margin-bottom:0.8rem}
 .jg-vencedor-titulo{font-family:"Playfair Display",serif;font-size:1.4rem;margin-bottom:0.5rem}
 .jg-vencedor-placar{color:rgba(255,255,255,0.6);font-size:0.9rem;margin-bottom:1.5rem}
+
+/* ===== ÁRVORE DO RELACIONAMENTO ===== */
+.av-conteudo{padding:1.2rem 1.4rem 3rem;max-width:420px;margin:0 auto}
+.av-svg-wrap{display:flex;justify-content:center;padding:0.5rem 0 1rem}
+.av-svg-wrap svg{width:100%;max-width:280px;height:auto}
+.av-porte{text-align:center;font-family:"Playfair Display",serif;font-size:1.35rem;margin-bottom:0.15rem}
+.av-porte-desc{text-align:center;font-size:0.78rem;color:#8fc98f;margin-bottom:0.3rem}
+.av-tempo{text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.45);margin-bottom:1.6rem}
+.av-secao-titulo{font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:#8fc98f;margin-bottom:0.7rem}
+.av-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:0.6rem;margin-bottom:1.6rem}
+.av-stat{background:var(--blk3);border:1px solid rgba(112,191,120,0.18);border-radius:12px;padding:0.7rem 0.85rem;display:flex;align-items:center;gap:0.6rem}
+.av-stat-icon{font-size:1.15rem;flex-shrink:0}
+.av-stat-num{font-family:"Playfair Display",serif;font-size:1.1rem;color:#fff;line-height:1.1}
+.av-stat-label{font-size:0.65rem;color:var(--gray)}
+.av-marco{background:rgba(112,191,120,0.08);border:1px solid rgba(112,191,120,0.25);border-radius:14px;padding:0.9rem 1rem;font-size:0.82rem;line-height:1.6;color:rgba(255,255,255,0.85);text-align:center}
 .tp-close{position:absolute;top:1rem;right:1rem;width:34px;height:34px;background:rgba(192,57,43,0.7);border:none;border-radius:50%;color:#fff;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .tp-tipo{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--redl);margin-bottom:0.4rem}
 .tp-titulo{font-family:"Playfair Display",serif;font-size:1.4rem;margin-bottom:1.2rem;line-height:1.3}
@@ -480,6 +501,14 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
           <div class="hcard-title">Pontos e Caixas</div>
           <div class="hcard-count">Jogar a dois</div>
         </div>
+      </div>
+      <div class="hcard-arvore" onclick="abrirArvore()">
+        <div class="hcard-arvore-icon">🌳</div>
+        <div class="hcard-arvore-info">
+          <div class="hcard-arvore-title">Nossa Árvore</div>
+          <div class="hcard-arvore-sub" id="arvore-home-sub">Vendo como ela está...</div>
+        </div>
+        <div class="hcard-arvore-arrow">›</div>
       </div>
       <div class="hcard-mini" onclick="window.open('https://joelcordeiro98.github.io/Quiz-namorados/quiz-namorados-1.html?portal=true','_blank')">
         <div class="hcard-mini-icon">❤️</div>
@@ -959,6 +988,33 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div class="jg-vencedor-titulo" id="jg-vencedor-titulo"></div>
     <div class="jg-vencedor-placar" id="jg-vencedor-placar"></div>
     <button class="btn-primary" onclick="fecharVencedor()">Jogar de novo</button>
+  </div>
+</div>
+
+<!-- ÁRVORE DO RELACIONAMENTO -->
+<div class="leitura-view" id="arvore-view">
+  <div class="jg-hdr">
+    <button class="leitura-fechar" onclick="fecharArvore()" aria-label="Fechar">✕</button>
+    <div class="jg-hdr-titulo">Nossa Árvore</div>
+    <div style="width:38px"></div>
+  </div>
+  <div class="av-conteudo">
+    <div class="av-svg-wrap" id="av-svg-wrap"></div>
+    <div class="av-porte" id="av-porte"></div>
+    <div class="av-porte-desc" id="av-porte-desc"></div>
+    <div class="av-tempo" id="av-tempo"></div>
+
+    <div class="av-secao-titulo">O que já regou essa árvore</div>
+    <div class="av-stats">
+      <div class="av-stat"><div class="av-stat-icon">📸</div><div><div class="av-stat-num" id="av-stat-fotos">0</div><div class="av-stat-label">fotos</div></div></div>
+      <div class="av-stat"><div class="av-stat-icon">✍️</div><div><div class="av-stat-num" id="av-stat-textos">0</div><div class="av-stat-label">textos</div></div></div>
+      <div class="av-stat"><div class="av-stat-icon">✨</div><div><div class="av-stat-num" id="av-stat-desejos">0</div><div class="av-stat-label">desejos realizados</div></div></div>
+      <div class="av-stat"><div class="av-stat-icon">🎬</div><div><div class="av-stat-num" id="av-stat-filmes">0</div><div class="av-stat-label">filmes/séries vistos</div></div></div>
+      <div class="av-stat"><div class="av-stat-icon">🎵</div><div><div class="av-stat-num" id="av-stat-musicas">0</div><div class="av-stat-label">músicas guardadas</div></div></div>
+      <div class="av-stat"><div class="av-stat-icon">💧</div><div><div class="av-stat-num" id="av-stat-total">0</div><div class="av-stat-label">momentos ao todo</div></div></div>
+    </div>
+
+    <div class="av-marco" id="av-marco"></div>
   </div>
 </div>
 
@@ -1660,6 +1716,183 @@ function fecharVencedor() {
   mostrarConfigJogo();
 }
 
+// ===== ÁRVORE DO RELACIONAMENTO =====
+// O "porte" (tamanho/estágio) vem do tempo juntos (DATA_INICIO_NAMORO, já usado no
+// contador da Home). A "decoração" (folhas/flores extras) vem das ações que vocês já
+// fizeram no app — usa os arrays que já estão carregados em memória (midias, textos,
+// desejos, indicacoes, musicas), sem nenhuma consulta nova ao Supabase.
+var AV_PORTES = [
+  { nome: "Semente", desc: "Acabou de ser plantada", diasMin: 0 },
+  { nome: "Muda", desc: "Criando raízes", diasMin: 30 },
+  { nome: "Arbusto", desc: "Ganhando força", diasMin: 183 },
+  { nome: "Árvore jovem", desc: "Esticando os galhos", diasMin: 365 },
+  { nome: "Árvore grande", desc: "Frondosa, cheia de história", diasMin: 730 }
+];
+var AV_DECOR_LIMIARES = [5, 15, 30, 60];
+
+// Circulos de folhagem em coordenadas relativas (dx,dy,r), do centro pra fora —
+// cada porte usa só os primeiros N, então a copa "aparece" aos poucos conforme cresce.
+var AV_CANOPY = [
+  { dx: 0, dy: 0, r: 1.0 }, { dx: -0.9, dy: 0.15, r: 0.75 }, { dx: 0.9, dy: 0.15, r: 0.75 },
+  { dx: -0.45, dy: 0.55, r: 0.65 }, { dx: 0.45, dy: 0.55, r: 0.65 }, { dx: 0, dy: 0.6, r: 0.7 },
+  { dx: -1.3, dy: 0.5, r: 0.55 }, { dx: 1.3, dy: 0.5, r: 0.55 }, { dx: -0.7, dy: -0.5, r: 0.6 },
+  { dx: 0.7, dy: -0.5, r: 0.6 }, { dx: 0, dy: -0.85, r: 0.55 }, { dx: -1.1, dy: -0.15, r: 0.5 },
+  { dx: 1.1, dy: -0.15, r: 0.5 }
+];
+// Pontos onde as florzinhas podem aparecer (mesma lógica: revela mais conforme o "tier")
+var AV_DECOR_PONTOS = [
+  { dx: -0.3, dy: -0.15 }, { dx: 0.35, dy: 0.1 }, { dx: 0, dy: 0.4 },
+  { dx: -0.85, dy: 0.35 }, { dx: 0.85, dy: 0.3 }, { dx: -0.5, dy: -0.55 },
+  { dx: 0.5, dy: -0.5 }, { dx: -1.15, dy: -0.05 }, { dx: 1.15, dy: 0 },
+  { dx: 0, dy: -0.95 }, { dx: -0.15, dy: 0.65 }, { dx: 0.6, dy: 0.6 },
+  { dx: -1.0, dy: 0.6 }, { dx: 1.0, dy: 0.55 }
+];
+var AV_DECOR_CONTAGEM = [0, 3, 6, 10, 14];
+var AV_PORTE_CFG = [
+  null, // semente é desenhada à parte
+  { canopy: 3, scale: 13, trunkH: 24, wTopo: 3, wBase: 5 },
+  { canopy: 6, scale: 16, trunkH: 36, wTopo: 4, wBase: 7 },
+  { canopy: 9, scale: 19, trunkH: 56, wTopo: 5, wBase: 10 },
+  { canopy: 13, scale: 23, trunkH: 78, wTopo: 6, wBase: 13 }
+];
+
+function avDiasNamoro() {
+  return Math.max(0, Math.floor((new Date() - DATA_INICIO_NAMORO) / 86400000));
+}
+
+function avCalcularPorte(dias) {
+  var idx = 0;
+  for (var i = 0; i < AV_PORTES.length; i++) if (dias >= AV_PORTES[i].diasMin) idx = i;
+  return idx;
+}
+
+function avCalcularAtividade() {
+  return midias.length + textos.length
+    + desejos.filter(function(d) { return d.feito; }).length
+    + indicacoes.filter(function(i) { return i.assistido; }).length
+    + musicas.length;
+}
+
+function avCalcularDecorTier(atividade) {
+  var tier = 0;
+  for (var i = 0; i < AV_DECOR_LIMIARES.length; i++) if (atividade >= AV_DECOR_LIMIARES[i]) tier = i + 1;
+  return tier;
+}
+
+function avFormatarTempo(dias) {
+  var inicio = DATA_INICIO_NAMORO, agora = new Date();
+  var anos = agora.getFullYear() - inicio.getFullYear();
+  var meses = agora.getMonth() - inicio.getMonth();
+  var d = agora.getDate() - inicio.getDate();
+  if (d < 0) { meses--; }
+  if (meses < 0) { meses += 12; anos--; }
+  var partes = [];
+  if (anos > 0) partes.push(anos + (anos === 1 ? " ano" : " anos"));
+  if (meses > 0) partes.push(meses + (meses === 1 ? " mês" : " meses"));
+  if (anos === 0) partes.push(dias + (dias === 1 ? " dia" : " dias"));
+  return "Plantada há " + partes.join(" e ");
+}
+
+function avFolhaCor(i) { return i % 2 === 0 ? "#3f8f4f" : "#4da85f"; }
+
+// Gera o SVG da árvore inteiro como string, combinando o porte (tamanho) com a
+// decoração (flores), sem depender de nenhuma imagem externa.
+function avGerarSVG(porte, decorTier) {
+  var cx = 120, groundY = 255;
+  var partes = [];
+  partes.push('<svg viewBox="0 0 240 300" xmlns="http://www.w3.org/2000/svg">');
+  partes.push('<ellipse cx="' + cx + '" cy="' + groundY + '" rx="58" ry="13" fill="#1c150f"/>');
+  partes.push('<ellipse cx="' + cx + '" cy="' + (groundY - 2) + '" rx="50" ry="9" fill="#23301c"/>');
+
+  if (porte === 0) {
+    // Semente/broto: caule fino com duas folhinhas em V
+    var topo = groundY - 26;
+    partes.push('<path d="M' + cx + ',' + groundY + ' L' + cx + ',' + topo + '" stroke="#4da85f" stroke-width="3" stroke-linecap="round" fill="none"/>');
+    partes.push('<ellipse cx="' + (cx - 9) + '" cy="' + (topo + 4) + '" rx="11" ry="6" fill="#5fbf6f" transform="rotate(-35 ' + (cx - 9) + ' ' + (topo + 4) + ')"/>');
+    partes.push('<ellipse cx="' + (cx + 9) + '" cy="' + (topo + 4) + '" rx="11" ry="6" fill="#5fbf6f" transform="rotate(35 ' + (cx + 9) + ' ' + (topo + 4) + ')"/>');
+    var gotas = Math.min(decorTier, 2);
+    for (var g = 0; g < gotas; g++) {
+      partes.push('<circle cx="' + (cx - 16 + g * 32) + '" cy="' + (groundY - 6) + '" r="3" fill="var(--jg-cor-a, #E74C3C)"/>');
+    }
+  } else {
+    var cfg = AV_PORTE_CFG[porte];
+    var topoTronco = groundY - cfg.trunkH;
+    partes.push('<path d="M' + (cx - cfg.wBase / 2) + ',' + groundY + ' L' + (cx - cfg.wTopo / 2) + ',' + topoTronco +
+      ' L' + (cx + cfg.wTopo / 2) + ',' + topoTronco + ' L' + (cx + cfg.wBase / 2) + ',' + groundY + ' Z" fill="#6b4226" stroke="#4a2d1a" stroke-width="1"/>');
+
+    for (var c = 0; c < cfg.canopy; c++) {
+      var f = AV_CANOPY[c];
+      var fx = cx + f.dx * cfg.scale, fy = topoTronco + f.dy * cfg.scale;
+      partes.push('<circle cx="' + fx.toFixed(1) + '" cy="' + fy.toFixed(1) + '" r="' + (f.r * cfg.scale * 0.8).toFixed(1) + '" fill="' + avFolhaCor(c) + '"/>');
+    }
+
+    var nDecor = AV_DECOR_CONTAGEM[decorTier];
+    for (var dI = 0; dI < nDecor; dI++) {
+      var p = AV_DECOR_PONTOS[dI];
+      var px = cx + p.dx * cfg.scale, py = topoTronco + p.dy * cfg.scale;
+      var pr = 3;
+      partes.push('<g>' +
+        '<circle cx="' + (px - pr * 1.1).toFixed(1) + '" cy="' + py.toFixed(1) + '" r="' + pr + '" fill="var(--jg-cor-a, #E74C3C)"/>' +
+        '<circle cx="' + (px + pr * 1.1).toFixed(1) + '" cy="' + py.toFixed(1) + '" r="' + pr + '" fill="var(--jg-cor-a, #E74C3C)"/>' +
+        '<circle cx="' + px.toFixed(1) + '" cy="' + (py - pr * 1.1).toFixed(1) + '" r="' + pr + '" fill="var(--jg-cor-a, #E74C3C)"/>' +
+        '<circle cx="' + px.toFixed(1) + '" cy="' + (py + pr * 1.1).toFixed(1) + '" r="' + pr + '" fill="var(--jg-cor-a, #E74C3C)"/>' +
+        '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="1.6" fill="#e6a81a"/>' +
+        '</g>');
+    }
+  }
+
+  partes.push('</svg>');
+  return partes.join("");
+}
+
+// Texto curto pro card da Home (chamado toda vez que os dados terminam de carregar)
+function atualizarResumoArvore() {
+  var sub = document.getElementById("arvore-home-sub");
+  if (!sub) return;
+  var porte = avCalcularPorte(avDiasNamoro());
+  sub.textContent = AV_PORTES[porte].nome + " · toque pra ver";
+}
+
+function abrirArvore() {
+  var dias = avDiasNamoro();
+  var porte = avCalcularPorte(dias);
+  var atividade = avCalcularAtividade();
+  var decorTier = avCalcularDecorTier(atividade);
+  var nFotos = midias.length, nTextos = textos.length;
+  var nDesejos = desejos.filter(function(d) { return d.feito; }).length;
+  var nFilmes = indicacoes.filter(function(i) { return i.assistido; }).length;
+  var nMusicas = musicas.length;
+
+  document.getElementById("av-svg-wrap").innerHTML = avGerarSVG(porte, decorTier);
+  document.getElementById("av-porte").textContent = AV_PORTES[porte].nome;
+  document.getElementById("av-porte-desc").textContent = AV_PORTES[porte].desc;
+  document.getElementById("av-tempo").textContent = avFormatarTempo(dias);
+  document.getElementById("av-stat-fotos").textContent = nFotos;
+  document.getElementById("av-stat-textos").textContent = nTextos;
+  document.getElementById("av-stat-desejos").textContent = nDesejos;
+  document.getElementById("av-stat-filmes").textContent = nFilmes;
+  document.getElementById("av-stat-musicas").textContent = nMusicas;
+  document.getElementById("av-stat-total").textContent = atividade;
+
+  var marco;
+  if (porte < AV_PORTES.length - 1) {
+    var diasFaltam = AV_PORTES[porte + 1].diasMin - dias;
+    marco = "Em " + diasFaltam + (diasFaltam === 1 ? " dia" : " dias") + " ela vira " + AV_PORTES[porte + 1].nome.toLowerCase() + ". 🌱";
+  } else if (decorTier < AV_DECOR_CONTAGEM.length - 1) {
+    var faltamAcoes = AV_DECOR_LIMIARES[decorTier] - atividade;
+    marco = "Faltam " + faltamAcoes + " momentos guardados no app pra ela florescer ainda mais. 🌸";
+  } else {
+    marco = "Ela já está no auge da floração — e continua crescendo com cada momento de vocês. 🌸";
+  }
+  document.getElementById("av-marco").textContent = marco;
+
+  document.getElementById("arvore-view").classList.add("show");
+}
+
+function fecharArvore() {
+  document.getElementById("arvore-view").classList.remove("show");
+}
+
 document.addEventListener("pointerdown", function(e) {
   if (e.pointerType === "mouse") return;
   if (!document.getElementById("app").classList.contains("show")) { swipeAtivo = false; return; }
@@ -1743,6 +1976,7 @@ function carregarTudo() {
   carregarRelembrando();
   verificarAniversario();
   iniciarContadorNamoro();
+  atualizarResumoArvore();
 }
 
 // ===== CONTADOR DE NAMORO (anos, meses, dias e relógio ao vivo) =====
