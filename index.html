@@ -264,6 +264,9 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .jg-field input[type=text]{width:100%;padding:0.75rem 1rem;border-radius:12px;border:1.5px solid rgba(192,57,43,0.3);background:rgba(255,255,255,0.05);color:#fff;font-size:0.95rem;font-family:"Lato",sans-serif;outline:none}
 .jg-field-row{display:flex;gap:1rem}
 .jg-field-row .jg-field{flex:1}
+.jg-color-input{width:100%;height:2.6rem;padding:0;border:1.5px solid rgba(192,57,43,0.3);border-radius:12px;background:rgba(255,255,255,0.05);cursor:pointer}
+.jg-color-input::-webkit-color-swatch-wrapper{padding:3px}
+.jg-color-input::-webkit-color-swatch{border:none;border-radius:8px}
 .jg-stepper{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.05);border:1.5px solid rgba(192,57,43,0.3);border-radius:12px;padding:0.4rem 0.6rem}
 .jg-stepper button{background:rgba(192,57,43,0.2);border:none;color:var(--redl);width:32px;height:32px;border-radius:8px;font-size:1.2rem;cursor:pointer}
 .jg-stepper span{font-family:"Playfair Display",serif;font-size:1.1rem;min-width:2ch;text-align:center}
@@ -271,8 +274,8 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .jg-toggle-row input{accent-color:var(--redl);width:20px;height:20px;flex-shrink:0}
 .jg-scoreboard{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;margin-bottom:0.8rem}
 .jg-player-chip{flex:1;display:flex;align-items:center;gap:0.6rem;background:var(--blk3);border:1.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:0.7rem 0.9rem;transition:border-color 0.2s}
-.jg-player-chip.a{--jg-cor:var(--redl)}
-.jg-player-chip.b{--jg-cor:#e6a81a}
+.jg-player-chip.a{--jg-cor:var(--jg-cor-a, var(--redl))}
+.jg-player-chip.b{--jg-cor:var(--jg-cor-b, #e6a81a)}
 .jg-player-chip.vez{border-color:var(--jg-cor)}
 .jg-player-letra{width:34px;height:34px;min-width:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:"Playfair Display",serif;font-weight:700;font-size:1rem;background:rgba(255,255,255,0.08);color:var(--jg-cor);border:1.5px solid var(--jg-cor)}
 .jg-player-info{flex:1;min-width:0}
@@ -288,24 +291,25 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .jg-board-wrap{overflow-x:auto;display:flex;justify-content:center;padding:0.5rem 0 1rem}
 .jg-board{position:relative;flex-shrink:0;touch-action:none}
 .jg-dot{position:absolute;width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.6);transform:translate(-50%,-50%);pointer-events:none;transition:transform 0.15s,background 0.15s}
-.jg-dot.ativo{background:var(--redl);transform:translate(-50%,-50%) scale(1.9)}
+.jg-dot.ativo{background:var(--jg-cor-a, var(--redl));transform:translate(-50%,-50%) scale(1.9)}
 .jg-edge{position:absolute;pointer-events:none}
-.jg-edge::after{content:"";position:absolute;border-radius:3px;background:rgba(255,255,255,0.12);transition:background 0.15s}
+.jg-edge::after{content:"";position:absolute;border-radius:3px;background:rgba(255,255,255,0.12);transition:background 0.15s,box-shadow 0.15s}
 .jg-edge.jg-h{transform:translate(-50%,-50%)}
 .jg-edge.jg-h::after{left:0;right:0;top:50%;height:5px;transform:translateY(-50%)}
 .jg-edge.jg-v{transform:translate(-50%,-50%)}
 .jg-edge.jg-v::after{top:0;bottom:0;left:50%;width:5px;transform:translateX(-50%)}
-.jg-edge.marked-a::after{background:var(--redl)}
-.jg-edge.marked-b::after{background:#e6a81a}
+.jg-edge.marked-a::after{background:var(--jg-cor-a, var(--redl))}
+.jg-edge.marked-b::after{background:var(--jg-cor-b, #e6a81a)}
 .jg-edge.marked{cursor:default}
+.jg-edge.ultima::after{box-shadow:0 0 0 2px #fff, 0 0 8px 2px rgba(255,255,255,0.7)}
 .jg-box{position:absolute;display:flex;align-items:center;justify-content:center;font-family:"Playfair Display",serif;font-weight:700;border-radius:6px;background:transparent;transition:background 0.25s,color 0.25s;color:transparent;transform:translate(-50%,-50%)}
-.jg-box.a{background:rgba(231,76,60,0.16);color:var(--redl)}
-.jg-box.b{background:rgba(230,168,26,0.16);color:#e6a81a}
+.jg-box.a{background:rgba(var(--jg-cor-a-rgb, 231,76,60),0.16);color:var(--jg-cor-a, var(--redl))}
+.jg-box.b{background:rgba(var(--jg-cor-b-rgb, 230,168,26),0.16);color:var(--jg-cor-b, #e6a81a)}
 .jg-legenda{display:flex;justify-content:center;gap:1.5rem;font-size:0.72rem;color:rgba(255,255,255,0.5);margin-bottom:1.2rem}
 .jg-legenda span{display:flex;align-items:center;gap:0.4rem}
 .jg-dot-cor{width:10px;height:10px;border-radius:50%;display:inline-block}
-.jg-dot-cor.a{background:var(--redl)}
-.jg-dot-cor.b{background:#e6a81a}
+.jg-dot-cor.a{background:var(--jg-cor-a, var(--redl))}
+.jg-dot-cor.b{background:var(--jg-cor-b, #e6a81a)}
 .jg-controles{display:flex;gap:0.75rem}
 .jg-btn{flex:1;padding:0.8rem;border-radius:12px;border:1.5px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.75);font-size:0.82rem;font-weight:700;cursor:pointer;font-family:"Lato",sans-serif}
 .jg-btn-fim{border-color:rgba(192,57,43,0.4);background:rgba(192,57,43,0.12);color:var(--redl)}
@@ -867,13 +871,25 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   <div class="jg-conteudo" id="jg-carregando" style="text-align:center;padding-top:3rem;color:rgba(255,255,255,0.5);display:none">Carregando...</div>
 
   <div class="jg-conteudo" id="jg-setup">
-    <div class="jg-field">
-      <label>Nome do Jogador 1</label>
-      <input type="text" id="jg-nome-a" placeholder="Jogador 1" maxlength="14">
+    <div class="jg-field-row">
+      <div class="jg-field" style="flex:1">
+        <label>Nome do Jogador 1</label>
+        <input type="text" id="jg-nome-a" placeholder="Jogador 1" maxlength="14">
+      </div>
+      <div class="jg-field" style="flex:0 0 52px">
+        <label>Cor</label>
+        <input type="color" id="jg-cor-a" class="jg-color-input" value="#E74C3C">
+      </div>
     </div>
-    <div class="jg-field">
-      <label>Nome do Jogador 2</label>
-      <input type="text" id="jg-nome-b" placeholder="Jogador 2" maxlength="14">
+    <div class="jg-field-row">
+      <div class="jg-field" style="flex:1">
+        <label>Nome do Jogador 2</label>
+        <input type="text" id="jg-nome-b" placeholder="Jogador 2" maxlength="14">
+      </div>
+      <div class="jg-field" style="flex:0 0 52px">
+        <label>Cor</label>
+        <input type="color" id="jg-cor-b" class="jg-color-input" value="#E6A81A">
+      </div>
     </div>
     <div class="jg-field-row">
       <div class="jg-field">
@@ -932,7 +948,6 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       <span><i class="jg-dot-cor b"></i><span id="jg-legenda-b">Jogador 2</span></span>
     </div>
     <div class="jg-controles">
-      <button class="jg-btn" onclick="desfazerJogada()">↺ Desfazer</button>
       <button class="jg-btn jg-btn-fim" onclick="finalizarJogo()">🏁 Finalizar jogo</button>
     </div>
   </div>
@@ -1281,6 +1296,27 @@ function mostrarTelaJogoAtiva() {
   document.getElementById("jg-letra-a").textContent = jogo.nomeA.charAt(0).toUpperCase();
   document.getElementById("jg-letra-b").textContent = jogo.nomeB.charAt(0).toUpperCase();
   document.getElementById("jg-dado-row").style.display = jogo.modoDado ? "flex" : "none";
+  aplicarCoresJogo();
+}
+
+// Converte "#rrggbb" (ou "#rgb") em "r,g,b" pra usar em rgba() via CSS var
+function hexParaRgb(hex) {
+  hex = (hex || "").replace("#", "");
+  if (hex.length === 3) hex = hex.split("").map(function(ch) { return ch + ch; }).join("");
+  var num = parseInt(hex, 16);
+  if (isNaN(num)) return "231,76,60";
+  return [(num >> 16) & 255, (num >> 8) & 255, num & 255].join(",");
+}
+
+// Aplica as cores escolhidas pelos jogadores como variáveis CSS, com fallback pras cores padrão
+function aplicarCoresJogo() {
+  var view = document.getElementById("jogo-view");
+  var corA = (jogo && jogo.corA) || "#E74C3C";
+  var corB = (jogo && jogo.corB) || "#E6A81A";
+  view.style.setProperty("--jg-cor-a", corA);
+  view.style.setProperty("--jg-cor-b", corB);
+  view.style.setProperty("--jg-cor-a-rgb", hexParaRgb(corA));
+  view.style.setProperty("--jg-cor-b-rgb", hexParaRgb(corB));
 }
 
 function ajustarGrade(campo, delta) {
@@ -1293,6 +1329,8 @@ function ajustarGrade(campo, delta) {
 function iniciarJogo() {
   var nomeA = document.getElementById("jg-nome-a").value.trim() || "Jogador 1";
   var nomeB = document.getElementById("jg-nome-b").value.trim() || "Jogador 2";
+  var corA = document.getElementById("jg-cor-a").value || "#E74C3C";
+  var corB = document.getElementById("jg-cor-b").value || "#E6A81A";
   var modoDado = document.getElementById("jg-modo-dado").checked;
   var linhas = jogoConfig.linhas, colunas = jogoConfig.colunas;
 
@@ -1304,10 +1342,11 @@ function iniciarJogo() {
   jogo = {
     linhas: linhas, colunas: colunas,
     nomeA: nomeA, nomeB: nomeB,
+    corA: corA, corB: corB,
     modoDado: modoDado,
     bordasH: bordasH, bordasV: bordasV, caixas: caixas,
     turno: "a", pontosA: 0, pontosB: 0,
-    historico: [], finalizado: false,
+    ultimaJogada: null, finalizado: false,
     dadoRestante: 0, rev: 0
   };
 
@@ -1337,9 +1376,24 @@ function atualizarUIDado() {
     : "";
 }
 
+// Sorteio de 1 a 6 o mais justo possível: usa crypto.getRandomValues (gerador
+// criptográfico, sem os pequenos vieses do Math.random) com rejection sampling
+// pra eliminar qualquer viés de módulo. Cai pra Math.random só se o navegador
+// não tiver suporte a crypto.
+function sortearDado() {
+  if (window.crypto && window.crypto.getRandomValues) {
+    var buf = new Uint32Array(1);
+    var limite = Math.floor(0xFFFFFFFF / 6) * 6;
+    var n;
+    do { window.crypto.getRandomValues(buf); n = buf[0]; } while (n >= limite);
+    return 1 + (n % 6);
+  }
+  return 1 + Math.floor(Math.random() * 6);
+}
+
 function rolarDado() {
   if (!jogo || jogo.dadoRestante > 0) return;
-  var valor = 1 + Math.floor(Math.random() * 6);
+  var valor = sortearDado();
   jogo.dadoRestante = valor;
   vibrar();
   document.getElementById("jg-dado-btn").disabled = true;
@@ -1415,6 +1469,7 @@ function renderTabuleiro() {
 }
 
 function atualizarVisualBordas() {
+  var ultima = jogo.ultimaJogada;
   jogo.bordasH.forEach(function(linha, r) {
     linha.forEach(function(dono, c) {
       var el = document.querySelector('.jg-edge.jg-h[data-r="' + r + '"][data-c="' + c + '"]');
@@ -1422,6 +1477,7 @@ function atualizarVisualBordas() {
       el.classList.toggle("marked", !!dono);
       el.classList.toggle("marked-a", dono === "a");
       el.classList.toggle("marked-b", dono === "b");
+      el.classList.toggle("ultima", !!(ultima && ultima.tipo === "h" && ultima.r === r && ultima.c === c));
     });
   });
   jogo.bordasV.forEach(function(linha, r) {
@@ -1431,6 +1487,7 @@ function atualizarVisualBordas() {
       el.classList.toggle("marked", !!dono);
       el.classList.toggle("marked-a", dono === "a");
       el.classList.toggle("marked-b", dono === "b");
+      el.classList.toggle("ultima", !!(ultima && ultima.tipo === "v" && ultima.r === r && ultima.c === c));
     });
   });
   jogo.caixas.forEach(function(linha, r) {
@@ -1514,7 +1571,6 @@ function marcarBorda(tipo, r, c) {
   var jogador = jogo.turno;
   if (tipo === "h") jogo.bordasH[r][c] = jogador; else jogo.bordasV[r][c] = jogador;
 
-  var caixasAntes = [];
   var afetadas = tipo === "h" ? [[r - 1, c], [r, c]] : [[r, c - 1], [r, c]];
   var completouAlguma = false;
   afetadas.forEach(function(pos) {
@@ -1525,16 +1581,10 @@ function marcarBorda(tipo, r, c) {
       jogo.caixas[rr][cc] = jogador;
       if (jogador === "a") jogo.pontosA++; else jogo.pontosB++;
       completouAlguma = true;
-      caixasAntes.push([rr, cc]);
     }
   });
 
-  jogo.historico.push({
-    tipo: tipo, r: r, c: c, jogador: jogador,
-    caixasCompletadas: caixasAntes,
-    turnoAntes: jogo.turno,
-    dadoRestanteAntes: jogo.dadoRestante
-  });
+  jogo.ultimaJogada = { tipo: tipo, r: r, c: c };
 
   if (completouAlguma) vibrar();
 
@@ -1569,25 +1619,6 @@ function atualizarTurnoUI() {
   document.getElementById("jg-turno").textContent = "Vez de " + nome;
   document.getElementById("jg-chip-a").classList.toggle("vez", jogo.turno === "a");
   document.getElementById("jg-chip-b").classList.toggle("vez", jogo.turno === "b");
-}
-
-function desfazerJogada() {
-  if (!jogo || jogo.historico.length === 0 || jogo.finalizado) return;
-  var mov = jogo.historico.pop();
-  if (mov.tipo === "h") jogo.bordasH[mov.r][mov.c] = null; else jogo.bordasV[mov.r][mov.c] = null;
-  mov.caixasCompletadas.forEach(function(pos) {
-    var rr = pos[0], cc = pos[1];
-    var dono = jogo.caixas[rr][cc];
-    if (dono === "a") jogo.pontosA--; else if (dono === "b") jogo.pontosB--;
-    jogo.caixas[rr][cc] = null;
-  });
-  jogo.turno = mov.turnoAntes;
-  jogo.dadoRestante = mov.dadoRestanteAntes;
-  atualizarUIDado();
-  atualizarVisualBordas();
-  atualizarPlacar();
-  atualizarTurnoUI();
-  sincronizarEstadoJogo();
 }
 
 function finalizarJogo() {
