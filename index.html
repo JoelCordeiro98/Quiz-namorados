@@ -142,13 +142,6 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .mdd-info{flex:1;min-width:0}
 .mdd-titulo{font-family:"Playfair Display",serif;font-size:1.05rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mdd-artista{font-size:0.78rem;color:rgba(255,255,255,0.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.relembrando-section{padding:0 1.5rem 1.5rem}
-.relembrando-section .plabel{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--redl);margin-bottom:0.5rem}
-.relembrando-card{display:flex;align-items:center;gap:0.85rem;padding:0.85rem 1rem;background:var(--blk3);border:1px solid rgba(255,255,255,0.07);border-radius:14px}
-.relembrando-thumb{display:none;width:50px;height:50px;border-radius:10px;background-size:cover;background-position:center;background-color:var(--blk2);flex-shrink:0}
-.relembrando-info{flex:1;min-width:0}
-.relembrando-tempo{font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--redl);margin-bottom:0.25rem}
-.relembrando-texto{font-family:"Playfair Display",serif;font-style:italic;font-size:0.88rem;color:rgba(255,255,255,0.85);line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .home-cards{padding:1.5rem;position:relative}
 .home-cards h3{font-family:"Playfair Display",serif;font-size:1.2rem;margin-bottom:1rem;color:rgba(255,255,255,0.8)}
 .cards-row{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem}
@@ -329,7 +322,10 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 /* ===== ÁRVORE DO RELACIONAMENTO ===== */
 .av-conteudo{padding:1.2rem 1.4rem 3rem;max-width:420px;margin:0 auto}
 .av-svg-wrap{display:flex;justify-content:center;padding:0.5rem 0 1rem}
-.av-svg-wrap svg{width:100%;max-width:280px;height:auto}
+.av-svg-wrap svg{width:100%;max-width:340px;height:auto}
+.av-fruta{cursor:pointer}
+.av-fruta:active{opacity:0.7}
+.av-dica-fruta{text-align:center;font-size:0.7rem;color:#8fc98f;margin:-0.9rem 0 1.2rem}
 .av-porte{text-align:center;font-family:"Playfair Display",serif;font-size:1.35rem;margin-bottom:0.15rem}
 .av-porte-desc{text-align:center;font-size:0.78rem;color:#8fc98f;margin-bottom:0.3rem}
 .av-tempo{text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.45);margin-bottom:1.6rem}
@@ -448,17 +444,6 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       </div>
       <img class="mascote mascote-ele" src="mascote-menino-aceno.png" alt="">
       <img class="mascote mascote-ela" src="mascote-menina-aceno.png" alt="">
-    </div>
-
-    <div class="relembrando-section" id="relembrando-section" style="display:none">
-      <div class="plabel">Relembrando</div>
-      <div class="relembrando-card" id="relembrando-card">
-        <div class="relembrando-thumb" id="relembrando-thumb"></div>
-        <div class="relembrando-info">
-          <div class="relembrando-tempo" id="relembrando-tempo"></div>
-          <div class="relembrando-texto" id="relembrando-texto"></div>
-        </div>
-      </div>
     </div>
 
     <div class="musica-section">
@@ -1003,6 +988,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div class="av-porte" id="av-porte"></div>
     <div class="av-porte-desc" id="av-porte-desc"></div>
     <div class="av-tempo" id="av-tempo"></div>
+    <div class="av-dica-fruta" id="av-dica-fruta" style="display:none">🍊 Toque em um fruto pra reviver uma lembrança</div>
 
     <div class="av-secao-titulo">O que já regou essa árvore</div>
     <div class="av-stats">
@@ -1750,11 +1736,22 @@ var AV_DECOR_PONTOS = [
 var AV_DECOR_CONTAGEM = [0, 3, 6, 10, 14];
 var AV_PORTE_CFG = [
   null, // semente é desenhada à parte
-  { canopy: 3, scale: 13, trunkH: 24, wTopo: 3, wBase: 5 },
-  { canopy: 6, scale: 16, trunkH: 36, wTopo: 4, wBase: 7 },
-  { canopy: 9, scale: 19, trunkH: 56, wTopo: 5, wBase: 10 },
-  { canopy: 13, scale: 23, trunkH: 78, wTopo: 6, wBase: 13 }
+  { canopy: 3, scale: 15, trunkH: 30, wTopo: 4, wBase: 6 },
+  { canopy: 6, scale: 18, trunkH: 46, wTopo: 5, wBase: 9 },
+  { canopy: 9, scale: 22, trunkH: 68, wTopo: 6, wBase: 12 },
+  { canopy: 13, scale: 26, trunkH: 92, wTopo: 8, wBase: 16 }
 ];
+
+// Frutos: cada um guarda uma lembrança (foto, texto ou pensamento antigo) sorteada
+// entre tudo que já foi guardado no app. Só aparecem a partir do "Arbusto" — antes
+// disso a árvore ainda não tem histórico suficiente pra dar frutos.
+var AV_FRUTA_PONTOS = [
+  { dx: -0.6, dy: 0.25 }, { dx: 0.6, dy: 0.25 }, { dx: 0, dy: 0.15 },
+  { dx: -1.05, dy: 0.15 }, { dx: 1.05, dy: 0.15 }, { dx: -0.3, dy: -0.3 },
+  { dx: 0.3, dy: -0.3 }, { dx: 0, dy: 0.7 }
+];
+var AV_FRUTA_CONTAGEM = [0, 0, 3, 5, 8];
+var avFrutaPool = [];
 
 function avDiasNamoro() {
   return Math.max(0, Math.floor((new Date() - DATA_INICIO_NAMORO) / 86400000));
@@ -1812,7 +1809,7 @@ function avGerarSVG(porte, decorTier) {
     partes.push('<ellipse cx="' + (cx + 9) + '" cy="' + (topo + 4) + '" rx="11" ry="6" fill="#5fbf6f" transform="rotate(35 ' + (cx + 9) + ' ' + (topo + 4) + ')"/>');
     var gotas = Math.min(decorTier, 2);
     for (var g = 0; g < gotas; g++) {
-      partes.push('<circle cx="' + (cx - 16 + g * 32) + '" cy="' + (groundY - 6) + '" r="3" fill="var(--jg-cor-a, #E74C3C)"/>');
+      partes.push('<circle cx="' + (cx - 16 + g * 32) + '" cy="' + (groundY - 6) + '" r="3" fill="#ff6f91"/>');
     }
   } else {
     var cfg = AV_PORTE_CFG[porte];
@@ -1832,10 +1829,10 @@ function avGerarSVG(porte, decorTier) {
       var px = cx + p.dx * cfg.scale, py = topoTronco + p.dy * cfg.scale;
       var pr = 3;
       partes.push('<g>' +
-        '<circle cx="' + (px - pr * 1.1).toFixed(1) + '" cy="' + py.toFixed(1) + '" r="' + pr + '" fill="var(--jg-cor-a, #E74C3C)"/>' +
-        '<circle cx="' + (px + pr * 1.1).toFixed(1) + '" cy="' + py.toFixed(1) + '" r="' + pr + '" fill="var(--jg-cor-a, #E74C3C)"/>' +
-        '<circle cx="' + px.toFixed(1) + '" cy="' + (py - pr * 1.1).toFixed(1) + '" r="' + pr + '" fill="var(--jg-cor-a, #E74C3C)"/>' +
-        '<circle cx="' + px.toFixed(1) + '" cy="' + (py + pr * 1.1).toFixed(1) + '" r="' + pr + '" fill="var(--jg-cor-a, #E74C3C)"/>' +
+        '<circle cx="' + (px - pr * 1.1).toFixed(1) + '" cy="' + py.toFixed(1) + '" r="' + pr + '" fill="#ff6f91"/>' +
+        '<circle cx="' + (px + pr * 1.1).toFixed(1) + '" cy="' + py.toFixed(1) + '" r="' + pr + '" fill="#ff6f91"/>' +
+        '<circle cx="' + px.toFixed(1) + '" cy="' + (py - pr * 1.1).toFixed(1) + '" r="' + pr + '" fill="#ff6f91"/>' +
+        '<circle cx="' + px.toFixed(1) + '" cy="' + (py + pr * 1.1).toFixed(1) + '" r="' + pr + '" fill="#ff6f91"/>' +
         '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="1.6" fill="#e6a81a"/>' +
         '</g>');
     }
@@ -1843,6 +1840,114 @@ function avGerarSVG(porte, decorTier) {
 
   partes.push('</svg>');
   return partes.join("");
+}
+
+// Gera só o grupo dos frutos clicáveis (adicionado à árvore depois, quando o
+// sorteio de lembranças termina) — usa a mesma âncora de copa que avGerarSVG.
+function avGerarFrutasSVG(porte, n) {
+  var cx = 120, groundY = 255;
+  var cfg = AV_PORTE_CFG[porte];
+  var topoTronco = groundY - cfg.trunkH;
+  var partes = [];
+  for (var i = 0; i < n; i++) {
+    var p = AV_FRUTA_PONTOS[i];
+    var fx = (cx + p.dx * cfg.scale).toFixed(1);
+    var fy = (topoTronco + p.dy * cfg.scale).toFixed(1);
+    partes.push('<g class="av-fruta" data-i="' + i + '">' +
+      '<circle cx="' + fx + '" cy="' + fy + '" r="14" fill="transparent"/>' +
+      '<path d="M' + fx + ',' + (fy - 7.5) + ' q2,-4 5,-3" stroke="#4da85f" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
+      '<circle cx="' + fx + '" cy="' + fy + '" r="7.5" fill="#e8873a" stroke="#b85f1f" stroke-width="1"/>' +
+      '<circle cx="' + (fx - 2.4) + '" cy="' + (fy - 2.4) + '" r="2.1" fill="rgba(255,255,255,0.55)"/>' +
+      '</g>');
+  }
+  return partes.join("");
+}
+
+// Monta o "pool" de lembranças candidatas a virar fruto: pensamentos antigos (única
+// consulta nova, leve — só texto) + textos e fotos que já estão em memória (nenhuma
+// consulta extra). Embaralha e distribui uma lembrança diferente pra cada fruto.
+function avMontarPoolFrutas(pensamentosHist, porte) {
+  var hoje = new Date();
+  var pool = [];
+
+  pensamentosHist.forEach(function(p) {
+    var texto = (p.ele && p.ele.trim()) || (p.ela && p.ela.trim());
+    if (!texto) return;
+    var d = new Date(p.data + "T12:00:00");
+    if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
+    pool.push({ tipo: "pensamento", data: d, texto: texto });
+  });
+
+  textos.forEach(function(t) {
+    if (!t.criado_em) return;
+    var d = new Date(t.criado_em);
+    if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
+    pool.push({ tipo: "texto", texto: t.titulo || t.corpo || "", id: t.id });
+  });
+
+  midias.forEach(function(m) {
+    if (m.tipo === "video" || !m.criado_em) return;
+    var d = new Date(m.criado_em);
+    if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
+    pool.push({ tipo: "foto", url: m.url });
+  });
+
+  if (pool.length === 0) return;
+
+  for (var i = pool.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+  }
+  var n = Math.min(AV_FRUTA_CONTAGEM[porte], AV_FRUTA_PONTOS.length, pool.length);
+  avFrutaPool = pool.slice(0, n);
+
+  var svgEl = document.querySelector("#av-svg-wrap svg");
+  if (!svgEl) return;
+  svgEl.insertAdjacentHTML("beforeend", avGerarFrutasSVG(porte, avFrutaPool.length));
+
+  var frutas = document.querySelectorAll("#av-svg-wrap .av-fruta");
+  frutas.forEach(function(el) {
+    el.addEventListener("click", function() {
+      avAbrirFruta(parseInt(el.getAttribute("data-i"), 10));
+    });
+  });
+
+  var dica = document.getElementById("av-dica-fruta");
+  if (dica) dica.style.display = "block";
+}
+
+function avCarregarFrutas(porte) {
+  avFrutaPool = [];
+  var dica = document.getElementById("av-dica-fruta");
+  if (dica) dica.style.display = "none";
+  if (AV_FRUTA_CONTAGEM[porte] <= 0) return;
+  api("/rest/v1/pensamentos?select=data,ele,ela&order=data.desc")
+    .then(function(r) { return r.json(); })
+    .then(function(hist) { avMontarPoolFrutas(Array.isArray(hist) ? hist : [], porte); })
+    .catch(function() { avMontarPoolFrutas([], porte); });
+}
+
+// Abre a lembrança sorteada pro fruto tocado — igual comportamento do antigo "Relembrando"
+function avAbrirFruta(idx) {
+  var item = avFrutaPool[idx];
+  if (!item) return;
+  fecharArvore();
+  if (item.tipo === "foto") {
+    var i = midias.findIndex(function(x) { return x.url === item.url; });
+    if (i >= 0) abrirLightbox(i); else mostrarToast("Essa foto não existe mais.");
+  } else if (item.tipo === "texto") {
+    var i2 = textos.findIndex(function(x) { return x.id === item.id; });
+    if (i2 >= 0) { goTo("textos"); abrirTexto(i2); } else mostrarToast("Esse texto não existe mais.");
+  } else {
+    var d = item.data;
+    var dataStr = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    document.getElementById("tp-tipo").textContent = "Pensamento do dia";
+    document.getElementById("tp-titulo").textContent = formatarDataBR(dataStr);
+    document.getElementById("tp-body").textContent = item.texto || "";
+    document.getElementById("tp-edit").style.display = "none";
+    document.getElementById("tp-del").style.display = "none";
+    document.getElementById("texto-popup").classList.add("show");
+  }
 }
 
 // Texto curto pro card da Home (chamado toda vez que os dados terminam de carregar)
@@ -1887,6 +1992,7 @@ function abrirArvore() {
   document.getElementById("av-marco").textContent = marco;
 
   document.getElementById("arvore-view").classList.add("show");
+  avCarregarFrutas(porte);
 }
 
 function fecharArvore() {
@@ -1973,7 +2079,6 @@ function carregarTudo() {
   carregarFotoDestaque();
   carregarIndicacoes();
   carregarMusicas();
-  carregarRelembrando();
   verificarAniversario();
   iniciarContadorNamoro();
   atualizarResumoArvore();
@@ -2274,159 +2379,8 @@ function mesmoDiaCalendario(d1, d2) {
   return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
 }
 
-function carregarRelembrando() {
-  api("/rest/v1/relembranca_dia?dia=eq." + hojeStr() + "&select=*")
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var row = Array.isArray(data) ? data[0] : null;
-      if (row) {
-        var item = {
-          tipo: row.tipo,
-          data: new Date((row.origem_data || row.dia) + "T12:00:00"),
-          texto: row.conteudo,
-          url: row.foto_url,
-          id: row.ref_id
-        };
-        renderRelembrando(item, !!row.exato);
-        document.getElementById("relembrando-section").style.display = "block";
-      } else {
-        gerarRelembrandoDoDia();
-      }
-    })
-    .catch(function() { gerarRelembrandoDoDia(); });
-}
-
-function gerarRelembrandoDoDia() {
-  Promise.all([
-    api("/rest/v1/pensamentos?select=data,ele,ela&order=data.desc").then(function(r) { return r.json(); }),
-    api("/rest/v1/textos?select=id,titulo,corpo,criado_em&order=criado_em.desc").then(function(r) { return r.json(); }),
-    api("/rest/v1/midias?select=url,tipo,criado_em&order=criado_em.desc").then(function(r) { return r.json(); })
-  ]).then(function(res) {
-    montarRelembrando(
-      Array.isArray(res[0]) ? res[0] : [],
-      Array.isArray(res[1]) ? res[1] : [],
-      Array.isArray(res[2]) ? res[2] : []
-    );
-  }).catch(function() {});
-}
-
-function salvarRelembrancaDoDia(item, exato) {
-  var d = item.data;
-  var origemData = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-  api("/rest/v1/relembranca_dia?on_conflict=dia", {
-    method: "POST",
-    headers: {
-      "apikey": SUPABASE_KEY,
-      "Authorization": "Bearer " + session.access_token,
-      "Content-Type": "application/json",
-      "Prefer": "resolution=merge-duplicates,return=minimal"
-    },
-    body: JSON.stringify({
-      dia: hojeStr(),
-      tipo: item.tipo,
-      conteudo: item.tipo === "foto" ? null : item.texto,
-      foto_url: item.tipo === "foto" ? item.url : null,
-      origem_data: origemData,
-      exato: exato,
-      ref_id: item.tipo === "texto" ? item.id : null
-    })
-  });
-}
-
-function montarRelembrando(pensamentosHist, textosHist, midiasHist) {
-  var hoje = new Date();
-  var candidatos = [];
-  var geral = [];
-
-  pensamentosHist.forEach(function(p) {
-    var texto = (p.ele && p.ele.trim()) || (p.ela && p.ela.trim());
-    if (!texto) return;
-    var d = new Date(p.data + "T12:00:00");
-    if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
-    var item = { tipo: "pensamento", data: d, texto: texto };
-    geral.push(item);
-    if (d.getMonth() === hoje.getMonth() && d.getDate() === hoje.getDate() && d.getFullYear() < hoje.getFullYear()) candidatos.push(item);
-  });
-
-  textosHist.forEach(function(t) {
-    if (!t.criado_em) return;
-    var d = new Date(t.criado_em);
-    if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
-    var item = { tipo: "texto", data: d, texto: t.titulo || t.corpo || "", id: t.id };
-    geral.push(item);
-    if (d.getMonth() === hoje.getMonth() && d.getDate() === hoje.getDate() && d.getFullYear() < hoje.getFullYear()) candidatos.push(item);
-  });
-
-  midiasHist.forEach(function(m) {
-    if (m.tipo === "video" || !m.criado_em) return;
-    var d = new Date(m.criado_em);
-    if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
-    var item = { tipo: "foto", data: d, url: m.url };
-    geral.push(item);
-    if (d.getMonth() === hoje.getMonth() && d.getDate() === hoje.getDate() && d.getFullYear() < hoje.getFullYear()) candidatos.push(item);
-  });
-
-  var section = document.getElementById("relembrando-section");
-  var pool = candidatos.length > 0 ? candidatos : geral;
-  if (pool.length === 0) { section.style.display = "none"; return; }
-
-  var escolhido = pool[Math.floor(Math.random() * pool.length)];
-  var exato = candidatos.length > 0;
-  salvarRelembrancaDoDia(escolhido, exato);
-  renderRelembrando(escolhido, exato);
-  section.style.display = "block";
-}
-
-function renderRelembrando(item, exato) {
-  var hoje = new Date();
-  var anos = hoje.getFullYear() - item.data.getFullYear();
-  var tempoEl = document.getElementById("relembrando-tempo");
-  var thumbEl = document.getElementById("relembrando-thumb");
-  var textoEl = document.getElementById("relembrando-texto");
-  var card = document.getElementById("relembrando-card");
-
-  tempoEl.textContent = (exato && anos >= 1) ? (anos === 1 ? "Há 1 ano" : "Há " + anos + " anos") : "Relembrando";
-
-  if (item.tipo === "foto") {
-    thumbEl.style.display = "block";
-    thumbEl.style.backgroundImage = "url(" + item.url + ")";
-    textoEl.textContent = "Uma foto de vocês ♥";
-    card.style.cursor = "pointer";
-    card.onclick = function() {
-      var idx = midias.findIndex(function(x) { return x.url === item.url; });
-      if (idx >= 0) abrirLightbox(idx);
-    };
-  } else if (item.tipo === "texto") {
-    thumbEl.style.display = "none";
-    thumbEl.style.backgroundImage = "";
-    var txtTexto = item.texto.length > 90 ? item.texto.substring(0, 90) + "…" : item.texto;
-    textoEl.textContent = '"' + txtTexto + '"';
-    card.style.cursor = "pointer";
-    card.onclick = function() {
-      var idx = textos.findIndex(function(x) { return x.id === item.id; });
-      if (idx >= 0) { goTo("textos"); abrirTexto(idx); }
-      else { mostrarToast("Esse texto não existe mais."); }
-    };
-  } else {
-    thumbEl.style.display = "none";
-    thumbEl.style.backgroundImage = "";
-    var txt = item.texto.length > 90 ? item.texto.substring(0, 90) + "…" : item.texto;
-    textoEl.textContent = '"' + txt + '"';
-    card.style.cursor = "pointer";
-    card.onclick = function() { abrirRelembrandoPensamento(item); };
-  }
-}
-
-function abrirRelembrandoPensamento(item) {
-  var d = item.data;
-  var dataStr = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-  document.getElementById("tp-tipo").textContent = "Pensamento do dia";
-  document.getElementById("tp-titulo").textContent = formatarDataBR(dataStr);
-  document.getElementById("tp-body").textContent = item.texto || "";
-  document.getElementById("tp-edit").style.display = "none";
-  document.getElementById("tp-del").style.display = "none";
-  document.getElementById("texto-popup").classList.add("show");
-}
+// A antiga seção "Relembrando" da Home virou os frutos da árvore (ver ===== ÁRVORE
+// DO RELACIONAMENTO ===== mais abaixo): avCarregarFrutas/avMontarPoolFrutas/avAbrirFruta.
 
 // ===== GALERIA =====
 function carregarMidias() {
