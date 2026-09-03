@@ -321,21 +321,32 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 
 /* ===== ÁRVORE DO RELACIONAMENTO ===== */
 .av-conteudo{padding:1.2rem 1.4rem 3rem;max-width:420px;margin:0 auto}
-.av-svg-wrap{display:flex;justify-content:center;padding:0.5rem 0 1rem}
-.av-svg-wrap svg{width:100%;max-width:340px;height:auto}
-.av-fruta{cursor:pointer}
-.av-fruta:active{opacity:0.7}
-.av-dica-fruta{text-align:center;font-size:0.7rem;color:#8fc98f;margin:-0.9rem 0 1.2rem}
-.av-porte{text-align:center;font-family:"Playfair Display",serif;font-size:1.35rem;margin-bottom:0.15rem}
-.av-porte-desc{text-align:center;font-size:0.78rem;color:#8fc98f;margin-bottom:0.3rem}
+.av-tree-wrap{position:relative;max-width:340px;margin:0.5rem auto 0.6rem}
+.av-tree-img{width:100%;display:block;border-radius:16px}
+.av-fruta{position:absolute;width:12%;transform:translate(-50%,-50%);cursor:pointer;mix-blend-mode:screen;filter:drop-shadow(0 0 5px rgba(255,180,70,0.6));transition:transform 0.15s ease;-webkit-user-drag:none;user-select:none}
+.av-fruta:active{transform:translate(-50%,-50%) scale(0.82)}
+.av-frase{text-align:center;font-family:"Playfair Display",serif;font-style:italic;font-size:0.85rem;color:#e6c88a;margin-bottom:0.6rem}
+.av-dica-fruta{text-align:center;font-size:0.7rem;color:#e6c88a;margin-bottom:1.2rem}
 .av-tempo{text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.45);margin-bottom:1.6rem}
-.av-secao-titulo{font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:#8fc98f;margin-bottom:0.7rem}
+.av-secao-titulo{font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:#e6c88a;margin-bottom:0.7rem}
 .av-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:0.6rem;margin-bottom:1.6rem}
-.av-stat{background:var(--blk3);border:1px solid rgba(112,191,120,0.18);border-radius:12px;padding:0.7rem 0.85rem;display:flex;align-items:center;gap:0.6rem}
+.av-stat{background:var(--blk3);border:1px solid rgba(230,168,26,0.18);border-radius:12px;padding:0.7rem 0.85rem;display:flex;align-items:center;gap:0.6rem}
 .av-stat-icon{font-size:1.15rem;flex-shrink:0}
 .av-stat-num{font-family:"Playfair Display",serif;font-size:1.1rem;color:#fff;line-height:1.1}
 .av-stat-label{font-size:0.65rem;color:var(--gray)}
-.av-marco{background:rgba(112,191,120,0.08);border:1px solid rgba(112,191,120,0.25);border-radius:14px;padding:0.9rem 1rem;font-size:0.82rem;line-height:1.6;color:rgba(255,255,255,0.85);text-align:center}
+.av-marco{background:rgba(230,168,26,0.08);border:1px solid rgba(230,168,26,0.25);border-radius:14px;padding:0.9rem 1rem;font-size:0.82rem;line-height:1.6;color:rgba(255,255,255,0.85);text-align:center}
+
+.av-revelacao-overlay{display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;padding:1.5rem}
+.av-revelacao-overlay.show{display:flex}
+.av-revelacao-box{position:relative;background:var(--blk2);border:1.5px solid rgba(230,168,26,0.4);border-radius:24px;padding:2.2rem 1.6rem 1.8rem;text-align:center;max-width:340px;width:100%;box-shadow:0 0 60px rgba(230,168,26,0.2);max-height:85vh;overflow-y:auto}
+.av-revelacao-fechar{position:absolute;top:0.9rem;right:0.9rem}
+.av-revelacao-icone{font-size:2rem;margin-bottom:0.5rem}
+.av-revelacao-titulo{font-family:"Playfair Display",serif;font-size:1.25rem;margin-bottom:1rem;color:#e6c88a}
+.av-revelacao-midia{margin-bottom:0.9rem}
+.av-revelacao-midia img{max-width:100%;max-height:220px;border-radius:12px;object-fit:cover}
+.av-revelacao-texto{font-size:0.9rem;line-height:1.6;color:rgba(255,255,255,0.88);margin-bottom:0.7rem;font-style:italic}
+.av-revelacao-data{font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--gray);margin-bottom:1.4rem}
+.av-revelacao-acoes{display:flex;flex-direction:column;gap:0.6rem}
 .tp-close{position:absolute;top:1rem;right:1rem;width:34px;height:34px;background:rgba(192,57,43,0.7);border:none;border-radius:50%;color:#fff;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .tp-tipo{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--redl);margin-bottom:0.4rem}
 .tp-titulo{font-family:"Playfair Display",serif;font-size:1.4rem;margin-bottom:1.2rem;line-height:1.3}
@@ -984,11 +995,12 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div style="width:38px"></div>
   </div>
   <div class="av-conteudo">
-    <div class="av-svg-wrap" id="av-svg-wrap"></div>
-    <div class="av-porte" id="av-porte"></div>
-    <div class="av-porte-desc" id="av-porte-desc"></div>
+    <div class="av-tree-wrap" id="av-tree-wrap">
+      <img class="av-tree-img" src="arvore-base.jpg" alt="Nossa árvore">
+    </div>
+    <div class="av-frase">"Nossa história floresce todo dia" ♥</div>
     <div class="av-tempo" id="av-tempo"></div>
-    <div class="av-dica-fruta" id="av-dica-fruta" style="display:none">🍊 Toque em um fruto pra reviver uma lembrança</div>
+    <div class="av-dica-fruta" id="av-dica-fruta" style="display:none">❤️ Toque em um fruto pra colher uma lembrança</div>
 
     <div class="av-secao-titulo">O que já regou essa árvore</div>
     <div class="av-stats">
@@ -1001,6 +1013,22 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </div>
 
     <div class="av-marco" id="av-marco"></div>
+  </div>
+</div>
+
+<!-- REVELAÇÃO DO FRUTO COLHIDO -->
+<div class="av-revelacao-overlay" id="av-revelacao-overlay">
+  <div class="av-revelacao-box">
+    <button class="leitura-fechar av-revelacao-fechar" onclick="fecharRevelacaoFruta()" aria-label="Fechar">✕</button>
+    <div class="av-revelacao-icone" id="av-revelacao-icone">❤️</div>
+    <div class="av-revelacao-titulo">Uma lembrança floresceu...</div>
+    <div class="av-revelacao-midia" id="av-revelacao-midia"></div>
+    <div class="av-revelacao-texto" id="av-revelacao-texto"></div>
+    <div class="av-revelacao-data" id="av-revelacao-data"></div>
+    <div class="av-revelacao-acoes">
+      <button class="btn-primary" id="av-revelacao-guardar" onclick="avGuardarFrutaAtual()">Guardar no coração ❤️</button>
+      <button class="jg-btn" onclick="avColherOutroFruto()">Colher outro fruto ✨</button>
+    </div>
   </div>
 </div>
 
@@ -1703,63 +1731,51 @@ function fecharVencedor() {
 }
 
 // ===== ÁRVORE DO RELACIONAMENTO =====
-// O "porte" (tamanho/estágio) vem do tempo juntos (DATA_INICIO_NAMORO, já usado no
-// contador da Home). A "decoração" (folhas/flores extras) vem das ações que vocês já
-// fizeram no app — usa os arrays que já estão carregados em memória (midias, textos,
-// desejos, indicacoes, musicas), sem nenhuma consulta nova ao Supabase.
-var AV_PORTES = [
-  { nome: "Semente", desc: "Acabou de ser plantada", diasMin: 0 },
-  { nome: "Muda", desc: "Criando raízes", diasMin: 30 },
-  { nome: "Arbusto", desc: "Ganhando força", diasMin: 183 },
-  { nome: "Árvore jovem", desc: "Esticando os galhos", diasMin: 365 },
-  { nome: "Árvore grande", desc: "Frondosa, cheia de história", diasMin: 730 }
-];
-var AV_DECOR_LIMIARES = [5, 15, 30, 60];
+// A árvore em si é uma imagem fixa (arvore-base.jpg, mandada por vocês) — ela não
+// muda de estágio. O "crescimento" aparece só na quantidade de frutos pendurados:
+// mais dias de relacionamento (DATA_INICIO_NAMORO) + mais ações no app (midias,
+// textos, desejos, indicacoes, musicas — já carregados em memória) = mais frutos.
+// Cada fruto guarda uma lembrança sorteada (foto/texto/música/filme/pensamento) e
+// ganha uma "raridade" visual: dourado (mesmo dia em anos anteriores), raro
+// (lembrança bem antiga) ou do amor (já guardada no coração), por cima da cor do
+// tipo. Os ícones de fruto vêm das imagens que vocês mandaram (fruto-*.png).
+var AV_TEMPO_LIMIARES = [0, 30, 183, 365, 730]; // dias juntos
+var AV_TEMPO_SLOTS = [0, 2, 4, 6, 8]; // frutos "base" liberados pelo tempo
+var AV_ATIVIDADE_LIMIARES = [5, 15, 30, 60]; // momentos guardados no app
+var AV_ATIVIDADE_BONUS = [0, 1, 2, 3, 4]; // frutos extra por atividade
 
-// Circulos de folhagem em coordenadas relativas (dx,dy,r), do centro pra fora —
-// cada porte usa só os primeiros N, então a copa "aparece" aos poucos conforme cresce.
-var AV_CANOPY = [
-  { dx: 0, dy: 0, r: 1.0 }, { dx: -0.9, dy: 0.15, r: 0.75 }, { dx: 0.9, dy: 0.15, r: 0.75 },
-  { dx: -0.45, dy: 0.55, r: 0.65 }, { dx: 0.45, dy: 0.55, r: 0.65 }, { dx: 0, dy: 0.6, r: 0.7 },
-  { dx: -1.3, dy: 0.5, r: 0.55 }, { dx: 1.3, dy: 0.5, r: 0.55 }, { dx: -0.7, dy: -0.5, r: 0.6 },
-  { dx: 0.7, dy: -0.5, r: 0.6 }, { dx: 0, dy: -0.85, r: 0.55 }, { dx: -1.1, dy: -0.15, r: 0.5 },
-  { dx: 1.1, dy: -0.15, r: 0.5 }
-];
-// Pontos onde as florzinhas podem aparecer (mesma lógica: revela mais conforme o "tier")
-var AV_DECOR_PONTOS = [
-  { dx: -0.3, dy: -0.15 }, { dx: 0.35, dy: 0.1 }, { dx: 0, dy: 0.4 },
-  { dx: -0.85, dy: 0.35 }, { dx: 0.85, dy: 0.3 }, { dx: -0.5, dy: -0.55 },
-  { dx: 0.5, dy: -0.5 }, { dx: -1.15, dy: -0.05 }, { dx: 1.15, dy: 0 },
-  { dx: 0, dy: -0.95 }, { dx: -0.15, dy: 0.65 }, { dx: 0.6, dy: 0.6 },
-  { dx: -1.0, dy: 0.6 }, { dx: 1.0, dy: 0.55 }
-];
-var AV_DECOR_CONTAGEM = [0, 3, 6, 10, 14];
-var AV_PORTE_CFG = [
-  null, // semente é desenhada à parte
-  { canopy: 3, scale: 15, trunkH: 30, wTopo: 4, wBase: 6 },
-  { canopy: 6, scale: 18, trunkH: 46, wTopo: 5, wBase: 9 },
-  { canopy: 9, scale: 22, trunkH: 68, wTopo: 6, wBase: 12 },
-  { canopy: 13, scale: 26, trunkH: 92, wTopo: 8, wBase: 16 }
-];
-
-// Frutos: cada um guarda uma lembrança (foto, texto ou pensamento antigo) sorteada
-// entre tudo que já foi guardado no app. Só aparecem a partir do "Arbusto" — antes
-// disso a árvore ainda não tem histórico suficiente pra dar frutos.
+// Posições (% da largura/altura da imagem) onde os frutos podem pendurar, espalhadas
+// pela copa da árvore — de cima a baixo, do centro pras bordas.
 var AV_FRUTA_PONTOS = [
-  { dx: -0.6, dy: 0.25 }, { dx: 0.6, dy: 0.25 }, { dx: 0, dy: 0.15 },
-  { dx: -1.05, dy: 0.15 }, { dx: 1.05, dy: 0.15 }, { dx: -0.3, dy: -0.3 },
-  { dx: 0.3, dy: -0.3 }, { dx: 0, dy: 0.7 }
+  { left: 50, top: 10 }, { left: 30, top: 15 }, { left: 70, top: 15 },
+  { left: 42, top: 21 }, { left: 58, top: 21 }, { left: 18, top: 25 },
+  { left: 82, top: 25 }, { left: 12, top: 39 }, { left: 88, top: 39 },
+  { left: 30, top: 45 }, { left: 70, top: 45 }, { left: 22, top: 53 }
 ];
-var AV_FRUTA_CONTAGEM = [0, 0, 3, 5, 8];
-var avFrutaPool = [];
+
+var AV_FRUTO_IMG = {
+  foto: "fruto-foto.png",
+  texto: "fruto-texto.png",
+  musica: "fruto-musica.png",
+  filme: "fruto-filme.png",
+  pensamento: "fruto-especial.png",
+  raro: "fruto-raro.png",
+  dourado: "fruto-dourado.png",
+  amor: "fruto-amor.png"
+};
+
+var avFrutaPool = [];   // os frutos visíveis agora na árvore (um por ponto)
+var avPoolCompleto = []; // todas as lembranças candidatas (pra "colher outro fruto")
+var avFavoritosSet = {}; // chaves "tipo|refId" já guardadas no coração
+var avItemAtual = null;  // lembrança aberta no momento na revelação
 
 function avDiasNamoro() {
   return Math.max(0, Math.floor((new Date() - DATA_INICIO_NAMORO) / 86400000));
 }
 
-function avCalcularPorte(dias) {
+function avCalcularTempoTier(dias) {
   var idx = 0;
-  for (var i = 0; i < AV_PORTES.length; i++) if (dias >= AV_PORTES[i].diasMin) idx = i;
+  for (var i = 0; i < AV_TEMPO_LIMIARES.length; i++) if (dias >= AV_TEMPO_LIMIARES[i]) idx = i;
   return idx;
 }
 
@@ -1770,9 +1786,9 @@ function avCalcularAtividade() {
     + musicas.length;
 }
 
-function avCalcularDecorTier(atividade) {
+function avCalcularAtividadeTier(atividade) {
   var tier = 0;
-  for (var i = 0; i < AV_DECOR_LIMIARES.length; i++) if (atividade >= AV_DECOR_LIMIARES[i]) tier = i + 1;
+  for (var i = 0; i < AV_ATIVIDADE_LIMIARES.length; i++) if (atividade >= AV_ATIVIDADE_LIMIARES[i]) tier = i + 1;
   return tier;
 }
 
@@ -1790,187 +1806,242 @@ function avFormatarTempo(dias) {
   return "Plantada há " + partes.join(" e ");
 }
 
-function avFolhaCor(i) { return i % 2 === 0 ? "#3f8f4f" : "#4da85f"; }
-
-// Gera o SVG da árvore inteiro como string, combinando o porte (tamanho) com a
-// decoração (flores), sem depender de nenhuma imagem externa.
-function avGerarSVG(porte, decorTier) {
-  var cx = 120, groundY = 255;
-  var partes = [];
-  partes.push('<svg viewBox="0 0 240 300" xmlns="http://www.w3.org/2000/svg">');
-  partes.push('<ellipse cx="' + cx + '" cy="' + groundY + '" rx="58" ry="13" fill="#1c150f"/>');
-  partes.push('<ellipse cx="' + cx + '" cy="' + (groundY - 2) + '" rx="50" ry="9" fill="#23301c"/>');
-
-  if (porte === 0) {
-    // Semente/broto: caule fino com duas folhinhas em V
-    var topo = groundY - 26;
-    partes.push('<path d="M' + cx + ',' + groundY + ' L' + cx + ',' + topo + '" stroke="#4da85f" stroke-width="3" stroke-linecap="round" fill="none"/>');
-    partes.push('<ellipse cx="' + (cx - 9) + '" cy="' + (topo + 4) + '" rx="11" ry="6" fill="#5fbf6f" transform="rotate(-35 ' + (cx - 9) + ' ' + (topo + 4) + ')"/>');
-    partes.push('<ellipse cx="' + (cx + 9) + '" cy="' + (topo + 4) + '" rx="11" ry="6" fill="#5fbf6f" transform="rotate(35 ' + (cx + 9) + ' ' + (topo + 4) + ')"/>');
-    var gotas = Math.min(decorTier, 2);
-    for (var g = 0; g < gotas; g++) {
-      partes.push('<circle cx="' + (cx - 16 + g * 32) + '" cy="' + (groundY - 6) + '" r="3" fill="#ff6f91"/>');
-    }
-  } else {
-    var cfg = AV_PORTE_CFG[porte];
-    var topoTronco = groundY - cfg.trunkH;
-    partes.push('<path d="M' + (cx - cfg.wBase / 2) + ',' + groundY + ' L' + (cx - cfg.wTopo / 2) + ',' + topoTronco +
-      ' L' + (cx + cfg.wTopo / 2) + ',' + topoTronco + ' L' + (cx + cfg.wBase / 2) + ',' + groundY + ' Z" fill="#6b4226" stroke="#4a2d1a" stroke-width="1"/>');
-
-    for (var c = 0; c < cfg.canopy; c++) {
-      var f = AV_CANOPY[c];
-      var fx = cx + f.dx * cfg.scale, fy = topoTronco + f.dy * cfg.scale;
-      partes.push('<circle cx="' + fx.toFixed(1) + '" cy="' + fy.toFixed(1) + '" r="' + (f.r * cfg.scale * 0.8).toFixed(1) + '" fill="' + avFolhaCor(c) + '"/>');
-    }
-
-    var nDecor = AV_DECOR_CONTAGEM[decorTier];
-    for (var dI = 0; dI < nDecor; dI++) {
-      var p = AV_DECOR_PONTOS[dI];
-      var px = cx + p.dx * cfg.scale, py = topoTronco + p.dy * cfg.scale;
-      var pr = 3;
-      partes.push('<g>' +
-        '<circle cx="' + (px - pr * 1.1).toFixed(1) + '" cy="' + py.toFixed(1) + '" r="' + pr + '" fill="#ff6f91"/>' +
-        '<circle cx="' + (px + pr * 1.1).toFixed(1) + '" cy="' + py.toFixed(1) + '" r="' + pr + '" fill="#ff6f91"/>' +
-        '<circle cx="' + px.toFixed(1) + '" cy="' + (py - pr * 1.1).toFixed(1) + '" r="' + pr + '" fill="#ff6f91"/>' +
-        '<circle cx="' + px.toFixed(1) + '" cy="' + (py + pr * 1.1).toFixed(1) + '" r="' + pr + '" fill="#ff6f91"/>' +
-        '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="1.6" fill="#e6a81a"/>' +
-        '</g>');
-    }
-  }
-
-  partes.push('</svg>');
-  return partes.join("");
+// "amor" (já favoritada) > "dourado" (caiu no mesmo dia/mês de um ano anterior,
+// tipo "Neste dia...") > "raro" (lembrança de mais de um ano) > normal (cor do tipo)
+function avCalcularRaridade(item) {
+  if (avFavoritosSet[item.tipo + "|" + item.refId]) return "amor";
+  var hoje = new Date();
+  if (item.data.getMonth() === hoje.getMonth() && item.data.getDate() === hoje.getDate() && item.data.getFullYear() < hoje.getFullYear()) return "dourado";
+  if ((hoje - item.data) >= 365 * 86400000) return "raro";
+  return null;
 }
 
-// Gera só o grupo dos frutos clicáveis (adicionado à árvore depois, quando o
-// sorteio de lembranças termina) — usa a mesma âncora de copa que avGerarSVG.
-function avGerarFrutasSVG(porte, n) {
-  var cx = 120, groundY = 255;
-  var cfg = AV_PORTE_CFG[porte];
-  var topoTronco = groundY - cfg.trunkH;
-  var partes = [];
-  for (var i = 0; i < n; i++) {
-    var p = AV_FRUTA_PONTOS[i];
-    var fx = (cx + p.dx * cfg.scale).toFixed(1);
-    var fy = (topoTronco + p.dy * cfg.scale).toFixed(1);
-    partes.push('<g class="av-fruta" data-i="' + i + '">' +
-      '<circle cx="' + fx + '" cy="' + fy + '" r="14" fill="transparent"/>' +
-      '<path d="M' + fx + ',' + (fy - 7.5) + ' q2,-4 5,-3" stroke="#4da85f" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
-      '<circle cx="' + fx + '" cy="' + fy + '" r="7.5" fill="#e8873a" stroke="#b85f1f" stroke-width="1"/>' +
-      '<circle cx="' + (fx - 2.4) + '" cy="' + (fy - 2.4) + '" r="2.1" fill="rgba(255,255,255,0.55)"/>' +
-      '</g>');
-  }
-  return partes.join("");
-}
-
-// Monta o "pool" de lembranças candidatas a virar fruto: pensamentos antigos (única
-// consulta nova, leve — só texto) + textos e fotos que já estão em memória (nenhuma
-// consulta extra). Embaralha e distribui uma lembrança diferente pra cada fruto.
-function avMontarPoolFrutas(pensamentosHist, porte) {
+// Monta o pool de lembranças candidatas: pensamentos antigos (única consulta nova,
+// leve — só texto) + textos/fotos/músicas/filmes já carregados em memória (nenhuma
+// consulta extra ao Supabase pra esses).
+function avMontarPoolFrutas(pensamentosHist) {
   var hoje = new Date();
   var pool = [];
 
   pensamentosHist.forEach(function(p) {
     var texto = (p.ele && p.ele.trim()) || (p.ela && p.ela.trim());
-    if (!texto) return;
+    if (!texto || !p.id) return;
     var d = new Date(p.data + "T12:00:00");
     if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
-    pool.push({ tipo: "pensamento", data: d, texto: texto });
+    pool.push({ tipo: "pensamento", refId: p.id, data: d, texto: texto });
   });
 
   textos.forEach(function(t) {
-    if (!t.criado_em) return;
+    if (!t.criado_em || !t.id) return;
     var d = new Date(t.criado_em);
     if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
-    pool.push({ tipo: "texto", texto: t.titulo || t.corpo || "", id: t.id });
+    pool.push({ tipo: "texto", refId: String(t.id), data: d, id: t.id, texto: t.titulo || t.corpo || "" });
   });
 
   midias.forEach(function(m) {
-    if (m.tipo === "video" || !m.criado_em) return;
+    if (m.tipo === "video" || !m.criado_em || !m.id) return;
     var d = new Date(m.criado_em);
     if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
-    pool.push({ tipo: "foto", url: m.url });
+    pool.push({ tipo: "foto", refId: String(m.id), data: d, id: m.id, url: m.url });
   });
 
-  if (pool.length === 0) return;
+  musicas.forEach(function(m) {
+    if (!m.criado_em || !m.id) return;
+    var d = new Date(m.criado_em);
+    if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
+    pool.push({ tipo: "musica", refId: String(m.id), data: d, id: m.id, thumb: m.thumb || "", texto: (m.titulo || "") + (m.artista ? " — " + m.artista : "") });
+  });
 
-  for (var i = pool.length - 1; i > 0; i--) {
+  indicacoes.forEach(function(i) {
+    if (!i.assistido || !i.criado_em || !i.id) return;
+    var d = new Date(i.criado_em);
+    if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
+    pool.push({ tipo: "filme", refId: String(i.id), data: d, id: i.id, nota: i.nota, texto: i.titulo || "" });
+  });
+
+  pool.forEach(function(item) { item.raridade = avCalcularRaridade(item); });
+  return pool;
+}
+
+function avRenderizarFrutas(pensHist, favoritos) {
+  avFavoritosSet = {};
+  favoritos.forEach(function(f) { avFavoritosSet[f.tipo + "|" + f.ref_id] = true; });
+
+  avPoolCompleto = avMontarPoolFrutas(pensHist);
+  if (avPoolCompleto.length === 0) return;
+
+  var embaralhado = avPoolCompleto.slice();
+  for (var i = embaralhado.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
-    var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+    var tmp = embaralhado[i]; embaralhado[i] = embaralhado[j]; embaralhado[j] = tmp;
   }
-  var n = Math.min(AV_FRUTA_CONTAGEM[porte], AV_FRUTA_PONTOS.length, pool.length);
-  avFrutaPool = pool.slice(0, n);
 
-  var svgEl = document.querySelector("#av-svg-wrap svg");
-  if (!svgEl) return;
-  svgEl.insertAdjacentHTML("beforeend", avGerarFrutasSVG(porte, avFrutaPool.length));
+  var dias = avDiasNamoro();
+  var tempoTier = avCalcularTempoTier(dias);
+  var atividade = avCalcularAtividade();
+  var atividadeTier = avCalcularAtividadeTier(atividade);
+  var totalSlots = AV_TEMPO_SLOTS[tempoTier] + AV_ATIVIDADE_BONUS[atividadeTier];
+  var n = Math.min(totalSlots, AV_FRUTA_PONTOS.length, embaralhado.length);
+  avFrutaPool = embaralhado.slice(0, n);
+  if (avFrutaPool.length === 0) return;
 
-  var frutas = document.querySelectorAll("#av-svg-wrap .av-fruta");
-  frutas.forEach(function(el) {
-    el.addEventListener("click", function() {
-      avAbrirFruta(parseInt(el.getAttribute("data-i"), 10));
-    });
+  var wrap = document.getElementById("av-tree-wrap");
+  if (!wrap) return;
+  var html = avFrutaPool.map(function(item, idx) {
+    var img = AV_FRUTO_IMG[item.raridade] || AV_FRUTO_IMG[item.tipo];
+    var p = AV_FRUTA_PONTOS[idx];
+    return '<img class="av-fruta" data-i="' + idx + '" src="' + img + '" alt="" style="left:' + p.left + '%;top:' + p.top + '%">';
+  }).join("");
+  wrap.insertAdjacentHTML("beforeend", html);
+
+  wrap.querySelectorAll(".av-fruta").forEach(function(el) {
+    el.addEventListener("click", function() { avAbrirFruta(parseInt(el.getAttribute("data-i"), 10)); });
   });
 
   var dica = document.getElementById("av-dica-fruta");
   if (dica) dica.style.display = "block";
 }
 
-function avCarregarFrutas(porte) {
+function avCarregarFrutas() {
   avFrutaPool = [];
   var dica = document.getElementById("av-dica-fruta");
   if (dica) dica.style.display = "none";
-  if (AV_FRUTA_CONTAGEM[porte] <= 0) return;
-  api("/rest/v1/pensamentos?select=data,ele,ela&order=data.desc")
-    .then(function(r) { return r.json(); })
-    .then(function(hist) { avMontarPoolFrutas(Array.isArray(hist) ? hist : [], porte); })
-    .catch(function() { avMontarPoolFrutas([], porte); });
+  Promise.all([
+    api("/rest/v1/pensamentos?select=id,data,ele,ela&order=data.desc").then(function(r) { return r.json(); }).catch(function() { return []; }),
+    api("/rest/v1/lembrancas_guardadas?select=tipo,ref_id").then(function(r) { return r.json(); }).catch(function() { return []; })
+  ]).then(function(res) {
+    avRenderizarFrutas(Array.isArray(res[0]) ? res[0] : [], Array.isArray(res[1]) ? res[1] : []);
+  });
 }
 
-// Abre a lembrança sorteada pro fruto tocado — igual comportamento do antigo "Relembrando"
 function avAbrirFruta(idx) {
   var item = avFrutaPool[idx];
-  if (!item) return;
-  fecharArvore();
+  if (item) avMostrarRevelacao(item);
+}
+
+// "Colher outro fruto": sorteia outra lembrança qualquer do pool completo (não só as
+// que estão penduradas agora), pra sempre ter novidade mesmo com poucos frutos visíveis.
+function avColherOutroFruto() {
+  if (avPoolCompleto.length === 0) return;
+  var candidatos = avPoolCompleto.filter(function(x) { return x !== avItemAtual; });
+  var escolhido = candidatos.length > 0 ? candidatos[Math.floor(Math.random() * candidatos.length)] : avPoolCompleto[0];
+  vibrar();
+  avMostrarRevelacao(escolhido);
+}
+
+var AV_ICONE_TIPO = { foto: "📷", texto: "✍️", musica: "🎵", filme: "🎬", pensamento: "💭" };
+
+function avMostrarRevelacao(item) {
+  avItemAtual = item;
+  var midiaEl = document.getElementById("av-revelacao-midia");
+  var textoEl = document.getElementById("av-revelacao-texto");
+  var dataEl = document.getElementById("av-revelacao-data");
+  var icone = document.getElementById("av-revelacao-icone");
+  var guardarBtn = document.getElementById("av-revelacao-guardar");
+
+  icone.textContent = AV_ICONE_TIPO[item.tipo] || "❤️";
+
+  midiaEl.innerHTML = "";
+  midiaEl.style.display = "none";
+  midiaEl.style.cursor = "default";
+  midiaEl.onclick = null;
   if (item.tipo === "foto") {
-    var i = midias.findIndex(function(x) { return x.url === item.url; });
-    if (i >= 0) abrirLightbox(i); else mostrarToast("Essa foto não existe mais.");
-  } else if (item.tipo === "texto") {
-    var i2 = textos.findIndex(function(x) { return x.id === item.id; });
-    if (i2 >= 0) { goTo("textos"); abrirTexto(i2); } else mostrarToast("Esse texto não existe mais.");
-  } else {
-    var d = item.data;
-    var dataStr = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-    document.getElementById("tp-tipo").textContent = "Pensamento do dia";
-    document.getElementById("tp-titulo").textContent = formatarDataBR(dataStr);
-    document.getElementById("tp-body").textContent = item.texto || "";
-    document.getElementById("tp-edit").style.display = "none";
-    document.getElementById("tp-del").style.display = "none";
-    document.getElementById("texto-popup").classList.add("show");
+    midiaEl.innerHTML = '<img src="' + item.url + '" alt="">';
+    midiaEl.style.display = "block";
+    midiaEl.style.cursor = "pointer";
+    midiaEl.onclick = function() {
+      var i = midias.findIndex(function(x) { return x.id === item.id; });
+      fecharRevelacaoFruta();
+      fecharArvore();
+      if (i >= 0) abrirLightbox(i);
+    };
+  } else if (item.tipo === "musica" && item.thumb) {
+    midiaEl.innerHTML = '<img src="' + item.thumb + '" alt="">';
+    midiaEl.style.display = "block";
   }
+
+  textoEl.onclick = null;
+  textoEl.style.cursor = "default";
+  if (item.tipo === "texto" || item.tipo === "pensamento") {
+    var txt = item.texto || "";
+    textoEl.textContent = '"' + (txt.length > 160 ? txt.substring(0, 160) + "…" : txt) + '"';
+    textoEl.style.display = "block";
+    if (item.tipo === "texto") {
+      textoEl.style.cursor = "pointer";
+      textoEl.onclick = function() {
+        var i2 = textos.findIndex(function(x) { return x.id === item.id; });
+        fecharRevelacaoFruta();
+        fecharArvore();
+        if (i2 >= 0) { goTo("textos"); abrirTexto(i2); }
+      };
+    }
+  } else if (item.tipo === "musica") {
+    textoEl.textContent = item.texto || "";
+    textoEl.style.display = "block";
+  } else if (item.tipo === "filme") {
+    textoEl.textContent = item.texto + (item.nota != null && item.nota !== "" ? " ・ nota " + item.nota + "/10" : "");
+    textoEl.style.display = "block";
+  } else {
+    textoEl.style.display = "none";
+  }
+
+  var d = item.data;
+  var dataStr = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  dataEl.textContent = formatarDataBR(dataStr);
+
+  var jaGuardado = !!avFavoritosSet[item.tipo + "|" + item.refId];
+  guardarBtn.textContent = jaGuardado ? "Guardado ✓" : "Guardar no coração ❤️";
+  guardarBtn.disabled = jaGuardado;
+
+  document.getElementById("av-revelacao-overlay").classList.add("show");
+}
+
+function fecharRevelacaoFruta() {
+  document.getElementById("av-revelacao-overlay").classList.remove("show");
+}
+
+function avGuardarFrutaAtual() {
+  if (!avItemAtual) return;
+  var item = avItemAtual;
+  api("/rest/v1/lembrancas_guardadas?on_conflict=tipo,ref_id", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "resolution=merge-duplicates,return=minimal"
+    },
+    body: JSON.stringify({ tipo: item.tipo, ref_id: item.refId })
+  }).then(function() {
+    avFavoritosSet[item.tipo + "|" + item.refId] = true;
+    vibrar();
+    mostrarToast("Guardado no coração ❤️");
+    var guardarBtn = document.getElementById("av-revelacao-guardar");
+    guardarBtn.textContent = "Guardado ✓";
+    guardarBtn.disabled = true;
+  }).catch(function() { mostrarToast("Não deu pra guardar agora."); });
 }
 
 // Texto curto pro card da Home (chamado toda vez que os dados terminam de carregar)
 function atualizarResumoArvore() {
   var sub = document.getElementById("arvore-home-sub");
   if (!sub) return;
-  var porte = avCalcularPorte(avDiasNamoro());
-  sub.textContent = AV_PORTES[porte].nome + " · toque pra ver";
+  sub.textContent = "Toque pra colher uma lembrança ❤️";
 }
 
 function abrirArvore() {
   var dias = avDiasNamoro();
-  var porte = avCalcularPorte(dias);
   var atividade = avCalcularAtividade();
-  var decorTier = avCalcularDecorTier(atividade);
+  var atividadeTier = avCalcularAtividadeTier(atividade);
+  var tempoTier = avCalcularTempoTier(dias);
   var nFotos = midias.length, nTextos = textos.length;
   var nDesejos = desejos.filter(function(d) { return d.feito; }).length;
   var nFilmes = indicacoes.filter(function(i) { return i.assistido; }).length;
   var nMusicas = musicas.length;
 
-  document.getElementById("av-svg-wrap").innerHTML = avGerarSVG(porte, decorTier);
-  document.getElementById("av-porte").textContent = AV_PORTES[porte].nome;
-  document.getElementById("av-porte-desc").textContent = AV_PORTES[porte].desc;
+  // tira os frutos da vez anterior antes de recarregar, senão eles se acumulam
+  document.querySelectorAll("#av-tree-wrap .av-fruta").forEach(function(el) { el.remove(); });
+
   document.getElementById("av-tempo").textContent = avFormatarTempo(dias);
   document.getElementById("av-stat-fotos").textContent = nFotos;
   document.getElementById("av-stat-textos").textContent = nTextos;
@@ -1980,19 +2051,19 @@ function abrirArvore() {
   document.getElementById("av-stat-total").textContent = atividade;
 
   var marco;
-  if (porte < AV_PORTES.length - 1) {
-    var diasFaltam = AV_PORTES[porte + 1].diasMin - dias;
-    marco = "Em " + diasFaltam + (diasFaltam === 1 ? " dia" : " dias") + " ela vira " + AV_PORTES[porte + 1].nome.toLowerCase() + ". 🌱";
-  } else if (decorTier < AV_DECOR_CONTAGEM.length - 1) {
-    var faltamAcoes = AV_DECOR_LIMIARES[decorTier] - atividade;
-    marco = "Faltam " + faltamAcoes + " momentos guardados no app pra ela florescer ainda mais. 🌸";
+  if (tempoTier < AV_TEMPO_LIMIARES.length - 1) {
+    var diasFaltam = AV_TEMPO_LIMIARES[tempoTier + 1] - dias;
+    marco = "Em " + diasFaltam + (diasFaltam === 1 ? " dia" : " dias") + " mais frutos vão poder crescer. 🌿";
+  } else if (atividadeTier < AV_ATIVIDADE_LIMIARES.length) {
+    var faltamAcoes = AV_ATIVIDADE_LIMIARES[atividadeTier] - atividade;
+    marco = "Faltam " + faltamAcoes + " momentos guardados no app pra mais um fruto aparecer. 🍯";
   } else {
-    marco = "Ela já está no auge da floração — e continua crescendo com cada momento de vocês. 🌸";
+    marco = "A árvore está no auge — repleta de frutos, e continua crescendo com cada momento de vocês. 🍯";
   }
   document.getElementById("av-marco").textContent = marco;
 
   document.getElementById("arvore-view").classList.add("show");
-  avCarregarFrutas(porte);
+  avCarregarFrutas();
 }
 
 function fecharArvore() {

@@ -157,3 +157,24 @@ on jogo_pontos for all
 to authenticated
 using (true)
 with check (true);
+
+-- "Guardar no coração": favoritos genéricos das lembranças colhidas na Árvore
+-- (foto/texto/musica/filme/pensamento). ref_id guarda o id do item original
+-- (o url, no caso de foto antiga sem id; texto/musica/filme usam o uuid; pensamento
+-- usa o uuid da linha em "pensamentos").
+create table if not exists lembrancas_guardadas (
+  id uuid primary key default gen_random_uuid(),
+  tipo text not null check (tipo in ('foto', 'texto', 'musica', 'filme', 'pensamento')),
+  ref_id text not null,
+  criado_em timestamptz default now(),
+  unique (tipo, ref_id)
+);
+
+alter table lembrancas_guardadas enable row level security;
+
+drop policy if exists "authenticated full access lembrancas_guardadas" on lembrancas_guardadas;
+create policy "authenticated full access lembrancas_guardadas"
+on lembrancas_guardadas for all
+to authenticated
+using (true)
+with check (true);
