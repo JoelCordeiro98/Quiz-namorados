@@ -1964,7 +1964,10 @@ function avMostrarRevelacao(item) {
   textoEl.style.cursor = "default";
   if (item.tipo === "texto" || item.tipo === "pensamento") {
     var txt = item.texto || "";
-    textoEl.textContent = '"' + (txt.length > 160 ? txt.substring(0, 160) + "…" : txt) + '"';
+    // "texto" tem leitura completa a um toque, então corta pra caber no cartão;
+    // "pensamento" não tem outra tela pra ver o resto, então mostra sempre por inteiro.
+    var mostrarCompleto = item.tipo === "pensamento" || txt.length <= 160;
+    textoEl.textContent = '"' + (mostrarCompleto ? txt : txt.substring(0, 160) + "…") + '"';
     textoEl.style.display = "block";
     if (item.tipo === "texto") {
       textoEl.style.cursor = "pointer";
