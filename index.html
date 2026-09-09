@@ -163,6 +163,12 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .hcard-arvore-title{font-family:"Playfair Display",serif;font-size:0.9rem;color:#fff}
 .hcard-arvore-sub{font-size:0.72rem;color:#8fc98f}
 .hcard-arvore-arrow{color:rgba(255,255,255,0.3);font-size:1.3rem;flex-shrink:0}
+.hcard-pergunta{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1rem;margin-top:0.75rem;background:linear-gradient(135deg,#1f1400,#2e1f00);border:1px solid rgba(230,168,26,0.3);border-radius:14px;cursor:pointer}
+.hcard-pergunta-icon{font-size:1.25rem;flex-shrink:0}
+.hcard-pergunta-info{flex:1;min-width:0}
+.hcard-pergunta-title{font-family:"Playfair Display",serif;font-size:0.9rem;color:#fff}
+.hcard-pergunta-sub{font-size:0.72rem;color:#e6c88a}
+.hcard-pergunta-arrow{color:rgba(255,255,255,0.3);font-size:1.3rem;flex-shrink:0}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px}
 .photo-item{aspect-ratio:1;background-size:cover;background-position:center;cursor:pointer;background-color:var(--blk3);position:relative;overflow:hidden;opacity:0;transition:opacity 0.35s ease}
 .photo-item.loaded{opacity:1}
@@ -344,9 +350,17 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .av-revelacao-titulo{font-family:"Playfair Display",serif;font-size:1.25rem;margin-bottom:1rem;color:#e6c88a}
 .av-revelacao-midia{margin-bottom:0.9rem}
 .av-revelacao-midia img{max-width:100%;max-height:220px;border-radius:12px;object-fit:cover}
-.av-revelacao-texto{font-size:0.9rem;line-height:1.6;color:rgba(255,255,255,0.88);margin-bottom:0.7rem;font-style:italic}
+.av-revelacao-texto{font-size:0.9rem;line-height:1.6;color:rgba(255,255,255,0.88);margin-bottom:0.7rem;font-style:italic;white-space:pre-line}
 .av-revelacao-data{font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--gray);margin-bottom:1.4rem}
 .av-revelacao-acoes{display:flex;flex-direction:column;gap:0.6rem}
+
+/* ===== PERGUNTA DO DIA ===== */
+.pg-numero{text-align:center;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:#e6c88a;margin-bottom:0.9rem}
+.pg-pergunta{text-align:center;font-family:"Playfair Display",serif;font-size:1.35rem;line-height:1.55;color:#fff;margin-bottom:0.4rem}
+.pg-completo{text-align:center;font-size:0.78rem;color:#e6c88a;margin:0.8rem 0 0.2rem}
+.pg-pessoalmente{width:100%;margin-top:0.5rem;padding:0.5rem;border-radius:10px;border:1.5px solid rgba(230,168,26,0.3);background:transparent;color:#e6c88a;font-size:0.66rem;letter-spacing:0.3px;cursor:pointer;font-family:"Lato",sans-serif;transition:all 0.2s}
+.pg-pessoalmente.marcado{border-color:rgba(230,168,26,0.5);background:rgba(230,168,26,0.12);cursor:default}
+.pg-pessoalmente:disabled{opacity:0.85;cursor:default}
 .tp-close{position:absolute;top:1rem;right:1rem;width:34px;height:34px;background:rgba(192,57,43,0.7);border:none;border-radius:50%;color:#fff;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .tp-tipo{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--redl);margin-bottom:0.4rem}
 .tp-titulo{font-family:"Playfair Display",serif;font-size:1.4rem;margin-bottom:1.2rem;line-height:1.3}
@@ -505,6 +519,14 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
           <div class="hcard-arvore-sub" id="arvore-home-sub">Vendo como ela está...</div>
         </div>
         <div class="hcard-arvore-arrow">›</div>
+      </div>
+      <div class="hcard-pergunta" onclick="abrirPergunta()">
+        <div class="hcard-pergunta-icon">💬</div>
+        <div class="hcard-pergunta-info">
+          <div class="hcard-pergunta-title">Pergunta do Dia</div>
+          <div class="hcard-pergunta-sub">Toque pra responder</div>
+        </div>
+        <div class="hcard-pergunta-arrow">›</div>
       </div>
       <div class="hcard-mini" onclick="window.open('https://joelcordeiro98.github.io/Quiz-namorados/quiz-namorados-1.html?portal=true','_blank')">
         <div class="hcard-mini-icon">❤️</div>
@@ -1029,6 +1051,36 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       <button class="btn-primary" id="av-revelacao-guardar" onclick="avGuardarFrutaAtual()">Guardar no coração ❤️</button>
       <button class="jg-btn" onclick="avColherOutroFruto()">Colher outro fruto ✨</button>
     </div>
+  </div>
+</div>
+
+<!-- PERGUNTA DO DIA -->
+<div class="leitura-view" id="pergunta-view">
+  <div class="jg-hdr">
+    <button class="leitura-fechar" onclick="fecharPergunta()" aria-label="Fechar">✕</button>
+    <div class="jg-hdr-titulo">Pergunta do Dia</div>
+    <div style="width:38px"></div>
+  </div>
+  <div class="av-conteudo">
+    <div class="pg-numero" id="pg-numero"></div>
+    <div class="pg-pergunta" id="pg-pergunta"></div>
+
+    <div class="diario-campos" style="margin-top:1.5rem">
+      <div class="diario-campo">
+        <div class="diario-campo-hdr"><label>Ele</label></div>
+        <textarea id="pg-resposta-ele" name="pg-resposta-ele" placeholder="Sua resposta..." autocomplete="off"></textarea>
+        <button type="button" class="diario-postar" id="pg-postar-ele" onclick="pgPostarResposta('ele')">Postar</button>
+        <button type="button" class="pg-pessoalmente" id="pg-pessoalmente-ele" onclick="pgTogglePessoalmente('ele')">💬 Respondi pessoalmente</button>
+      </div>
+      <div class="diario-campo">
+        <div class="diario-campo-hdr"><label>Ela</label></div>
+        <textarea id="pg-resposta-ela" name="pg-resposta-ela" placeholder="Sua resposta..." autocomplete="off"></textarea>
+        <button type="button" class="diario-postar" id="pg-postar-ela" onclick="pgPostarResposta('ela')">Postar</button>
+        <button type="button" class="pg-pessoalmente" id="pg-pessoalmente-ela" onclick="pgTogglePessoalmente('ela')">💬 Respondi pessoalmente</button>
+      </div>
+    </div>
+    <div class="diario-salvo" id="pg-salvo">Salvo ♥</div>
+    <div class="pg-completo" id="pg-completo" style="display:none">✓ Pergunta respondida por completo hoje! Ela vai virar uma lembrança na árvore.</div>
   </div>
 </div>
 
@@ -1759,6 +1811,7 @@ var AV_FRUTO_IMG = {
   musica: "fruto-musica.png",
   filme: "fruto-filme.png",
   pensamento: "fruto-especial.png",
+  pergunta: "fruto-especial.png",
   raro: "fruto-raro.png",
   dourado: "fruto-dourado.png",
   amor: "fruto-amor.png"
@@ -1816,10 +1869,10 @@ function avCalcularRaridade(item) {
   return null;
 }
 
-// Monta o pool de lembranças candidatas: pensamentos antigos (única consulta nova,
-// leve — só texto) + textos/fotos/músicas/filmes já carregados em memória (nenhuma
-// consulta extra ao Supabase pra esses).
-function avMontarPoolFrutas(pensamentosHist) {
+// Monta o pool de lembranças candidatas: pensamentos e perguntas antigas (únicas
+// consultas novas, leves — só texto) + textos/fotos/músicas/filmes já carregados em
+// memória (nenhuma consulta extra ao Supabase pra esses).
+function avMontarPoolFrutas(pensamentosHist, perguntasHist) {
   var hoje = new Date();
   var pool = [];
 
@@ -1859,15 +1912,28 @@ function avMontarPoolFrutas(pensamentosHist) {
     pool.push({ tipo: "filme", refId: String(i.id), data: d, id: i.id, nota: i.nota, texto: i.titulo || "" });
   });
 
+  (perguntasHist || []).forEach(function(p) {
+    var teveResposta = (p.resposta_ele && p.resposta_ele.trim()) || (p.resposta_ela && p.resposta_ela.trim()) || p.pessoalmente_ele || p.pessoalmente_ela;
+    if (!teveResposta || !p.dia) return;
+    var d = new Date(p.dia + "T12:00:00");
+    if (mesmoDiaCalendario(d, hoje) || d > hoje) return;
+    pool.push({
+      tipo: "pergunta", refId: p.dia, data: d,
+      pergunta: p.pergunta_texto || "",
+      respostaEle: p.resposta_ele, respostaEla: p.resposta_ela,
+      pessoalmenteEle: p.pessoalmente_ele, pessoalmenteEla: p.pessoalmente_ela
+    });
+  });
+
   pool.forEach(function(item) { item.raridade = avCalcularRaridade(item); });
   return pool;
 }
 
-function avRenderizarFrutas(pensHist, favoritos) {
+function avRenderizarFrutas(pensHist, favoritos, perguntasHist) {
   avFavoritosSet = {};
   favoritos.forEach(function(f) { avFavoritosSet[f.tipo + "|" + f.ref_id] = true; });
 
-  avPoolCompleto = avMontarPoolFrutas(pensHist);
+  avPoolCompleto = avMontarPoolFrutas(pensHist, perguntasHist);
   if (avPoolCompleto.length === 0) return;
 
   var embaralhado = avPoolCompleto.slice();
@@ -1908,9 +1974,10 @@ function avCarregarFrutas() {
   if (dica) dica.style.display = "none";
   Promise.all([
     api("/rest/v1/pensamentos?select=id,data,ele,ela&order=data.desc").then(function(r) { return r.json(); }).catch(function() { return []; }),
-    api("/rest/v1/lembrancas_guardadas?select=tipo,ref_id").then(function(r) { return r.json(); }).catch(function() { return []; })
+    api("/rest/v1/lembrancas_guardadas?select=tipo,ref_id").then(function(r) { return r.json(); }).catch(function() { return []; }),
+    api("/rest/v1/pergunta_respostas?select=dia,pergunta_texto,resposta_ele,resposta_ela,pessoalmente_ele,pessoalmente_ela&order=dia.desc").then(function(r) { return r.json(); }).catch(function() { return []; })
   ]).then(function(res) {
-    avRenderizarFrutas(Array.isArray(res[0]) ? res[0] : [], Array.isArray(res[1]) ? res[1] : []);
+    avRenderizarFrutas(Array.isArray(res[0]) ? res[0] : [], Array.isArray(res[1]) ? res[1] : [], Array.isArray(res[2]) ? res[2] : []);
   });
 }
 
@@ -1929,7 +1996,7 @@ function avColherOutroFruto() {
   avMostrarRevelacao(escolhido);
 }
 
-var AV_ICONE_TIPO = { foto: "📷", texto: "✍️", musica: "🎵", filme: "🎬", pensamento: "💭" };
+var AV_ICONE_TIPO = { foto: "📷", texto: "✍️", musica: "🎵", filme: "🎬", pensamento: "💭", pergunta: "❓" };
 
 function avMostrarRevelacao(item) {
   avItemAtual = item;
@@ -1983,6 +2050,11 @@ function avMostrarRevelacao(item) {
     textoEl.style.display = "block";
   } else if (item.tipo === "filme") {
     textoEl.textContent = item.texto + (item.nota != null && item.nota !== "" ? " ・ nota " + item.nota + "/10" : "");
+    textoEl.style.display = "block";
+  } else if (item.tipo === "pergunta") {
+    var respEle = item.pessoalmenteEle ? "💬 Respondido pessoalmente" : (item.respostaEle && item.respostaEle.trim() ? item.respostaEle : "—");
+    var respEla = item.pessoalmenteEla ? "💬 Respondido pessoalmente" : (item.respostaEla && item.respostaEla.trim() ? item.respostaEla : "—");
+    textoEl.textContent = '"' + item.pergunta + '"\n\n☀️ Ele: ' + respEle + '\n🌙 Ela: ' + respEla;
     textoEl.style.display = "block";
   } else {
     textoEl.style.display = "none";
@@ -2071,6 +2143,198 @@ function abrirArvore() {
 
 function fecharArvore() {
   document.getElementById("arvore-view").classList.remove("show");
+}
+
+// ===== PERGUNTA DO DIA =====
+// 30 perguntas cadastradas (dá pra adicionar mais depois, é só crescer esse array).
+// A ordem em que elas aparecem é embaralhada uma vez com uma semente fixa — os dois
+// aparelhos calculam exatamente a mesma ordem sem precisar de nenhuma consulta ao
+// Supabase pra isso. Ela troca sozinha à meia-noite (baseada na data local).
+var PERGUNTAS_DIARIAS = [
+  "Qual foi a primeira coisa em mim que realmente chamou sua atenção?",
+  "Qual momento nosso você gostaria de viver pela primeira vez novamente?",
+  "Qual mania minha você reclama, mas sentiria falta se eu parasse?",
+  "Se pudéssemos viajar amanhã sem nos preocupar com dinheiro, para onde você me levaria?",
+  "Qual foi o momento em que você percebeu: \"eu tô gostando mesmo dessa pessoa\"?",
+  "Qual coisa pequena que eu faço consegue melhorar seu dia?",
+  "Se nosso relacionamento fosse um filme, qual seria o título?",
+  "Qual foto nossa você escolheria se pudesse guardar apenas uma?",
+  "O que você acha que eu mais amo em você?",
+  "Qual foi a situação mais engraçada ou vergonhosa que já vivemos juntos?",
+  "Qual característica minha você espera que nunca mude?",
+  "Se tivéssemos 24 horas completamente livres só para nós dois, o que você gostaria de fazer?",
+  "Qual música imediatamente faz você lembrar de mim?",
+  "O que você acha que nós fazemos melhor como casal?",
+  "Qual experiência você ainda sonha viver comigo?",
+  "Qual foi o encontro ou passeio nosso que mais te marcou?",
+  "Se pudesse me fazer uma pergunta e eu fosse obrigado(a) a responder com total sinceridade, o que perguntaria? 👀",
+  "Qual elogio meu você mais gosta de receber?",
+  "Qual é uma coisa sobre você que acha que eu ainda não percebi?",
+  "Quando estamos longe, do que você sente mais saudade em mim?",
+  "Qual atitude minha você acha irresistível, mesmo que eu nem perceba? 😏",
+  "Qual foi a situação em que você ficou com mais ciúmes de mim, mesmo que tenha disfarçado? 👀",
+  "Se estivéssemos nos conhecendo hoje, acha que você ainda se apaixonaria por mim?",
+  "Qual é o lugar mais inesperado onde você gostaria de receber um beijo meu?",
+  "Qual roupa ou estilo meu você acha mais atraente?",
+  "Qual momento entre nós fez você pensar: \"essa pessoa me conhece de verdade\"?",
+  "Se pudesse escolher uma coisa diferente para fazermos juntos hoje à noite, o que escolheria? 😏",
+  "Qual lembrança nossa ainda consegue fazer você sorrir sozinho(a)?",
+  "O que você gostaria que fizéssemos mais vezes no nosso relacionamento?",
+  "Sem pensar muito: se eu estivesse na sua frente agora e dissesse \"você pode pedir qualquer coisa\", o que você pediria? 👀❤️"
+];
+
+var PERGUNTAS_INICIO = new Date(2026, 8, 9); // 9 de setembro de 2026 — "dia 1"
+
+// PRNG determinístico (mulberry32) — mesma semente sempre gera a mesma sequência,
+// então os dois aparelhos calculam a mesma ordem embaralhada sem sincronizar nada.
+function pgRandomSeed(seed) {
+  return function() {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function pgGerarOrdem(n) {
+  var idx = [];
+  for (var i = 0; i < n; i++) idx.push(i);
+  var rand = pgRandomSeed(20260909);
+  for (var i2 = idx.length - 1; i2 > 0; i2--) {
+    var j = Math.floor(rand() * (i2 + 1));
+    var tmp = idx[i2]; idx[i2] = idx[j]; idx[j] = tmp;
+  }
+  return idx;
+}
+
+var PERGUNTAS_ORDEM = pgGerarOrdem(PERGUNTAS_DIARIAS.length);
+
+function pgHojeMeiaNoite() {
+  var d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function pgDiasDesdeInicio() {
+  var dias = Math.round((pgHojeMeiaNoite() - PERGUNTAS_INICIO) / 86400000);
+  return Math.max(0, dias);
+}
+
+// Retorna a pergunta de hoje: texto, número dela na lista embaralhada e quantas
+// "voltas" completas já foram dadas (pra quando passar das 30, antes de você adicionar mais)
+function pgPerguntaDeHoje() {
+  var dias = pgDiasDesdeInicio();
+  var pos = dias % PERGUNTAS_ORDEM.length;
+  var volta = Math.floor(dias / PERGUNTAS_ORDEM.length);
+  return { texto: PERGUNTAS_DIARIAS[PERGUNTAS_ORDEM[pos]], numero: pos + 1, volta: volta };
+}
+
+var pgPerguntaTextoAtual = "";
+var pgPostadoEle = false, pgPostadoEla = false;
+var pgPessoalmenteEle = false, pgPessoalmenteEla = false;
+
+function abrirPergunta() {
+  var pd = pgPerguntaDeHoje();
+  pgPerguntaTextoAtual = pd.texto;
+  document.getElementById("pg-pergunta").textContent = pd.texto;
+  document.getElementById("pg-numero").textContent = "Pergunta " + pd.numero + " de " + PERGUNTAS_DIARIAS.length +
+    (pd.volta > 0 ? " · rodada " + (pd.volta + 1) : "");
+  document.getElementById("pergunta-view").classList.add("show");
+  carregarPergunta();
+}
+
+function fecharPergunta() {
+  document.getElementById("pergunta-view").classList.remove("show");
+}
+
+function carregarPergunta() {
+  api("/rest/v1/pergunta_respostas?dia=eq." + hojeStr() + "&select=*")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var row = Array.isArray(data) ? data[0] : null;
+      document.getElementById("pg-resposta-ele").value = row ? (row.resposta_ele || "") : "";
+      document.getElementById("pg-resposta-ela").value = row ? (row.resposta_ela || "") : "";
+      pgPostadoEle = row ? !!row.postado_ele : false;
+      pgPostadoEla = row ? !!row.postado_ela : false;
+      pgPessoalmenteEle = row ? !!row.pessoalmente_ele : false;
+      pgPessoalmenteEla = row ? !!row.pessoalmente_ela : false;
+      pgAtualizarEstado();
+    });
+}
+
+function pgAtualizarEstado() {
+  ["ele", "ela"].forEach(function(quem) {
+    var postado = quem === "ele" ? pgPostadoEle : pgPostadoEla;
+    var pessoal = quem === "ele" ? pgPessoalmenteEle : pgPessoalmenteEla;
+    var txt = document.getElementById("pg-resposta-" + quem);
+    var btnPostar = document.getElementById("pg-postar-" + quem);
+    var btnPessoal = document.getElementById("pg-pessoalmente-" + quem);
+
+    if (pessoal) {
+      txt.style.display = "none";
+      btnPostar.style.display = "none";
+      btnPessoal.style.display = "block";
+      btnPessoal.textContent = "💬 Respondida pessoalmente ✓";
+      btnPessoal.disabled = true;
+      btnPessoal.classList.add("marcado");
+    } else {
+      txt.style.display = "block";
+      txt.readOnly = postado;
+      btnPostar.style.display = postado ? "none" : "block";
+      btnPostar.disabled = postado;
+      btnPessoal.style.display = postado ? "none" : "block";
+      btnPessoal.textContent = "💬 Respondi pessoalmente";
+      btnPessoal.disabled = false;
+      btnPessoal.classList.remove("marcado");
+    }
+  });
+
+  var completo = (pgPostadoEle || pgPessoalmenteEle) && (pgPostadoEla || pgPessoalmenteEla);
+  document.getElementById("pg-completo").style.display = completo ? "block" : "none";
+}
+
+function pgPostarResposta(quem) {
+  var texto = document.getElementById("pg-resposta-" + quem).value.trim();
+  if (!texto) { mostrarToast("Escreva sua resposta antes de postar!"); return; }
+  if (quem === "ele") pgPostadoEle = true; else pgPostadoEla = true;
+  pgAtualizarEstado();
+  pgSalvar();
+  vibrar();
+  mostrarToast("✓ Resposta postada!");
+}
+
+function pgTogglePessoalmente(quem) {
+  if (quem === "ele") pgPessoalmenteEle = true; else pgPessoalmenteEla = true;
+  pgAtualizarEstado();
+  pgSalvar();
+  vibrar();
+  mostrarToast("💬 Marcado como respondida pessoalmente");
+}
+
+function pgSalvar() {
+  api("/rest/v1/pergunta_respostas?on_conflict=dia", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "resolution=merge-duplicates,return=minimal"
+    },
+    body: JSON.stringify({
+      dia: hojeStr(),
+      pergunta_texto: pgPerguntaTextoAtual,
+      resposta_ele: document.getElementById("pg-resposta-ele").value,
+      resposta_ela: document.getElementById("pg-resposta-ela").value,
+      pessoalmente_ele: pgPessoalmenteEle,
+      pessoalmente_ela: pgPessoalmenteEla,
+      postado_ele: pgPostadoEle,
+      postado_ela: pgPostadoEla
+    })
+  }).then(function(r) {
+    if (!r.ok) return;
+    var el = document.getElementById("pg-salvo");
+    el.classList.add("show");
+    setTimeout(function() { el.classList.remove("show"); }, 1500);
+  });
 }
 
 document.addEventListener("pointerdown", function(e) {
