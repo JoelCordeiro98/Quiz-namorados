@@ -437,7 +437,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
             <label>Ele</label>
             <button type="button" class="diario-lido" id="lido-ele" onclick="toggleLido('ele')" aria-label="Marcar como lido">☀️</button>
           </div>
-          <textarea id="pensamento-ele" placeholder="O que está pensando hoje?" oninput="campoAlterado('ele')"></textarea>
+          <textarea id="pensamento-ele" name="pensamento-ele" placeholder="O que está pensando hoje?" oninput="campoAlterado('ele')" autocomplete="off"></textarea>
           <button type="button" class="diario-postar" id="postar-ele" onclick="postarPensamento('ele')">Postar</button>
         </div>
         <div class="diario-campo">
@@ -445,7 +445,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
             <label>Ela</label>
             <button type="button" class="diario-lido" id="lido-ela" onclick="toggleLido('ela')" aria-label="Marcar como lido">🌙</button>
           </div>
-          <textarea id="pensamento-ela" placeholder="O que está pensando hoje?" oninput="campoAlterado('ela')"></textarea>
+          <textarea id="pensamento-ela" name="pensamento-ela" placeholder="O que está pensando hoje?" oninput="campoAlterado('ela')" autocomplete="off"></textarea>
           <button type="button" class="diario-postar" id="postar-ela" onclick="postarPensamento('ela')">Postar</button>
         </div>
       </div>
@@ -697,11 +697,11 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </div>
     <div class="form-group">
       <label>Título</label>
-      <input type="text" id="txt-titulo" placeholder="Título do texto...">
+      <input type="text" id="txt-titulo" name="txt-titulo" placeholder="Título do texto..." autocomplete="off">
     </div>
     <div class="form-group">
       <label>Conteúdo</label>
-      <textarea id="txt-corpo" placeholder="Escreva aqui..."></textarea>
+      <textarea id="txt-corpo" name="txt-corpo" placeholder="Escreva aqui..." autocomplete="off"></textarea>
     </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="fecharModal('modal-texto')">Cancelar</button>
@@ -717,7 +717,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div class="modal-title">✨ Adicionar Desejo</div>
     <div class="form-group">
       <label>Desejo</label>
-      <input type="text" id="des-titulo" placeholder="Ex: Assistir ao nascer do sol juntos...">
+      <input type="text" id="des-titulo" name="des-titulo" placeholder="Ex: Assistir ao nascer do sol juntos..." autocomplete="off">
     </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="fecharModal('modal-desejo')">Cancelar</button>
@@ -734,7 +734,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div class="form-group">
       <label>Link do YouTube</label>
       <div class="musica-add-row">
-        <input type="text" id="musica-link" placeholder="Cole o link do YouTube...">
+        <input type="text" id="musica-link" name="musica-link" placeholder="Cole o link do YouTube..." autocomplete="off">
         <button class="btn-save" style="flex:0 0 auto;padding:0.8rem 1.1rem" onclick="adicionarMusica()">+</button>
       </div>
     </div>
@@ -758,7 +758,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </div>
     <div class="form-group">
       <label>Filme ou série</label>
-      <input type="text" id="indic-titulo" placeholder="Ex: Interestelar...">
+      <input type="text" id="indic-titulo" name="indic-titulo" placeholder="Ex: Interestelar..." autocomplete="off">
     </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="fecharModal('modal-indicacao')">Cancelar</button>
@@ -781,7 +781,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </div>
     <div class="form-group">
       <label>Comentário</label>
-      <textarea id="com-texto" placeholder="Escreva o que acharam..."></textarea>
+      <textarea id="com-texto" name="com-texto" placeholder="Escreva o que acharam..." autocomplete="off"></textarea>
     </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="fecharModal('modal-comentario')">Cancelar</button>
@@ -838,11 +838,11 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div class="modal-title">✎ Editar legenda</div>
     <div class="form-group">
       <label>Legenda de J</label>
-      <textarea id="leg-j" placeholder="O que esse dia representa pra você?"></textarea>
+      <textarea id="leg-j" name="leg-j" placeholder="O que esse dia representa pra você?" autocomplete="off"></textarea>
     </div>
     <div class="form-group">
       <label>Legenda de R</label>
-      <textarea id="leg-r" placeholder="O que esse dia representa pra você?"></textarea>
+      <textarea id="leg-r" name="leg-r" placeholder="O que esse dia representa pra você?" autocomplete="off"></textarea>
     </div>
     <div class="form-group">
       <label>Data desse momento</label>
@@ -899,7 +899,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div class="jg-field-row">
       <div class="jg-field" style="flex:1">
         <label>Nome do Jogador 1</label>
-        <input type="text" id="jg-nome-a" placeholder="Jogador 1" maxlength="14">
+        <input type="text" id="jg-nome-a" name="jg-nome-a" placeholder="Jogador 1" maxlength="14" autocomplete="off">
       </div>
       <div class="jg-field" style="flex:0 0 52px">
         <label>Cor</label>
@@ -909,7 +909,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div class="jg-field-row">
       <div class="jg-field" style="flex:1">
         <label>Nome do Jogador 2</label>
-        <input type="text" id="jg-nome-b" placeholder="Jogador 2" maxlength="14">
+        <input type="text" id="jg-nome-b" name="jg-nome-b" placeholder="Jogador 2" maxlength="14" autocomplete="off">
       </div>
       <div class="jg-field" style="flex:0 0 52px">
         <label>Cor</label>
@@ -1056,11 +1056,11 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div class="modal-title">✎ Letra da música</div>
     <div class="form-group">
       <label>Letra</label>
-      <textarea id="ml-letra" placeholder="Cole ou escreva a letra aqui..."></textarea>
+      <textarea id="ml-letra" name="ml-letra" placeholder="Cole ou escreva a letra aqui..." autocomplete="off"></textarea>
     </div>
     <div class="form-group">
       <label>Tradução (opcional)</label>
-      <textarea id="ml-traducao" placeholder="Tradução, se quiser..."></textarea>
+      <textarea id="ml-traducao" name="ml-traducao" placeholder="Tradução, se quiser..." autocomplete="off"></textarea>
     </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="fecharModal('modal-letra-musica')">Cancelar</button>
@@ -2709,8 +2709,8 @@ function renderUploadPreview() {
     div.innerHTML =
       '<div class="up-item-thumb" style="background-image:url(' + (item.thumb || "") + ')"></div>' +
       '<div class="up-item-fields">' +
-        '<input type="text" placeholder="Legenda de J (opcional)" class="up-item-legenda-j">' +
-        '<input type="text" placeholder="Legenda de R (opcional)" class="up-item-legenda-r">' +
+        '<input type="text" placeholder="Legenda de J (opcional)" class="up-item-legenda-j" autocomplete="off">' +
+        '<input type="text" placeholder="Legenda de R (opcional)" class="up-item-legenda-r" autocomplete="off">' +
         '<input type="date" class="up-item-data">' +
       '</div>' +
       '<button type="button" class="up-item-del">✕</button>';
