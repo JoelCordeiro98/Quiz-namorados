@@ -1070,13 +1070,13 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
         <div class="diario-campo-hdr"><label>Ele</label></div>
         <textarea id="pg-resposta-ele" name="pg-resposta-ele" placeholder="Sua resposta..." autocomplete="off"></textarea>
         <button type="button" class="diario-postar" id="pg-postar-ele" onclick="pgPostarResposta('ele')">Postar</button>
-        <button type="button" class="pg-pessoalmente" id="pg-pessoalmente-ele" onclick="pgTogglePessoalmente('ele')">💬 Respondi pessoalmente</button>
+        <button type="button" class="pg-pessoalmente" id="pg-pessoalmente-ele" onclick="pgTogglePessoalmente('ele')">💬 Responder pessoalmente</button>
       </div>
       <div class="diario-campo">
         <div class="diario-campo-hdr"><label>Ela</label></div>
         <textarea id="pg-resposta-ela" name="pg-resposta-ela" placeholder="Sua resposta..." autocomplete="off"></textarea>
         <button type="button" class="diario-postar" id="pg-postar-ela" onclick="pgPostarResposta('ela')">Postar</button>
-        <button type="button" class="pg-pessoalmente" id="pg-pessoalmente-ela" onclick="pgTogglePessoalmente('ela')">💬 Respondi pessoalmente</button>
+        <button type="button" class="pg-pessoalmente" id="pg-pessoalmente-ela" onclick="pgTogglePessoalmente('ela')">💬 Responder pessoalmente</button>
       </div>
     </div>
     <div class="diario-salvo" id="pg-salvo">Salvo ♥</div>
@@ -2282,7 +2282,7 @@ function pgAtualizarEstado() {
       btnPostar.style.display = postado ? "none" : "block";
       btnPostar.disabled = postado;
       btnPessoal.style.display = postado ? "none" : "block";
-      btnPessoal.textContent = "💬 Respondi pessoalmente";
+      btnPessoal.textContent = "💬 Responder pessoalmente";
       btnPessoal.disabled = false;
       btnPessoal.classList.remove("marcado");
     }
