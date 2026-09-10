@@ -361,6 +361,8 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .pg-pessoalmente{width:100%;margin-top:0.5rem;padding:0.5rem;border-radius:10px;border:1.5px solid rgba(230,168,26,0.3);background:transparent;color:#e6c88a;font-size:0.66rem;letter-spacing:0.3px;cursor:pointer;font-family:"Lato",sans-serif;transition:all 0.2s}
 .pg-pessoalmente.marcado{border-color:rgba(230,168,26,0.5);background:rgba(230,168,26,0.12);cursor:default}
 .pg-pessoalmente:disabled{opacity:0.85;cursor:default}
+.pg-lido{width:100%;margin-top:0.4rem;padding:0.4rem;border-radius:10px;border:1.5px solid rgba(255,255,255,0.12);background:transparent;color:rgba(255,255,255,0.45);font-size:0.66rem;letter-spacing:0.3px;cursor:pointer;font-family:"Lato",sans-serif;transition:all 0.2s}
+.pg-lido.lido{border-color:rgba(255,209,102,0.5);background:rgba(255,209,102,0.12);color:#ffd166}
 .tp-close{position:absolute;top:1rem;right:1rem;width:34px;height:34px;background:rgba(192,57,43,0.7);border:none;border-radius:50%;color:#fff;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .tp-tipo{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--redl);margin-bottom:0.4rem}
 .tp-titulo{font-family:"Playfair Display",serif;font-size:1.4rem;margin-bottom:1.2rem;line-height:1.3}
@@ -1069,12 +1071,14 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       <div class="diario-campo">
         <div class="diario-campo-hdr"><label>Ele</label></div>
         <textarea id="pg-resposta-ele" name="pg-resposta-ele" placeholder="Sua resposta..." autocomplete="off"></textarea>
+        <button type="button" class="pg-lido" id="pg-lido-ele" onclick="pgToggleLido('ele')" aria-label="Marcar como lido">☀️ Marcar como lido</button>
         <button type="button" class="diario-postar" id="pg-postar-ele" onclick="pgPostarResposta('ele')">Postar</button>
         <button type="button" class="pg-pessoalmente" id="pg-pessoalmente-ele" onclick="pgTogglePessoalmente('ele')">💬 Responder pessoalmente</button>
       </div>
       <div class="diario-campo">
         <div class="diario-campo-hdr"><label>Ela</label></div>
         <textarea id="pg-resposta-ela" name="pg-resposta-ela" placeholder="Sua resposta..." autocomplete="off"></textarea>
+        <button type="button" class="pg-lido" id="pg-lido-ela" onclick="pgToggleLido('ela')" aria-label="Marcar como lido">🌙 Marcar como lido</button>
         <button type="button" class="diario-postar" id="pg-postar-ela" onclick="pgPostarResposta('ela')">Postar</button>
         <button type="button" class="pg-pessoalmente" id="pg-pessoalmente-ela" onclick="pgTogglePessoalmente('ela')">💬 Responder pessoalmente</button>
       </div>
@@ -2231,6 +2235,7 @@ function pgPerguntaDeHoje() {
 var pgPerguntaTextoAtual = "";
 var pgPostadoEle = false, pgPostadoEla = false;
 var pgPessoalmenteEle = false, pgPessoalmenteEla = false;
+var pgLidoEle = false, pgLidoEla = false;
 
 function abrirPergunta() {
   var pd = pgPerguntaDeHoje();
@@ -2248,7 +2253,10 @@ function fecharPergunta() {
 
 function carregarPergunta() {
   api("/rest/v1/pergunta_respostas?dia=eq." + hojeStr() + "&select=*")
-    .then(function(r) { return r.json(); })
+    .then(function(r) {
+      if (!r.ok) { throw new Error("http " + r.status); }
+      return r.json();
+    })
     .then(function(data) {
       var row = Array.isArray(data) ? data[0] : null;
       document.getElementById("pg-resposta-ele").value = row ? (row.resposta_ele || "") : "";
@@ -2257,7 +2265,13 @@ function carregarPergunta() {
       pgPostadoEla = row ? !!row.postado_ela : false;
       pgPessoalmenteEle = row ? !!row.pessoalmente_ele : false;
       pgPessoalmenteEla = row ? !!row.pessoalmente_ela : false;
+      pgLidoEle = row ? !!row.lido_ele : false;
+      pgLidoEla = row ? !!row.lido_ela : false;
       pgAtualizarEstado();
+    })
+    .catch(function(e) {
+      console.error("carregarPergunta falhou:", e);
+      mostrarToast("Não consegui carregar sua resposta salva. Verifique a conexão.");
     });
 }
 
@@ -2265,9 +2279,12 @@ function pgAtualizarEstado() {
   ["ele", "ela"].forEach(function(quem) {
     var postado = quem === "ele" ? pgPostadoEle : pgPostadoEla;
     var pessoal = quem === "ele" ? pgPessoalmenteEle : pgPessoalmenteEla;
+    var lido = quem === "ele" ? pgLidoEle : pgLidoEla;
     var txt = document.getElementById("pg-resposta-" + quem);
     var btnPostar = document.getElementById("pg-postar-" + quem);
     var btnPessoal = document.getElementById("pg-pessoalmente-" + quem);
+    var btnLido = document.getElementById("pg-lido-" + quem);
+    if (btnLido) btnLido.classList.toggle("lido", lido);
 
     if (pessoal) {
       txt.style.display = "none";
@@ -2310,6 +2327,13 @@ function pgTogglePessoalmente(quem) {
   mostrarToast("💬 Marcado como respondida pessoalmente");
 }
 
+function pgToggleLido(quem) {
+  if (quem === "ele") pgLidoEle = !pgLidoEle; else pgLidoEla = !pgLidoEla;
+  pgAtualizarEstado();
+  pgSalvar();
+  vibrar();
+}
+
 function pgSalvar() {
   api("/rest/v1/pergunta_respostas?on_conflict=dia", {
     method: "POST",
@@ -2327,13 +2351,23 @@ function pgSalvar() {
       pessoalmente_ele: pgPessoalmenteEle,
       pessoalmente_ela: pgPessoalmenteEla,
       postado_ele: pgPostadoEle,
-      postado_ela: pgPostadoEla
+      postado_ela: pgPostadoEla,
+      lido_ele: pgLidoEle,
+      lido_ela: pgLidoEla
     })
   }).then(function(r) {
-    if (!r.ok) return;
+    if (!r.ok) {
+      return r.text().then(function(txt) {
+        console.error("pgSalvar falhou:", r.status, txt);
+        mostrarToast("Não deu pra salvar sua resposta agora. Tente de novo em instantes.");
+      });
+    }
     var el = document.getElementById("pg-salvo");
     el.classList.add("show");
     setTimeout(function() { el.classList.remove("show"); }, 1500);
+  }).catch(function(e) {
+    console.error("pgSalvar erro de rede:", e);
+    mostrarToast("Não deu pra salvar sua resposta agora. Verifique a conexão.");
   });
 }
 

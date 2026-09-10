@@ -164,17 +164,52 @@ with check (true);
 -- usa o uuid da linha em "pensamentos").
 create table if not exists lembrancas_guardadas (
   id uuid primary key default gen_random_uuid(),
-  tipo text not null check (tipo in ('foto', 'texto', 'musica', 'filme', 'pensamento')),
+  tipo text not null check (tipo in ('foto', 'texto', 'musica', 'filme', 'pensamento', 'pergunta')),
   ref_id text not null,
   criado_em timestamptz default now(),
   unique (tipo, ref_id)
 );
+
+-- Já existia com um check mais restrito antes da "pergunta do dia" existir — solta o
+-- check antigo e recria incluindo 'pergunta', pra não travar quem já rodou o SQL antes.
+alter table lembrancas_guardadas drop constraint if exists lembrancas_guardadas_tipo_check;
+alter table lembrancas_guardadas add constraint lembrancas_guardadas_tipo_check
+  check (tipo in ('foto', 'texto', 'musica', 'filme', 'pensamento', 'pergunta'));
 
 alter table lembrancas_guardadas enable row level security;
 
 drop policy if exists "authenticated full access lembrancas_guardadas" on lembrancas_guardadas;
 create policy "authenticated full access lembrancas_guardadas"
 on lembrancas_guardadas for all
+to authenticated
+using (true)
+with check (true);
+
+-- "Pergunta do Dia": uma pergunta nova por dia (sorteada entre as cadastradas no app),
+-- cada um com sua caixa de resposta ou a opção de marcar "respondi pessoalmente".
+-- pergunta_texto guarda uma cópia do texto da pergunta do dia, pra manter o histórico
+-- correto mesmo se a lista de perguntas mudar depois.
+create table if not exists pergunta_respostas (
+  dia date primary key,
+  pergunta_texto text not null,
+  resposta_ele text default '',
+  resposta_ela text default '',
+  pessoalmente_ele boolean default false,
+  pessoalmente_ela boolean default false,
+  postado_ele boolean default false,
+  postado_ela boolean default false,
+  atualizado_em timestamptz default now()
+);
+
+-- Confirmação de leitura (sol/lua), igual ao "pensamento do dia"
+alter table pergunta_respostas add column if not exists lido_ele boolean default false;
+alter table pergunta_respostas add column if not exists lido_ela boolean default false;
+
+alter table pergunta_respostas enable row level security;
+
+drop policy if exists "authenticated full access pergunta_respostas" on pergunta_respostas;
+create policy "authenticated full access pergunta_respostas"
+on pergunta_respostas for all
 to authenticated
 using (true)
 with check (true);
