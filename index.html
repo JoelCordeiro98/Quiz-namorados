@@ -2974,6 +2974,42 @@ function renderHeroPhotos(items) {
   }, 250);
 }
 
+// Fotos tiradas no iPhone costumam vir em HEIC/HEIF (formato padrão da câmera da Apple).
+// A maioria dos navegadores (Chrome, Firefox, Android, e até o próprio Safari ao carregar
+// a imagem de uma URL remota) não sabe decodificar HEIC dentro de uma <img> — o resultado é
+// a "foto preta" sem conteúdo. Aqui, ainda no aparelho que está enviando (onde o HEIC
+// consegue ser decodificado nativamente ao carregar o arquivo local), convertemos pra JPEG
+// antes de subir, garantindo que a foto abra certo depois em qualquer dispositivo.
+function precisaConverterHeic(file) {
+  var mime = tipoArquivo(file);
+  return mime === "image/heic" || mime === "image/heif" || /\.(heic|heif)$/i.test(file.name || "");
+}
+
+function prepararArquivo(file) {
+  if (!precisaConverterHeic(file)) return Promise.resolve(file);
+  return new Promise(function(resolve) {
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(function(blob) {
+        URL.revokeObjectURL(url);
+        if (!blob) { resolve(file); return; }
+        var novoNome = (file.name || "foto").replace(/\.[^.]+$/, "") + ".jpg";
+        resolve(new File([blob], novoNome, { type: "image/jpeg" }));
+      }, "image/jpeg", 0.92);
+    };
+    img.onerror = function() {
+      URL.revokeObjectURL(url);
+      resolve(file); // não deu pra converter aqui — manda o arquivo original mesmo assim
+    };
+    img.src = url;
+  });
+}
+
 function previewFiles(input) {
   var todos = Array.from(input.files);
   var validos = todos.filter(function(file) {
@@ -2988,13 +3024,20 @@ function previewFiles(input) {
   var pendentes = itensSelecionados.length;
   if (pendentes === 0) { renderUploadPreview(); return; }
   itensSelecionados.forEach(function(item) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      item.thumb = e.target.result;
-      pendentes--;
-      if (pendentes === 0) renderUploadPreview();
-    };
-    reader.readAsDataURL(item.file);
+    prepararArquivo(item.file).then(function(fileFinal) {
+      item.file = fileFinal;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        item.thumb = e.target.result;
+        pendentes--;
+        if (pendentes === 0) renderUploadPreview();
+      };
+      reader.onerror = function() {
+        pendentes--;
+        if (pendentes === 0) renderUploadPreview();
+      };
+      reader.readAsDataURL(item.file);
+    });
   });
 }
 
