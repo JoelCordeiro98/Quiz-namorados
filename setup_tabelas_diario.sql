@@ -102,6 +102,16 @@ alter table musicas add column if not exists do_dia boolean default false;
 -- Marca se a letra/tradução foi escrita manualmente (em vez de buscada automaticamente)
 alter table musicas add column if not exists letra_manual boolean default false;
 
+-- Suporte a músicas do Spotify (toca de verdade, sem anúncio, via conta Premium de quem
+-- estiver conectada naquele aparelho) ao lado das músicas do YouTube já existentes.
+-- "fonte" diz qual player usar; video_id deixa de ser obrigatório pras músicas do Spotify.
+alter table musicas alter column video_id drop not null;
+alter table musicas add column if not exists fonte text not null default 'youtube';
+alter table musicas drop constraint if exists musicas_fonte_check;
+alter table musicas add constraint musicas_fonte_check check (fonte in ('youtube', 'spotify'));
+alter table musicas add column if not exists spotify_id text;
+alter table musicas add column if not exists spotify_uri text;
+
 -- Legenda e data do momento nas fotos/vídeos da galeria
 alter table midias add column if not exists legenda text;
 alter table midias add column if not exists data_evento date;

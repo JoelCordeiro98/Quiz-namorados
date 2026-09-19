@@ -133,6 +133,12 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .musica-item-del{background:none;border:none;color:rgba(255,255,255,0.2);font-size:1rem;cursor:pointer;padding:0.25rem;flex-shrink:0}
 .musica-item-star{background:none;border:none;color:rgba(255,255,255,0.2);font-size:1.1rem;cursor:pointer;padding:0.25rem;flex-shrink:0}
 .musica-item-star.active{color:#e6a81a}
+.musica-item-spotify{background:rgba(29,185,84,0.15);border:none;color:#1db954;width:28px;height:28px;min-width:28px;border-radius:50%;font-size:0.78rem;cursor:pointer;padding:0;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.musica-item-spotify.tocando{background:#1db954;color:#fff}
+.sp-connect-bar{margin:0 1.5rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:0.6rem;padding:0.7rem 0.9rem;border-radius:12px;background:rgba(29,185,84,0.08);border:1px solid rgba(29,185,84,0.28);font-size:0.76rem;color:rgba(255,255,255,0.8)}
+.sp-connect-status{color:#1db954;font-weight:700}
+.sp-connect-btn{background:#1db954;border:none;color:#fff;padding:0.45rem 0.9rem;border-radius:50px;font-size:0.7rem;font-weight:700;cursor:pointer;font-family:"Lato",sans-serif;flex-shrink:0}
+.sp-connect-btn.sp-desconectar{background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6)}
 .musica-list-wrap{max-height:45vh;overflow-y:auto}
 .musica-page-list{padding:0.5rem 1.5rem 1.5rem}
 .musica-do-dia{margin:0 1.5rem 1.2rem;padding:1rem 1.1rem;background:linear-gradient(135deg,rgba(230,168,26,0.12),rgba(192,57,43,0.1));border:1px solid rgba(230,168,26,0.35);border-radius:16px;cursor:pointer}
@@ -685,6 +691,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       </div>
       <button class="btn-add" onclick="abrirModalMusicas()">+</button>
     </div>
+    <div class="sp-connect-bar" id="sp-connect-bar"></div>
     <div class="musica-do-dia" id="musica-do-dia-card" style="display:none" onclick="abrirMusicaDetalheDoDia()">
       <div class="mdd-label">☀ Música do dia</div>
       <div class="mdd-linha">
@@ -796,7 +803,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div class="form-group">
       <label>Link do YouTube</label>
       <div class="musica-add-row">
-        <input type="text" id="musica-link" name="musica-link" placeholder="Cole o link do YouTube..." autocomplete="off">
+        <input type="text" id="musica-link" name="musica-link" placeholder="Cole o link do YouTube ou do Spotify..." autocomplete="off">
         <button class="btn-save" style="flex:0 0 auto;padding:0.8rem 1.1rem" onclick="adicionarMusica()">+</button>
       </div>
     </div>
@@ -1165,7 +1172,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div class="tp-actions">
       <button class="tp-del" id="md-toggle-traducao" style="display:none" onclick="alternarTraducao()">🌐 Ver tradução</button>
       <button class="tp-del" onclick="abrirModalLetraMusica()">✎ Editar letra</button>
-      <button class="tp-del" onclick="abrirYoutubeMusica()">▶ Ouvir no YouTube</button>
+      <button class="tp-del" id="md-tocar-btn" onclick="tocarMusicaDetalhe()">▶ Ouvir no YouTube</button>
     </div>
     <div class="md-credito" id="md-credito"></div>
   </div>
@@ -1215,6 +1222,11 @@ var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 // Letra vem do LRCLIB e tradução do MyMemory — ambos gratuitos e sem cadastro
 // Usar um e-mail no MyMemory (sem precisar de conta) aumenta o limite gratuito de 5.000 para 50.000 caracteres/dia
 var MYMEMORY_EMAIL = "viajaaibolso@gmail.com";
+// Spotify: cada aparelho conecta a própria conta Premium (OAuth PKCE, sem precisar de
+// servidor nem de client secret). O Client ID é público por natureza desse fluxo.
+var SPOTIFY_CLIENT_ID = "555d788f60f7490d9641189ecd1567a5";
+var SPOTIFY_REDIRECT_URI = "https://joelcordeiro98.github.io/Quiz-namorados/index.html";
+var SPOTIFY_SCOPES = "streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state";
 var session = null;
 var midias = [];
 var textos = [];
@@ -1294,6 +1306,7 @@ function authApi(path, body) {
 
 // Sempre pede login de novo ao abrir o app (sessão não fica salva)
 function init() {
+  spProcessarRedirect();
   localStorage.removeItem("sb_session");
   mostrarLogin();
   document.getElementById("loading").style.display = "none";
@@ -4203,7 +4216,207 @@ function deletarIndicacao(id) {
   });
 }
 
-// ===== MÚSICAS (lista de favoritas com link pro YouTube) =====
+// ===== SPOTIFY (OAuth PKCE + Web Playback SDK) =====
+// Tokens ficam só no localStorage deste aparelho — cada um conecta a própria conta.
+function spGerarStringAleatoria(tamanho) {
+  var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var arr = new Uint8Array(tamanho);
+  crypto.getRandomValues(arr);
+  var out = "";
+  for (var i = 0; i < tamanho; i++) out += chars[arr[i] % chars.length];
+  return out;
+}
+
+function spSha256Base64Url(str) {
+  var enc = new TextEncoder().encode(str);
+  return crypto.subtle.digest("SHA-256", enc).then(function(hash) {
+    var bytes = new Uint8Array(hash);
+    var bin = "";
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  });
+}
+
+function spConectar() {
+  var verifier = spGerarStringAleatoria(64);
+  localStorage.setItem("sp_code_verifier", verifier);
+  spSha256Base64Url(verifier).then(function(challenge) {
+    var params = new URLSearchParams({
+      client_id: SPOTIFY_CLIENT_ID,
+      response_type: "code",
+      redirect_uri: SPOTIFY_REDIRECT_URI,
+      scope: SPOTIFY_SCOPES,
+      code_challenge_method: "S256",
+      code_challenge: challenge
+    });
+    window.location.href = "https://accounts.spotify.com/authorize?" + params.toString();
+  });
+}
+
+function spDesconectar() {
+  localStorage.removeItem("sp_access_token");
+  localStorage.removeItem("sp_refresh_token");
+  localStorage.removeItem("sp_expires_at");
+  if (spPlayer) { try { spPlayer.disconnect(); } catch (e) {} }
+  spPlayer = null;
+  spPlayerPronto = null;
+  spDeviceId = null;
+  spEstadoAtual = null;
+  atualizarBarraSpotify();
+  renderMusicaPagina();
+}
+
+// Processa o "?code=...&state=..." que o Spotify devolve na própria URL do app depois do
+// login. Precisa rodar bem no início do boot, antes de qualquer outra coisa mexer na URL.
+function spProcessarRedirect() {
+  var params = new URLSearchParams(window.location.search);
+  var code = params.get("code");
+  if (!code) return;
+  var verifier = localStorage.getItem("sp_code_verifier");
+  history.replaceState({}, document.title, window.location.pathname);
+  if (!verifier) return;
+  fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "authorization_code",
+      code: code,
+      redirect_uri: SPOTIFY_REDIRECT_URI,
+      client_id: SPOTIFY_CLIENT_ID,
+      code_verifier: verifier
+    })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.access_token) {
+      spSalvarTokens(data);
+      mostrarToast("🎧 Spotify conectado!");
+      atualizarBarraSpotify();
+      renderMusicaPagina();
+    }
+  }).catch(function() {});
+}
+
+function spSalvarTokens(data) {
+  localStorage.setItem("sp_access_token", data.access_token);
+  if (data.refresh_token) localStorage.setItem("sp_refresh_token", data.refresh_token);
+  localStorage.setItem("sp_expires_at", String(Date.now() + (data.expires_in * 1000) - 60000));
+}
+
+function spConectado() {
+  return !!localStorage.getItem("sp_refresh_token");
+}
+
+function spTokenValido() {
+  var exp = parseInt(localStorage.getItem("sp_expires_at") || "0", 10);
+  return Date.now() < exp;
+}
+
+// Devolve um access_token válido, renovando via refresh_token se preciso. Resolve null
+// se não tiver conta conectada ou se a renovação falhar (conexão revogada, etc).
+function spObterToken() {
+  if (spTokenValido()) return Promise.resolve(localStorage.getItem("sp_access_token"));
+  var refresh = localStorage.getItem("sp_refresh_token");
+  if (!refresh) return Promise.resolve(null);
+  return fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: refresh, client_id: SPOTIFY_CLIENT_ID })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (!data.access_token) { spDesconectar(); return null; }
+    spSalvarTokens(data);
+    return data.access_token;
+  }).catch(function() { return null; });
+}
+
+function atualizarBarraSpotify() {
+  var bar = document.getElementById("sp-connect-bar");
+  if (!bar) return;
+  if (spConectado()) {
+    bar.innerHTML = '<span class="sp-connect-status">🎧 Spotify conectado</span>' +
+      '<button type="button" class="sp-connect-btn sp-desconectar" onclick="spDesconectar()">Desconectar</button>';
+  } else {
+    bar.innerHTML = '<span>🎧 Conecte o Spotify pra tocar sem anúncio</span>' +
+      '<button type="button" class="sp-connect-btn" onclick="spConectar()">Conectar</button>';
+  }
+}
+
+// ===== SPOTIFY: Web Playback SDK (o player de verdade, dentro da aba) =====
+var spPlayer = null;
+var spDeviceId = null;
+var spPlayerPronto = null;
+var spEstadoAtual = null;
+
+function spCarregarSDK() {
+  if (window.Spotify) return Promise.resolve();
+  if (spCarregarSDK._p) return spCarregarSDK._p;
+  spCarregarSDK._p = new Promise(function(resolve) {
+    window.onSpotifyWebPlaybackSDKReady = resolve;
+    var script = document.createElement("script");
+    script.src = "https://sdk.scdn.co/spotify-player.js";
+    document.head.appendChild(script);
+  });
+  return spCarregarSDK._p;
+}
+
+function spGarantirPlayer() {
+  if (spPlayerPronto) return spPlayerPronto;
+  spPlayerPronto = spCarregarSDK().then(function() {
+    return new Promise(function(resolve, reject) {
+      spPlayer = new Spotify.Player({
+        name: "Nosso Espaço",
+        getOAuthToken: function(cb) { spObterToken().then(function(t) { cb(t || ""); }); },
+        volume: 0.8
+      });
+      spPlayer.addListener("ready", function(e) { spDeviceId = e.device_id; resolve(); });
+      spPlayer.addListener("not_ready", function() { spDeviceId = null; });
+      spPlayer.addListener("initialization_error", function(e) { reject(e); });
+      spPlayer.addListener("authentication_error", function(e) { reject(e); });
+      spPlayer.addListener("account_error", function(e) { reject(e); });
+      spPlayer.addListener("player_state_changed", function(state) {
+        spEstadoAtual = state;
+        renderMusicaPagina();
+        atualizarBotaoTocarDetalhe();
+      });
+      spPlayer.connect();
+    });
+  }).catch(function(e) {
+    console.error("Erro ao iniciar o player do Spotify:", e);
+    spPlayerPronto = null;
+    mostrarToast("Não deu pra conectar o player do Spotify (precisa de conta Premium).");
+    throw e;
+  });
+  return spPlayerPronto;
+}
+
+function spFaixaTocandoAgora() {
+  if (!spEstadoAtual || spEstadoAtual.paused) return null;
+  return spEstadoAtual.track_window && spEstadoAtual.track_window.current_track ? spEstadoAtual.track_window.current_track.uri : null;
+}
+
+function spTocarFaixa(uri) {
+  if (!spConectado()) { mostrarToast("Conecte sua conta Spotify primeiro."); return; }
+  spGarantirPlayer().then(function() {
+    return spObterToken();
+  }).then(function(token) {
+    if (!token) { mostrarToast("Sua sessão do Spotify expirou. Conecte de novo."); return; }
+    return fetch("https://api.spotify.com/v1/me/player/play?device_id=" + spDeviceId, {
+      method: "PUT",
+      headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+      body: JSON.stringify({ uris: [uri] })
+    }).then(function(r) {
+      if (r.status === 403) mostrarToast("Precisa de Spotify Premium pra tocar por aqui.");
+    });
+  }).catch(function() {});
+}
+
+function spAlternarPlayPause(uri) {
+  if (spFaixaTocandoAgora() === uri) {
+    if (spPlayer) spPlayer.togglePlay();
+    return;
+  }
+  spTocarFaixa(uri);
+}
+
+// ===== MÚSICAS (lista de favoritas com link pro YouTube ou do Spotify) =====
 var musicas = [];
 
 function extrairYoutubeId(url) {
@@ -4212,6 +4425,7 @@ function extrairYoutubeId(url) {
 }
 
 function carregarMusicas() {
+  atualizarBarraSpotify();
   api("/rest/v1/musicas?order=criado_em.asc&select=*")
     .then(function(r) { return r.json(); })
     .then(function(data) {
@@ -4266,13 +4480,23 @@ function renderMusicaPagina() {
   musicas.forEach(function(m) {
     var div = document.createElement("div");
     div.className = "musica-item";
+    var botaoSpotify = "";
+    if (m.fonte === "spotify") {
+      if (spConectado()) {
+        var tocando = spFaixaTocandoAgora() === m.spotify_uri;
+        botaoSpotify = '<button type="button" class="musica-item-spotify' + (tocando ? ' tocando' : '') + '" onclick="event.stopPropagation();spAlternarPlayPause(\'' + m.spotify_uri + '\')" aria-label="Tocar no Spotify">' + (tocando ? "⏸" : "▶") + '</button>';
+      } else {
+        botaoSpotify = '<a class="musica-item-spotify" href="https://open.spotify.com/track/' + m.spotify_id + '" target="_blank" onclick="event.stopPropagation()" aria-label="Abrir no Spotify">↗</a>';
+      }
+    }
     div.innerHTML = '<div class="musica-item-thumb" style="background-image:url(' + (m.thumb || "") + ')"></div>' +
       '<div class="musica-item-info"><div class="musica-item-titulo">' + (m.titulo || "Música") + '</div>' +
       '<div class="musica-item-artista">' + (m.artista || "") + '</div></div>' +
+      botaoSpotify +
       '<button class="musica-item-star' + (m.do_dia ? ' active' : '') + '" onclick="event.stopPropagation();marcarMusicaDoDia(\'' + m.id + '\',' + (m.do_dia ? "true" : "false") + ')" aria-label="Música do dia">☀</button>' +
       '<button class="musica-item-del" onclick="event.stopPropagation();deletarMusica(\'' + m.id + '\')">🗑</button>';
     div.onclick = function(e) {
-      if (e.target.closest("button")) return;
+      if (e.target.closest("button, a")) return;
       abrirMusicaDetalhe(m);
     };
     list.appendChild(div);
@@ -4404,10 +4628,18 @@ function traduzirLetra(texto) {
   return proximo(0);
 }
 
+function extrairSpotifyTrackId(url) {
+  var m = url.match(/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?track\/([a-zA-Z0-9]+)/) || url.match(/spotify:track:([a-zA-Z0-9]+)/);
+  return m ? m[1] : null;
+}
+
 function adicionarMusica() {
   var link = document.getElementById("musica-link").value.trim();
+  var spotifyId = extrairSpotifyTrackId(link);
+  if (spotifyId) { adicionarMusicaSpotify(spotifyId); return; }
+
   var videoId = extrairYoutubeId(link);
-  if (!videoId) { mostrarToast("Link do YouTube inválido!"); return; }
+  if (!videoId) { mostrarToast("Link inválido! Cole um link do YouTube ou do Spotify."); return; }
 
   fetch("https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=" + videoId + "&format=json")
     .then(function(r) { return r.ok ? r.json() : null; })
@@ -4429,6 +4661,7 @@ function adicionarMusica() {
               "Prefer": "return=minimal"
             },
             body: JSON.stringify({
+              fonte: "youtube",
               video_id: videoId,
               titulo: titulo,
               artista: artista,
@@ -4449,6 +4682,54 @@ function adicionarMusica() {
     .catch(function() {
       mostrarToast("Erro ao adicionar música.");
     });
+}
+
+function adicionarMusicaSpotify(trackId) {
+  if (!spConectado()) { mostrarToast("Conecte sua conta Spotify primeiro pra adicionar músicas de lá."); return; }
+  spObterToken().then(function(token) {
+    if (!token) { mostrarToast("Sua sessão do Spotify expirou. Conecte de novo."); return; }
+    return fetch("https://api.spotify.com/v1/tracks/" + trackId, {
+      headers: { "Authorization": "Bearer " + token }
+    }).then(function(r) { return r.ok ? r.json() : null; }).then(function(info) {
+      if (!info) { mostrarToast("Não encontrei essa música no Spotify."); return; }
+      var titulo = info.name || "Música";
+      var artista = (info.artists || []).map(function(a) { return a.name; }).join(", ");
+      var thumb = (info.album && info.album.images && info.album.images[0]) ? info.album.images[0].url : "";
+      var uri = info.uri || ("spotify:track:" + trackId);
+      var busca = extrairArtistaMusica(titulo, artista);
+
+      return buscarLetraLRCLIB(busca.artista || artista, busca.musica || titulo).then(function(letra) {
+        return traduzirLetra(letra).then(function(traducao) {
+          return api("/rest/v1/musicas", {
+            method: "POST",
+            headers: {
+              "apikey": SUPABASE_KEY,
+              "Authorization": "Bearer " + session.access_token,
+              "Content-Type": "application/json",
+              "Prefer": "return=minimal"
+            },
+            body: JSON.stringify({
+              fonte: "spotify",
+              spotify_id: trackId,
+              spotify_uri: uri,
+              titulo: titulo,
+              artista: artista,
+              thumb: thumb,
+              letra: letra || null,
+              traducao: traducao || null
+            })
+          }).then(function() {
+            document.getElementById("musica-link").value = "";
+            fecharModal("modal-musicas");
+            mostrarToast("✓ Música adicionada!");
+            carregarMusicas();
+          });
+        });
+      });
+    });
+  }).catch(function() {
+    mostrarToast("Erro ao adicionar música.");
+  });
 }
 
 var musicaAtual = null;
@@ -4477,7 +4758,23 @@ function abrirMusicaDetalhe(m) {
     creditoEl.textContent = "Letra via LRCLIB" + (m.traducao ? " · tradução automática (MyMemory)" : "");
   }
 
+  atualizarBotaoTocarDetalhe();
   document.getElementById("musica-detalhe").classList.add("show");
+}
+
+function atualizarBotaoTocarDetalhe() {
+  var btn = document.getElementById("md-tocar-btn");
+  if (!btn || !musicaAtual) return;
+  if (musicaAtual.fonte === "spotify") {
+    if (spConectado()) {
+      var tocando = spFaixaTocandoAgora() === musicaAtual.spotify_uri;
+      btn.textContent = tocando ? "⏸ Pausar" : "▶ Tocar no Spotify";
+    } else {
+      btn.textContent = "↗ Abrir no Spotify";
+    }
+  } else {
+    btn.textContent = "▶ Ouvir no YouTube";
+  }
 }
 
 function fecharMusicaDetalhe() {
@@ -4492,8 +4789,17 @@ function alternarTraducao() {
   toggleBtn.textContent = mostrando ? "🌐 Ver tradução" : "🌐 Ocultar tradução";
 }
 
-function abrirYoutubeMusica() {
-  if (musicaAtual) window.open("https://www.youtube.com/watch?v=" + musicaAtual.video_id, "_blank");
+function tocarMusicaDetalhe() {
+  if (!musicaAtual) return;
+  if (musicaAtual.fonte === "spotify") {
+    if (spConectado()) {
+      spAlternarPlayPause(musicaAtual.spotify_uri);
+    } else {
+      window.open("https://open.spotify.com/track/" + musicaAtual.spotify_id, "_blank");
+    }
+  } else {
+    window.open("https://www.youtube.com/watch?v=" + musicaAtual.video_id, "_blank");
+  }
 }
 
 function abrirModalLetraMusica() {
