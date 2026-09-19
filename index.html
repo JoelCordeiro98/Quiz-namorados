@@ -147,6 +147,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .sp-mini-titulo{font-size:0.8rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sp-mini-artista{font-size:0.68rem;color:rgba(255,255,255,0.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sp-mini-playpause{background:#1db954;border:none;color:#fff;width:34px;height:34px;min-width:34px;border-radius:50%;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.sp-mini-skip{background:none;border:none;color:rgba(255,255,255,0.75);font-size:0.95rem;cursor:pointer;padding:0.25rem;flex-shrink:0}
 .sp-mini-esconder{background:none;border:none;color:rgba(255,255,255,0.35);font-size:0.9rem;cursor:pointer;padding:0.3rem;flex-shrink:0}
 .sp-mini-bolha{display:none;position:fixed;right:14px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:150;width:46px;height:46px;border-radius:50%;background:#1db954;border:none;color:#fff;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.4);align-items:center;justify-content:center}
 .sp-mini-bolha.show{display:flex}
@@ -745,7 +746,9 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       <div class="sp-mini-titulo" id="sp-mini-titulo">—</div>
       <div class="sp-mini-artista" id="sp-mini-artista"></div>
     </div>
+    <button type="button" class="sp-mini-skip" onclick="event.stopPropagation();spFaixaAnterior()" aria-label="Faixa anterior">⏮</button>
     <button type="button" class="sp-mini-playpause" id="sp-mini-playpause" onclick="event.stopPropagation();spMiniAlternarPlayPause()" aria-label="Pausar/Tocar">▶</button>
+    <button type="button" class="sp-mini-skip" onclick="event.stopPropagation();spProximaFaixa()" aria-label="Próxima faixa">⏭</button>
     <button type="button" class="sp-mini-esconder" onclick="event.stopPropagation();spEsconderPlayer()" aria-label="Esconder player">▾</button>
   </div>
   <button type="button" class="sp-mini-bolha" id="sp-mini-bolha" onclick="spMostrarPlayer()" aria-label="Mostrar player">🎵</button>
@@ -4456,6 +4459,30 @@ function spMostrarPlayer() {
 function spMiniAlternarPlayPause() {
   if (spPlayer) spPlayer.togglePlay();
 }
+
+// A "próxima/anterior faixa" pula dentro da lista de músicas do Spotify que vocês já
+// adicionaram no app (não a fila do Spotify em si, já que cada faixa é tocada sozinha).
+function spFaixaCarregadaUri() {
+  return (spEstadoAtual && spEstadoAtual.track_window && spEstadoAtual.track_window.current_track)
+    ? spEstadoAtual.track_window.current_track.uri
+    : null;
+}
+
+function spListaSpotify() {
+  return musicas.filter(function(m) { return m.fonte === "spotify" && m.spotify_uri; });
+}
+
+function spPular(direcao) {
+  var lista = spListaSpotify();
+  if (lista.length === 0) { mostrarToast("Nenhuma música do Spotify na lista ainda."); return; }
+  var atualUri = spFaixaCarregadaUri();
+  var idx = lista.findIndex(function(m) { return m.spotify_uri === atualUri; });
+  var novoIdx = idx === -1 ? (direcao > 0 ? 0 : lista.length - 1) : (idx + direcao + lista.length) % lista.length;
+  spTocarFaixa(lista[novoIdx].spotify_uri);
+}
+
+function spProximaFaixa() { spPular(1); }
+function spFaixaAnterior() { spPular(-1); }
 
 // Toque no corpo do mini-player (fora dos botões) leva pra lista de músicas, pra trocar de faixa
 function spAbrirSelecaoFaixa() {
