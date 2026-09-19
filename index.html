@@ -139,6 +139,17 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .sp-connect-status{color:#1db954;font-weight:700}
 .sp-connect-btn{background:#1db954;border:none;color:#fff;padding:0.45rem 0.9rem;border-radius:50px;font-size:0.7rem;font-weight:700;cursor:pointer;font-family:"Lato",sans-serif;flex-shrink:0}
 .sp-connect-btn.sp-desconectar{background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6)}
+#app.tem-mini-player{padding-bottom:144px}
+.sp-mini-player{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom));z-index:150;display:none;align-items:center;gap:0.6rem;padding:0.5rem 0.8rem;background:rgba(18,18,18,0.97);border-top:1px solid rgba(29,185,84,0.3);box-shadow:0 -4px 16px rgba(0,0,0,0.4)}
+.sp-mini-player.show{display:flex}
+.sp-mini-thumb{width:38px;height:38px;border-radius:8px;background-size:cover;background-position:center;background-color:var(--blk2);flex-shrink:0}
+.sp-mini-info{flex:1;min-width:0;cursor:pointer}
+.sp-mini-titulo{font-size:0.8rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-mini-artista{font-size:0.68rem;color:rgba(255,255,255,0.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-mini-playpause{background:#1db954;border:none;color:#fff;width:34px;height:34px;min-width:34px;border-radius:50%;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.sp-mini-esconder{background:none;border:none;color:rgba(255,255,255,0.35);font-size:0.9rem;cursor:pointer;padding:0.3rem;flex-shrink:0}
+.sp-mini-bolha{display:none;position:fixed;right:14px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:150;width:46px;height:46px;border-radius:50%;background:#1db954;border:none;color:#fff;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.4);align-items:center;justify-content:center}
+.sp-mini-bolha.show{display:flex}
 .musica-list-wrap{max-height:45vh;overflow-y:auto}
 .musica-page-list{padding:0.5rem 1.5rem 1.5rem}
 .musica-do-dia{margin:0 1.5rem 1.2rem;padding:1rem 1.1rem;background:linear-gradient(135deg,rgba(230,168,26,0.12),rgba(192,57,43,0.1));border:1px solid rgba(230,168,26,0.35);border-radius:16px;cursor:pointer}
@@ -727,6 +738,17 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       <span class="bitem-icon">🎵</span><span class="bitem-label">Músicas</span>
     </button>
   </nav>
+
+  <div class="sp-mini-player" id="sp-mini-player">
+    <div class="sp-mini-thumb" id="sp-mini-thumb"></div>
+    <div class="sp-mini-info" onclick="spAbrirSelecaoFaixa()">
+      <div class="sp-mini-titulo" id="sp-mini-titulo">—</div>
+      <div class="sp-mini-artista" id="sp-mini-artista"></div>
+    </div>
+    <button type="button" class="sp-mini-playpause" id="sp-mini-playpause" onclick="event.stopPropagation();spMiniAlternarPlayPause()" aria-label="Pausar/Tocar">▶</button>
+    <button type="button" class="sp-mini-esconder" onclick="event.stopPropagation();spEsconderPlayer()" aria-label="Esconder player">▾</button>
+  </div>
+  <button type="button" class="sp-mini-bolha" id="sp-mini-bolha" onclick="spMostrarPlayer()" aria-label="Mostrar player">🎵</button>
 </div>
 
 <!-- MODAL FOTO -->
@@ -4264,6 +4286,7 @@ function spDesconectar() {
   spEstadoAtual = null;
   atualizarBarraSpotify();
   renderMusicaPagina();
+  spAtualizarMiniPlayer();
 }
 
 // Processa o "?code=...&state=..." que o Spotify devolve na própria URL do app depois do
@@ -4375,6 +4398,7 @@ function spGarantirPlayer() {
         spEstadoAtual = state;
         renderMusicaPagina();
         atualizarBotaoTocarDetalhe();
+        spAtualizarMiniPlayer();
       });
       spPlayer.connect();
     });
@@ -4414,6 +4438,55 @@ function spAlternarPlayPause(uri) {
     return;
   }
   spTocarFaixa(uri);
+}
+
+// ===== SPOTIFY: mini-player visível navegando pelo app, com opção de esconder =====
+var spPlayerEscondido = false;
+
+function spEsconderPlayer() {
+  spPlayerEscondido = true;
+  spAtualizarMiniPlayer();
+}
+
+function spMostrarPlayer() {
+  spPlayerEscondido = false;
+  spAtualizarMiniPlayer();
+}
+
+function spMiniAlternarPlayPause() {
+  if (spPlayer) spPlayer.togglePlay();
+}
+
+// Toque no corpo do mini-player (fora dos botões) leva pra lista de músicas, pra trocar de faixa
+function spAbrirSelecaoFaixa() {
+  goTo("musicas");
+}
+
+function spAtualizarMiniPlayer() {
+  var barra = document.getElementById("sp-mini-player");
+  var bolha = document.getElementById("sp-mini-bolha");
+  var appEl = document.getElementById("app");
+  if (!barra || !bolha) return;
+  var faixa = spEstadoAtual && spEstadoAtual.track_window && spEstadoAtual.track_window.current_track;
+  if (!faixa) {
+    barra.classList.remove("show");
+    bolha.classList.remove("show");
+    if (appEl) appEl.classList.remove("tem-mini-player");
+    return;
+  }
+  if (appEl) appEl.classList.add("tem-mini-player");
+  if (spPlayerEscondido) {
+    barra.classList.remove("show");
+    bolha.classList.add("show");
+    return;
+  }
+  bolha.classList.remove("show");
+  barra.classList.add("show");
+  var thumb = (faixa.album && faixa.album.images && faixa.album.images[0]) ? faixa.album.images[0].url : "";
+  document.getElementById("sp-mini-thumb").style.backgroundImage = thumb ? "url(" + thumb + ")" : "none";
+  document.getElementById("sp-mini-titulo").textContent = faixa.name || "Tocando...";
+  document.getElementById("sp-mini-artista").textContent = (faixa.artists || []).map(function(a) { return a.name; }).join(", ");
+  document.getElementById("sp-mini-playpause").textContent = spEstadoAtual.paused ? "▶" : "⏸";
 }
 
 // ===== MÚSICAS (lista de favoritas com link pro YouTube ou do Spotify) =====
