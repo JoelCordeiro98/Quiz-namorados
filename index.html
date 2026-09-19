@@ -325,6 +325,44 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .jg-vencedor-titulo{font-family:"Playfair Display",serif;font-size:1.4rem;margin-bottom:0.5rem}
 .jg-vencedor-placar{color:rgba(255,255,255,0.6);font-size:0.9rem;margin-bottom:1.5rem}
 
+/* ===== JOGO: CHAT (TEXTO + ÁUDIO) ===== */
+.jg-chat-badge{position:absolute;top:3px;right:3px;width:9px;height:9px;border-radius:50%;background:var(--redl);border:1.5px solid var(--blk2);display:none}
+.jg-chat-badge.show{display:block}
+.jg-chat-painel{position:fixed;left:0;right:0;bottom:0;z-index:760;background:var(--blk2);border-top:1.5px solid rgba(192,57,43,0.35);border-radius:20px 20px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,0.5);max-height:78vh;display:flex;flex-direction:column;transform:translateY(105%);transition:transform 0.3s ease}
+.jg-chat-painel.show{transform:translateY(0)}
+.jg-chat-hdr{display:flex;align-items:center;gap:0.6rem;padding:1rem 1.2rem;border-bottom:1px solid rgba(255,255,255,0.08)}
+.jg-chat-hdr-titulo{font-size:0.85rem;color:#fff;font-weight:700}
+.jg-chat-hdr-sub{flex:1;font-size:0.72rem;color:#e6a81a;cursor:pointer}
+.jg-chat-fechar{background:rgba(255,255,255,0.08);border:none;color:#fff;width:30px;height:30px;min-width:30px;border-radius:50%;font-size:0.85rem;cursor:pointer}
+.jg-chat-lista{overflow-y:auto;padding:0.9rem 1.1rem;display:flex;flex-direction:column;gap:0.55rem;min-height:80px}
+.jg-chat-vazio{text-align:center;font-size:0.78rem;color:rgba(255,255,255,0.35);padding:1.2rem 0}
+.jg-chat-msg{display:flex;flex-direction:column;max-width:78%}
+.jg-chat-msg.minha{align-self:flex-end;align-items:flex-end}
+.jg-chat-msg.delas{align-self:flex-start;align-items:flex-start}
+.jg-chat-msg-bolha{border-radius:16px;padding:0.55rem 0.8rem;font-size:0.85rem;line-height:1.45;color:#fff;word-break:break-word}
+.jg-chat-msg.minha .jg-chat-msg-bolha{background:rgba(var(--jg-cor-a-rgb,231,76,60),0.28);border:1px solid rgba(var(--jg-cor-a-rgb,231,76,60),0.5);border-bottom-right-radius:4px}
+.jg-chat-msg.delas .jg-chat-msg-bolha{background:rgba(var(--jg-cor-b-rgb,230,168,26),0.2);border:1px solid rgba(var(--jg-cor-b-rgb,230,168,26),0.45);border-bottom-left-radius:4px}
+.jg-chat-msg.minha.jogador-b .jg-chat-msg-bolha{background:rgba(var(--jg-cor-b-rgb,230,168,26),0.28);border-color:rgba(var(--jg-cor-b-rgb,230,168,26),0.5)}
+.jg-chat-msg.delas.jogador-a .jg-chat-msg-bolha{background:rgba(var(--jg-cor-a-rgb,231,76,60),0.2);border-color:rgba(var(--jg-cor-a-rgb,231,76,60),0.45)}
+.jg-chat-msg-bolha.audio{display:flex;align-items:center;gap:0.6rem;padding:0.4rem 0.7rem 0.4rem 0.4rem}
+.jg-chat-play{background:rgba(255,255,255,0.14);border:none;color:#fff;width:32px;height:32px;min-width:32px;border-radius:50%;font-size:0.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.jg-chat-play.tocando{background:#fff;color:var(--redl)}
+.jg-chat-msg-dur{font-size:0.78rem;color:rgba(255,255,255,0.85)}
+.jg-chat-msg-meta{display:flex;align-items:center;gap:0.4rem;font-size:0.62rem;color:rgba(255,255,255,0.35);margin-top:0.2rem;padding:0 0.2rem}
+.jg-chat-msg-del{background:none;border:none;color:rgba(255,255,255,0.3);font-size:0.75rem;cursor:pointer;padding:0.1rem}
+.jg-chat-quem-picker{padding:0.9rem 1.2rem;border-top:1px solid rgba(255,255,255,0.08);text-align:center}
+.jg-chat-quem-pergunta{font-size:0.78rem;color:rgba(255,255,255,0.6);margin-bottom:0.6rem}
+.jg-chat-quem-opcoes{display:flex;gap:0.7rem}
+.jg-chat-quem-btn{flex:1;padding:0.7rem;border-radius:12px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:#fff;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:"Lato",sans-serif}
+.jg-chat-composer{display:flex;align-items:center;gap:0.5rem;padding:0.8rem 1rem;border-top:1px solid rgba(255,255,255,0.08)}
+.jg-chat-composer input[type=text]{flex:1;padding:0.65rem 0.9rem;border-radius:50px;border:1.5px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#fff;font-size:0.85rem;font-family:"Lato",sans-serif;outline:none}
+.jg-chat-icone-btn{background:rgba(255,255,255,0.08);border:none;color:#fff;width:38px;height:38px;min-width:38px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.jg-chat-enviar{background:var(--red);color:#fff}
+.jg-chat-gravar.gravando{background:var(--red);animation:jgAudioPulse 1.2s infinite}
+@keyframes jgAudioPulse{0%{box-shadow:0 0 0 0 rgba(192,57,43,0.6)}70%{box-shadow:0 0 0 14px rgba(192,57,43,0)}100%{box-shadow:0 0 0 0 rgba(192,57,43,0)}}
+.jg-chat-gravando-info{display:flex;align-items:center;gap:0.6rem;padding:0 1.2rem 0.9rem;font-size:0.8rem;color:rgba(255,255,255,0.7)}
+.jg-chat-cancelar-gravacao{background:none;border:none;color:var(--redl);font-size:0.75rem;cursor:pointer;text-decoration:underline}
+
 /* ===== ÁRVORE DO RELACIONAMENTO ===== */
 .av-conteudo{padding:1.2rem 1.4rem 3rem;max-width:420px;margin:0 auto}
 .av-tree-wrap{position:relative;max-width:340px;margin:0.5rem auto 0.6rem}
@@ -914,7 +952,10 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   <div class="jg-hdr">
     <button class="leitura-fechar" onclick="fecharJogo()" aria-label="Fechar">✕</button>
     <div class="jg-hdr-titulo">Pontos e Caixas</div>
-    <button class="leitura-acao" onclick="mostrarConfigJogo()" aria-label="Configurações">⚙</button>
+    <div class="leitura-hdr-actions">
+      <button class="leitura-acao" id="jg-chat-toggle" onclick="jgChatTogglePainel()" aria-label="Conversa" style="display:none;position:relative">💬<span class="jg-chat-badge" id="jg-chat-badge"></span></button>
+      <button class="leitura-acao" onclick="mostrarConfigJogo()" aria-label="Configurações">⚙</button>
+    </div>
   </div>
 
   <div class="jg-conteudo" id="jg-carregando" style="text-align:center;padding-top:3rem;color:rgba(255,255,255,0.5);display:none">Carregando...</div>
@@ -998,6 +1039,31 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </div>
     <div class="jg-controles">
       <button class="jg-btn jg-btn-fim" onclick="finalizarJogo()">🏁 Finalizar jogo</button>
+    </div>
+  </div>
+
+  <div class="jg-chat-painel" id="jg-chat-painel">
+    <div class="jg-chat-hdr">
+      <div class="jg-chat-hdr-titulo">💬 Conversa</div>
+      <div class="jg-chat-hdr-sub" id="jg-chat-quem-atual" onclick="jgChatAbrirEscolhaQuem()"></div>
+      <button class="jg-chat-fechar" onclick="jgChatFecharPainel()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="jg-chat-lista" id="jg-chat-lista"></div>
+    <div class="jg-chat-quem-picker" id="jg-chat-quem-picker" style="display:none">
+      <div class="jg-chat-quem-pergunta">Você é...</div>
+      <div class="jg-chat-quem-opcoes">
+        <button type="button" class="jg-chat-quem-btn" id="jg-chat-quem-a" onclick="jgChatEscolherQuem('a')">Jogador 1</button>
+        <button type="button" class="jg-chat-quem-btn" id="jg-chat-quem-b" onclick="jgChatEscolherQuem('b')">Jogador 2</button>
+      </div>
+    </div>
+    <div class="jg-chat-composer" id="jg-chat-composer">
+      <input type="text" id="jg-chat-input" name="jg-chat-input" placeholder="Escreva algo..." autocomplete="off" onkeydown="jgChatInputKeydown(event)">
+      <button type="button" class="jg-chat-icone-btn jg-chat-gravar" id="jg-chat-gravar-btn" onclick="jgChatAlternarGravacao()" aria-label="Gravar áudio">🎤</button>
+      <button type="button" class="jg-chat-icone-btn jg-chat-enviar" id="jg-chat-enviar-btn" onclick="jgChatEnviarTexto()" aria-label="Enviar">➤</button>
+    </div>
+    <div class="jg-chat-gravando-info" id="jg-chat-gravando-info" style="display:none">
+      🔴 Gravando... <span id="jg-chat-timer">0:00</span>
+      <button type="button" class="jg-chat-cancelar-gravacao" onclick="jgChatCancelarGravacao()">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1367,6 +1433,7 @@ function iniciarPollingJogo() {
         if (jogo.finalizado) exibirTelaVencedor();
       }
     });
+    if (document.getElementById("jg-chat-toggle").style.display !== "none") jgChatPoll();
   }, 2500);
 }
 
@@ -1387,6 +1454,7 @@ function abrirJogo() {
       jogo = null;
       mostrarConfigJogo();
     }
+    if (jogo && !jogo.finalizado) jgChatPoll();
     iniciarPollingJogo();
   });
 }
@@ -1396,6 +1464,7 @@ function fecharJogo() {
     if (!confirm("Sair agora não apaga a partida — ela continua salva pra você (ou seu par) continuar depois. Fechar mesmo assim?")) return;
   }
   pararPollingJogo();
+  jgChatFecharPainel();
   document.getElementById("jogo-view").classList.remove("show");
 }
 
@@ -1409,6 +1478,8 @@ function mostrarConfigJogo() {
   document.getElementById("jg-carregando").style.display = "none";
   document.getElementById("jg-setup").style.display = "block";
   document.getElementById("jg-jogo").style.display = "none";
+  document.getElementById("jg-chat-toggle").style.display = "none";
+  jgChatFecharPainel();
 }
 
 function mostrarTelaJogoAtiva() {
@@ -1423,6 +1494,8 @@ function mostrarTelaJogoAtiva() {
   document.getElementById("jg-letra-b").textContent = jogo.nomeB.charAt(0).toUpperCase();
   document.getElementById("jg-dado-row").style.display = jogo.modoDado ? "flex" : "none";
   aplicarCoresJogo();
+  document.getElementById("jg-chat-toggle").style.display = "inline-block";
+  jgChatAtualizarQuemLabel();
 }
 
 // Converte "#rrggbb" (ou "#rgb") em "r,g,b" pra usar em rgba() via CSS var
@@ -1443,6 +1516,309 @@ function aplicarCoresJogo() {
   view.style.setProperty("--jg-cor-b", corB);
   view.style.setProperty("--jg-cor-a-rgb", hexParaRgb(corA));
   view.style.setProperty("--jg-cor-b-rgb", hexParaRgb(corB));
+}
+
+// ===== JOGO: CHAT (TEXTO + ÁUDIO), acumula até ser apagado manualmente =====
+var jgChatMensagens = [];
+var jgChatGravando = false;
+var jgChatMediaRecorder = null;
+var jgChatAudioChunks = [];
+var jgChatGravacaoTimer = null;
+var jgChatGravacaoSegundos = 0;
+var jgChatDescartarProximaGravacao = false;
+var jgChatAudioAtual = null;
+var jgChatAudioAtualId = null;
+
+function jgFormatarDuracao(segundos) {
+  segundos = Math.round(segundos || 0);
+  var m = Math.floor(segundos / 60);
+  var s = segundos % 60;
+  return m + ":" + String(s).padStart(2, "0");
+}
+
+function jgFormatarTempoRelativo(iso) {
+  var d = new Date(iso);
+  var diffMin = Math.floor((Date.now() - d.getTime()) / 60000);
+  if (diffMin < 1) return "agora";
+  if (diffMin < 60) return "há " + diffMin + " min";
+  var diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return "há " + diffH + "h";
+  return "há " + Math.floor(diffH / 24) + "d";
+}
+
+// "Quem sou eu" é local a cada aparelho (não sincronizado) — reaproveita os nomes
+// já digitados na configuração do jogo (Jogador 1 / Jogador 2), só marca qual dos
+// dois lados este aparelho está representando no chat.
+function jgChatQuemSou() {
+  return localStorage.getItem("jg_chat_quem");
+}
+
+function jgChatAtualizarQuemLabel() {
+  var quem = jgChatQuemSou();
+  var el = document.getElementById("jg-chat-quem-atual");
+  if (!el) return;
+  if (!quem) { el.textContent = "Quem é você? →"; return; }
+  var nome = quem === "a" ? ((jogo && jogo.nomeA) || "Jogador 1") : ((jogo && jogo.nomeB) || "Jogador 2");
+  el.textContent = "Você: " + nome + " (trocar)";
+}
+
+function jgChatAbrirEscolhaQuem() {
+  document.getElementById("jg-chat-quem-a").textContent = (jogo && jogo.nomeA) || "Jogador 1";
+  document.getElementById("jg-chat-quem-b").textContent = (jogo && jogo.nomeB) || "Jogador 2";
+  document.getElementById("jg-chat-quem-picker").style.display = "block";
+  document.getElementById("jg-chat-composer").style.display = "none";
+  document.getElementById("jg-chat-gravando-info").style.display = "none";
+}
+
+function jgChatEscolherQuem(quem) {
+  localStorage.setItem("jg_chat_quem", quem);
+  document.getElementById("jg-chat-quem-picker").style.display = "none";
+  document.getElementById("jg-chat-composer").style.display = "flex";
+  jgChatAtualizarQuemLabel();
+  jgChatRenderizarLista();
+}
+
+function jgChatTogglePainel() {
+  var painel = document.getElementById("jg-chat-painel");
+  var abrindo = !painel.classList.contains("show");
+  painel.classList.toggle("show", abrindo);
+  if (abrindo) {
+    jgChatAtualizarQuemLabel();
+    if (!jgChatQuemSou()) {
+      jgChatAbrirEscolhaQuem();
+    } else {
+      document.getElementById("jg-chat-quem-picker").style.display = "none";
+      document.getElementById("jg-chat-composer").style.display = "flex";
+    }
+    jgChatPoll();
+  }
+}
+
+function jgChatFecharPainel() {
+  var painel = document.getElementById("jg-chat-painel");
+  if (painel) painel.classList.remove("show");
+  if (jgChatGravando) jgChatCancelarGravacao();
+}
+
+function jgChatPoll() {
+  return api("/rest/v1/jogo_mensagens?select=*&order=criado_em.asc&limit=100")
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) {
+      if (!Array.isArray(data)) return;
+      jgChatMensagens = data;
+      var ultimoId = data.length ? data[data.length - 1].id : null;
+      var painelAberto = document.getElementById("jg-chat-painel").classList.contains("show");
+      if (painelAberto) {
+        jgChatRenderizarLista();
+        if (ultimoId) localStorage.setItem("jg_chat_visto", ultimoId);
+        document.getElementById("jg-chat-badge").classList.remove("show");
+      } else if (ultimoId && ultimoId !== localStorage.getItem("jg_chat_visto")) {
+        document.getElementById("jg-chat-badge").classList.add("show");
+      }
+    })
+    .catch(function() {});
+}
+
+function jgChatRenderizarLista() {
+  var lista = document.getElementById("jg-chat-lista");
+  if (!lista) return;
+  var pertoDoFim = (lista.scrollHeight - lista.scrollTop - lista.clientHeight) < 80;
+  var quemSou = jgChatQuemSou();
+  if (jgChatMensagens.length === 0) {
+    lista.innerHTML = '<div class="jg-chat-vazio">Nenhuma mensagem ainda. Manda um "oi" 👋</div>';
+    return;
+  }
+  lista.innerHTML = jgChatMensagens.map(function(m) {
+    var minha = quemSou && m.jogador === quemSou;
+    var classes = "jg-chat-msg " + (minha ? "minha" : "delas") + " jogador-" + m.jogador;
+    var nome = m.jogador === "a" ? ((jogo && jogo.nomeA) || "Jogador 1") : ((jogo && jogo.nomeB) || "Jogador 2");
+    var corpo;
+    if (m.tipo === "audio") {
+      corpo = '<div class="jg-chat-msg-bolha audio"><button type="button" class="jg-chat-play" data-id="' + m.id + '" onclick="jgChatTocarAudio(\'' + m.id + '\')">▶</button><span class="jg-chat-msg-dur">' + jgFormatarDuracao(m.duracao) + '</span></div>';
+    } else {
+      corpo = '<div class="jg-chat-msg-bolha">' + (m.texto || "") + '</div>';
+    }
+    return '<div class="' + classes + '" data-id="' + m.id + '">' + corpo +
+      '<div class="jg-chat-msg-meta"><span>' + nome + '</span><span>· ' + jgFormatarTempoRelativo(m.criado_em) + '</span>' +
+      '<button type="button" class="jg-chat-msg-del" onclick="jgChatApagar(\'' + m.id + '\')" aria-label="Apagar mensagem">🗑</button></div></div>';
+  }).join("");
+  if (pertoDoFim) lista.scrollTop = lista.scrollHeight;
+}
+
+function jgChatInputKeydown(event) {
+  if (event.key === "Enter") { event.preventDefault(); jgChatEnviarTexto(); }
+}
+
+function jgChatEnviarTexto() {
+  var quem = jgChatQuemSou();
+  if (!quem) { jgChatAbrirEscolhaQuem(); mostrarToast("Escolha quem é você antes de mandar mensagem."); return; }
+  var input = document.getElementById("jg-chat-input");
+  var texto = input.value.trim();
+  if (!texto) return;
+  input.value = "";
+  api("/rest/v1/jogo_mensagens", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "return=minimal"
+    },
+    body: JSON.stringify({ jogador: quem, tipo: "texto", texto: texto })
+  }).then(function(r) {
+    if (!r.ok) { mostrarToast("Não deu pra enviar a mensagem."); return; }
+    jgChatPoll();
+  }).catch(function() { mostrarToast("Não deu pra enviar a mensagem."); });
+}
+
+function jgChatAlternarGravacao() {
+  if (jgChatGravando) { jgChatPararGravacao(true); return; }
+  if (!jgChatQuemSou()) { jgChatAbrirEscolhaQuem(); mostrarToast("Escolha quem é você antes de gravar."); return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    mostrarToast("Esse navegador não permite gravar áudio.");
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+    var mimeCandidatos = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/aac"];
+    var mime = mimeCandidatos.find(function(t) {
+      return window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t);
+    }) || "";
+    try {
+      jgChatMediaRecorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+    } catch (e) {
+      mostrarToast("Não deu pra iniciar a gravação.");
+      stream.getTracks().forEach(function(t) { t.stop(); });
+      return;
+    }
+    jgChatAudioChunks = [];
+    jgChatMediaRecorder.ondataavailable = function(e) { if (e.data && e.data.size > 0) jgChatAudioChunks.push(e.data); };
+    jgChatMediaRecorder.onstop = function() {
+      stream.getTracks().forEach(function(t) { t.stop(); });
+      var descartar = jgChatDescartarProximaGravacao;
+      jgChatDescartarProximaGravacao = false;
+      var chunks = jgChatAudioChunks;
+      jgChatAudioChunks = [];
+      if (descartar || chunks.length === 0) return;
+      var blob = new Blob(chunks, { type: (jgChatMediaRecorder && jgChatMediaRecorder.mimeType) || mime || "audio/webm" });
+      jgChatEnviarAudio(blob, jgChatGravacaoSegundos);
+    };
+    jgChatMediaRecorder.start();
+    jgChatGravando = true;
+    jgChatGravacaoSegundos = 0;
+    document.getElementById("jg-chat-gravar-btn").classList.add("gravando");
+    document.getElementById("jg-chat-gravando-info").style.display = "flex";
+    document.getElementById("jg-chat-timer").textContent = "0:00";
+    jgChatGravacaoTimer = setInterval(function() {
+      jgChatGravacaoSegundos++;
+      document.getElementById("jg-chat-timer").textContent = jgFormatarDuracao(jgChatGravacaoSegundos);
+      if (jgChatGravacaoSegundos >= 120) jgChatPararGravacao(true);
+    }, 1000);
+  }).catch(function() {
+    mostrarToast("Não consegui acessar o microfone. Confira as permissões.");
+  });
+}
+
+function jgChatPararGravacao(enviar) {
+  if (!jgChatGravando) return;
+  jgChatGravando = false;
+  jgChatDescartarProximaGravacao = !enviar;
+  clearInterval(jgChatGravacaoTimer);
+  document.getElementById("jg-chat-gravar-btn").classList.remove("gravando");
+  document.getElementById("jg-chat-gravando-info").style.display = "none";
+  if (jgChatMediaRecorder && jgChatMediaRecorder.state !== "inactive") {
+    jgChatMediaRecorder.stop();
+  }
+}
+
+function jgChatCancelarGravacao() {
+  jgChatPararGravacao(false);
+}
+
+function jgChatEnviarAudio(blob, duracaoSeg) {
+  var quem = jgChatQuemSou();
+  if (!quem) { mostrarToast("Escolha quem é você antes de enviar."); return; }
+  var ext = blob.type.indexOf("mp4") >= 0 ? "m4a" : (blob.type.indexOf("aac") >= 0 ? "aac" : "webm");
+  var path = "jogo-audios/" + Date.now() + "_" + Math.random().toString(36).slice(2, 8) + "." + ext;
+  var storageUrl = SUPABASE_URL + "/storage/v1/object/midias/" + path;
+  fetch(storageUrl, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": blob.type || "audio/webm",
+      "x-upsert": "true"
+    },
+    body: blob
+  }).then(function(r) {
+    return r.json().then(function(data) {
+      if (!r.ok) throw new Error((data && (data.message || data.error)) || ("HTTP " + r.status));
+      return data;
+    });
+  }).then(function() {
+    var publicUrl = SUPABASE_URL + "/storage/v1/object/public/midias/" + path;
+    return api("/rest/v1/jogo_mensagens", {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + session.access_token,
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify({ jogador: quem, tipo: "audio", url: publicUrl, path: "midias/" + path, duracao: duracaoSeg })
+    });
+  }).then(function() {
+    vibrar();
+    jgChatPoll();
+  }).catch(function(e) {
+    console.error("Erro ao enviar áudio:", e);
+    mostrarToast("Não deu pra enviar o áudio agora.");
+  });
+}
+
+function jgChatTocarAudio(id) {
+  var msg = jgChatMensagens.find(function(m) { return String(m.id) === String(id); });
+  if (!msg || !msg.url) return;
+  var btns = document.querySelectorAll(".jg-chat-play");
+  if (jgChatAudioAtual && String(jgChatAudioAtualId) === String(id)) {
+    jgChatAudioAtual.pause();
+    jgChatAudioAtual = null;
+    jgChatAudioAtualId = null;
+    btns.forEach(function(b) { b.textContent = "▶"; b.classList.remove("tocando"); });
+    return;
+  }
+  if (jgChatAudioAtual) jgChatAudioAtual.pause();
+  btns.forEach(function(b) { b.textContent = "▶"; b.classList.remove("tocando"); });
+  var audio = new Audio(msg.url);
+  jgChatAudioAtual = audio;
+  jgChatAudioAtualId = id;
+  var btn = document.querySelector('.jg-chat-play[data-id="' + id + '"]');
+  if (btn) { btn.textContent = "⏸"; btn.classList.add("tocando"); }
+  audio.play().catch(function() { mostrarToast("Não deu pra tocar o áudio."); });
+  audio.onended = function() {
+    if (btn) { btn.textContent = "▶"; btn.classList.remove("tocando"); }
+    jgChatAudioAtual = null;
+    jgChatAudioAtualId = null;
+  };
+}
+
+function jgChatApagar(id) {
+  var msg = jgChatMensagens.find(function(m) { return String(m.id) === String(id); });
+  if (!msg) return;
+  if (!confirm("Apagar essa mensagem?")) return;
+  api("/rest/v1/jogo_mensagens?id=eq." + id, {
+    method: "DELETE",
+    headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + session.access_token }
+  }).then(function(r) {
+    if (!r.ok) { mostrarToast("Não deu pra apagar."); return; }
+    if (msg.tipo === "audio" && msg.path) {
+      fetch(SUPABASE_URL + "/storage/v1/object/" + msg.path, {
+        method: "DELETE",
+        headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + session.access_token }
+      }).catch(function() {});
+    }
+    jgChatMensagens = jgChatMensagens.filter(function(m) { return String(m.id) !== String(id); });
+    jgChatRenderizarLista();
+  }).catch(function() { mostrarToast("Não deu pra apagar."); });
 }
 
 function ajustarGrade(campo, delta) {

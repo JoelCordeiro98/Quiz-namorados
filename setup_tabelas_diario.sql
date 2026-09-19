@@ -213,3 +213,27 @@ on pergunta_respostas for all
 to authenticated
 using (true)
 with check (true);
+
+-- Chat do jogo "Pontos e Caixas" (texto e mensagens de voz trocados entre os dois
+-- aparelhos enquanto jogam). "jogador" é 'a' ou 'b', igual ao Jogador 1/Jogador 2 do
+-- jogo, pra saber quem mandou. Áudios ficam no bucket "midias" já existente, dentro da
+-- pasta "jogo-audios/". Mensagens ficam acumuladas até serem apagadas manualmente.
+create table if not exists jogo_mensagens (
+  id uuid primary key default gen_random_uuid(),
+  jogador text not null check (jogador in ('a', 'b')),
+  tipo text not null check (tipo in ('audio', 'texto')),
+  texto text,
+  url text,
+  path text,
+  duracao numeric,
+  criado_em timestamptz default now()
+);
+
+alter table jogo_mensagens enable row level security;
+
+drop policy if exists "authenticated full access jogo_mensagens" on jogo_mensagens;
+create policy "authenticated full access jogo_mensagens"
+on jogo_mensagens for all
+to authenticated
+using (true)
+with check (true);
