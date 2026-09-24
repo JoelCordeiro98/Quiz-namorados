@@ -247,3 +247,42 @@ on jogo_mensagens for all
 to authenticated
 using (true)
 with check (true);
+
+-- O chat deixou de ser só do jogo — agora é uma conversa geral do app, acessível de
+-- qualquer tela. "jogador" passa a guardar o perfil (id de "perfis" — ver abaixo) de quem
+-- mandou; solta o check antigo (que só aceitava 'a'/'b') e aceita os valores novos também,
+-- sem quebrar mensagens antigas que já tenham sido enviadas com 'a'/'b'.
+alter table jogo_mensagens drop constraint if exists jogo_mensagens_jogador_check;
+alter table jogo_mensagens add constraint jogo_mensagens_jogador_check
+  check (jogador in ('a', 'b', 'joel', 'ranny'));
+
+-- Perfis (Joel / Ranny): nome e foto de cada um, editável pelo próprio app. Usado pra
+-- identificar "quem fez o quê" nas Novidades e no chat.
+create table if not exists perfis (
+  id text primary key check (id in ('joel', 'ranny')),
+  nome text not null,
+  foto_url text,
+  atualizado_em timestamptz default now()
+);
+
+insert into perfis (id, nome) values ('joel', 'Joel') on conflict (id) do nothing;
+insert into perfis (id, nome) values ('ranny', 'Ranny') on conflict (id) do nothing;
+
+alter table perfis enable row level security;
+
+drop policy if exists "authenticated full access perfis" on perfis;
+create policy "authenticated full access perfis"
+on perfis for all
+to authenticated
+using (true)
+with check (true);
+
+-- "Novidades" na Home: cada tabela de conteúdo ganha uma coluna "autor" (id de perfis)
+-- guardando quem adicionou aquele item, preenchida automaticamente pelo app a partir do
+-- perfil escolhido no aparelho. Itens antigos ficam com autor nulo (não aparecem nas
+-- Novidades, só o que for adicionado a partir de agora).
+alter table midias add column if not exists autor text references perfis(id);
+alter table textos add column if not exists autor text references perfis(id);
+alter table desejos add column if not exists autor text references perfis(id);
+alter table musicas add column if not exists autor text references perfis(id);
+alter table indicacoes add column if not exists autor text references perfis(id);
