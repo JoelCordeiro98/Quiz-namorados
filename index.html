@@ -68,6 +68,29 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .hero-tag{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--redl);border:1px solid rgba(192,57,43,0.4);padding:0.25rem 0.9rem;border-radius:50px;margin-bottom:0.5rem}
 .hero-contador{font-size:0.72rem;color:rgba(255,255,255,0.55);letter-spacing:0.3px;margin-bottom:0.7rem;font-variant-numeric:tabular-nums}
 .hero-title{font-family:"Playfair Display",serif;font-size:clamp(1.8rem,6vw,2.8rem);line-height:1.2}
+.perfil-bubble{position:absolute;top:1rem;right:1rem;z-index:2;width:42px;height:42px;border-radius:50%;padding:0;border:2px solid rgba(255,255,255,0.5);background:var(--blk3);cursor:pointer;overflow:hidden}
+.perfil-bubble-avatar{width:100%;height:100%;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-family:"Playfair Display",serif;font-weight:700;font-size:1.1rem;color:#fff}
+.perfil-picker-overlay{display:none;position:fixed;inset:0;z-index:950;background:rgba(0,0,0,0.9);align-items:center;justify-content:center;padding:1.5rem}
+.perfil-picker-overlay.show{display:flex}
+.perfil-picker-box{position:relative;background:var(--blk2);border:1.5px solid rgba(192,57,43,0.35);border-radius:24px;padding:2.2rem 1.6rem 1.6rem;text-align:center;max-width:340px;width:100%}
+.perfil-picker-fechar{position:absolute;top:0.9rem;right:0.9rem;background:rgba(255,255,255,0.08);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:0.85rem;cursor:pointer}
+.perfil-picker-titulo{font-family:"Playfair Display",serif;font-size:1.3rem;margin-bottom:1.6rem;color:#fff}
+.perfil-picker-opcoes{display:flex;gap:1.4rem;justify-content:center;margin-bottom:1.2rem}
+.perfil-picker-card{display:flex;flex-direction:column;align-items:center;gap:0.4rem}
+.perfil-picker-avatar-btn{background:none;border:none;padding:0;cursor:pointer}
+.perfil-picker-avatar{width:76px;height:76px;border-radius:50%;background-size:cover;background-position:center;background-color:var(--blk3);border:2px solid rgba(192,57,43,0.4);display:flex;align-items:center;justify-content:center;font-family:"Playfair Display",serif;font-weight:700;font-size:1.8rem;color:#fff;transition:border-color 0.2s}
+.perfil-picker-avatar-btn:active .perfil-picker-avatar{border-color:var(--redl)}
+.perfil-picker-nome{font-size:0.85rem;color:#fff;font-weight:700}
+.perfil-picker-editar{background:none;border:none;color:rgba(255,255,255,0.4);font-size:0.66rem;cursor:pointer;padding:0.2rem}
+.perfil-picker-dica{font-size:0.7rem;color:var(--gray);margin-top:0.4rem;line-height:1.5}
+.hcard-novidades{margin-bottom:1rem;background:var(--blk3);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:1rem 1.1rem}
+.novidades-titulo{font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--redl);margin-bottom:0.7rem}
+.novidades-item{display:flex;align-items:center;gap:0.6rem;padding:0.4rem 0;border-top:1px solid rgba(255,255,255,0.06)}
+.novidades-item:first-child{border-top:none;padding-top:0}
+.novidades-icon{font-size:1.1rem;flex-shrink:0}
+.novidades-texto{flex:1;min-width:0;font-size:0.78rem;color:rgba(255,255,255,0.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.novidades-texto b{color:#fff}
+.novidades-meta{font-size:0.64rem;color:var(--gray);flex-shrink:0;white-space:nowrap}
 .hero-title em{color:var(--redl);font-style:italic}
 .diario-section{padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);text-align:center;position:relative}
 .mascote{position:absolute;pointer-events:none;mix-blend-mode:screen;z-index:1;-webkit-user-drag:none;user-select:none}
@@ -358,20 +381,15 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .jg-chat-msg.minha{align-self:flex-end;align-items:flex-end}
 .jg-chat-msg.delas{align-self:flex-start;align-items:flex-start}
 .jg-chat-msg-bolha{border-radius:16px;padding:0.55rem 0.8rem;font-size:0.85rem;line-height:1.45;color:#fff;word-break:break-word}
-.jg-chat-msg.minha .jg-chat-msg-bolha{background:rgba(var(--jg-cor-a-rgb,231,76,60),0.28);border:1px solid rgba(var(--jg-cor-a-rgb,231,76,60),0.5);border-bottom-right-radius:4px}
-.jg-chat-msg.delas .jg-chat-msg-bolha{background:rgba(var(--jg-cor-b-rgb,230,168,26),0.2);border:1px solid rgba(var(--jg-cor-b-rgb,230,168,26),0.45);border-bottom-left-radius:4px}
-.jg-chat-msg.minha.jogador-b .jg-chat-msg-bolha{background:rgba(var(--jg-cor-b-rgb,230,168,26),0.28);border-color:rgba(var(--jg-cor-b-rgb,230,168,26),0.5)}
-.jg-chat-msg.delas.jogador-a .jg-chat-msg-bolha{background:rgba(var(--jg-cor-a-rgb,231,76,60),0.2);border-color:rgba(var(--jg-cor-a-rgb,231,76,60),0.45)}
+.jg-chat-msg.minha .jg-chat-msg-bolha{background:rgba(192,57,43,0.28);border:1px solid rgba(192,57,43,0.5);border-bottom-right-radius:4px}
+.jg-chat-msg.delas .jg-chat-msg-bolha{background:rgba(230,168,26,0.2);border:1px solid rgba(230,168,26,0.45);border-bottom-left-radius:4px}
+.chat-fab{position:fixed;left:14px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:150;width:46px;height:46px;border-radius:50%;background:var(--red);border:none;color:#fff;font-size:1.15rem;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center}
 .jg-chat-msg-bolha.audio{display:flex;align-items:center;gap:0.6rem;padding:0.4rem 0.7rem 0.4rem 0.4rem}
 .jg-chat-play{background:rgba(255,255,255,0.14);border:none;color:#fff;width:32px;height:32px;min-width:32px;border-radius:50%;font-size:0.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .jg-chat-play.tocando{background:#fff;color:var(--redl)}
 .jg-chat-msg-dur{font-size:0.78rem;color:rgba(255,255,255,0.85)}
 .jg-chat-msg-meta{display:flex;align-items:center;gap:0.4rem;font-size:0.62rem;color:rgba(255,255,255,0.35);margin-top:0.2rem;padding:0 0.2rem}
 .jg-chat-msg-del{background:none;border:none;color:rgba(255,255,255,0.3);font-size:0.75rem;cursor:pointer;padding:0.1rem}
-.jg-chat-quem-picker{padding:0.9rem 1.2rem;border-top:1px solid rgba(255,255,255,0.08);text-align:center}
-.jg-chat-quem-pergunta{font-size:0.78rem;color:rgba(255,255,255,0.6);margin-bottom:0.6rem}
-.jg-chat-quem-opcoes{display:flex;gap:0.7rem}
-.jg-chat-quem-btn{flex:1;padding:0.7rem;border-radius:12px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:#fff;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:"Lato",sans-serif}
 .jg-chat-composer{display:flex;align-items:center;gap:0.5rem;padding:0.8rem 1rem;border-top:1px solid rgba(255,255,255,0.08)}
 .jg-chat-composer input[type=text]{flex:1;padding:0.65rem 0.9rem;border-radius:50px;border:1.5px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#fff;font-size:0.85rem;font-family:"Lato",sans-serif;outline:none}
 .jg-chat-icone-btn{background:rgba(255,255,255,0.08);border:none;color:#fff;width:38px;height:38px;min-width:38px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
@@ -498,6 +516,9 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
         <div class="hero-contador" id="hero-contador"></div>
         <h1 class="hero-title">Nosso<br><em>Espaço</em></h1>
       </div>
+      <button type="button" class="perfil-bubble" id="perfil-bubble" onclick="abrirEscolhaPerfil(true)" aria-label="Seu perfil">
+        <div class="perfil-bubble-avatar" id="perfil-bubble-avatar"></div>
+      </button>
     </div>
 
     <div class="diario-section">
@@ -585,6 +606,10 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
           <div class="hcard-pergunta-sub">Toque pra responder</div>
         </div>
         <div class="hcard-pergunta-arrow">›</div>
+      </div>
+      <div class="hcard-novidades" id="hcard-novidades" style="display:none">
+        <div class="novidades-titulo">📰 Novidades</div>
+        <div class="novidades-lista" id="novidades-lista"></div>
       </div>
       <div class="hcard-mini" onclick="window.open('https://joelcordeiro98.github.io/Quiz-namorados/quiz-namorados-1.html?portal=true','_blank')">
         <div class="hcard-mini-icon">❤️</div>
@@ -752,6 +777,26 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <button type="button" class="sp-mini-esconder" onclick="event.stopPropagation();spEsconderPlayer()" aria-label="Esconder player">▾</button>
   </div>
   <button type="button" class="sp-mini-bolha" id="sp-mini-bolha" onclick="spMostrarPlayer()" aria-label="Mostrar player">🎵</button>
+
+  <!-- CONVERSA (chat geral do app: texto + áudio, acessível de qualquer tela) -->
+  <button type="button" class="chat-fab" id="chat-fab" onclick="jgChatTogglePainel()" aria-label="Conversa">💬<span class="jg-chat-badge" id="jg-chat-badge"></span></button>
+  <div class="jg-chat-painel" id="jg-chat-painel">
+    <div class="jg-chat-hdr">
+      <div class="jg-chat-hdr-titulo">💬 Conversa</div>
+      <div class="jg-chat-hdr-sub" id="jg-chat-quem-atual" onclick="abrirEscolhaPerfil(true)"></div>
+      <button class="jg-chat-fechar" onclick="jgChatFecharPainel()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="jg-chat-lista" id="jg-chat-lista"></div>
+    <div class="jg-chat-composer" id="jg-chat-composer">
+      <input type="text" id="jg-chat-input" name="jg-chat-input" placeholder="Escreva algo..." autocomplete="off" onkeydown="jgChatInputKeydown(event)">
+      <button type="button" class="jg-chat-icone-btn jg-chat-gravar" id="jg-chat-gravar-btn" onclick="jgChatAlternarGravacao()" aria-label="Gravar áudio">🎤</button>
+      <button type="button" class="jg-chat-icone-btn jg-chat-enviar" id="jg-chat-enviar-btn" onclick="jgChatEnviarTexto()" aria-label="Enviar">➤</button>
+    </div>
+    <div class="jg-chat-gravando-info" id="jg-chat-gravando-info" style="display:none">
+      🔴 Gravando... <span id="jg-chat-timer">0:00</span>
+      <button type="button" class="jg-chat-cancelar-gravacao" onclick="jgChatCancelarGravacao()">Cancelar</button>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL FOTO -->
@@ -985,7 +1030,6 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <button class="leitura-fechar" onclick="fecharJogo()" aria-label="Fechar">✕</button>
     <div class="jg-hdr-titulo">Pontos e Caixas</div>
     <div class="leitura-hdr-actions">
-      <button class="leitura-acao" id="jg-chat-toggle" onclick="jgChatTogglePainel()" aria-label="Conversa" style="display:none;position:relative">💬<span class="jg-chat-badge" id="jg-chat-badge"></span></button>
       <button class="leitura-acao" onclick="mostrarConfigJogo()" aria-label="Configurações">⚙</button>
     </div>
   </div>
@@ -1071,31 +1115,6 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </div>
     <div class="jg-controles">
       <button class="jg-btn jg-btn-fim" onclick="finalizarJogo()">🏁 Finalizar jogo</button>
-    </div>
-  </div>
-
-  <div class="jg-chat-painel" id="jg-chat-painel">
-    <div class="jg-chat-hdr">
-      <div class="jg-chat-hdr-titulo">💬 Conversa</div>
-      <div class="jg-chat-hdr-sub" id="jg-chat-quem-atual" onclick="jgChatAbrirEscolhaQuem()"></div>
-      <button class="jg-chat-fechar" onclick="jgChatFecharPainel()" aria-label="Fechar">✕</button>
-    </div>
-    <div class="jg-chat-lista" id="jg-chat-lista"></div>
-    <div class="jg-chat-quem-picker" id="jg-chat-quem-picker" style="display:none">
-      <div class="jg-chat-quem-pergunta">Você é...</div>
-      <div class="jg-chat-quem-opcoes">
-        <button type="button" class="jg-chat-quem-btn" id="jg-chat-quem-a" onclick="jgChatEscolherQuem('a')">Jogador 1</button>
-        <button type="button" class="jg-chat-quem-btn" id="jg-chat-quem-b" onclick="jgChatEscolherQuem('b')">Jogador 2</button>
-      </div>
-    </div>
-    <div class="jg-chat-composer" id="jg-chat-composer">
-      <input type="text" id="jg-chat-input" name="jg-chat-input" placeholder="Escreva algo..." autocomplete="off" onkeydown="jgChatInputKeydown(event)">
-      <button type="button" class="jg-chat-icone-btn jg-chat-gravar" id="jg-chat-gravar-btn" onclick="jgChatAlternarGravacao()" aria-label="Gravar áudio">🎤</button>
-      <button type="button" class="jg-chat-icone-btn jg-chat-enviar" id="jg-chat-enviar-btn" onclick="jgChatEnviarTexto()" aria-label="Enviar">➤</button>
-    </div>
-    <div class="jg-chat-gravando-info" id="jg-chat-gravando-info" style="display:none">
-      🔴 Gravando... <span id="jg-chat-timer">0:00</span>
-      <button type="button" class="jg-chat-cancelar-gravacao" onclick="jgChatCancelarGravacao()">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1240,6 +1259,32 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- ESCOLHA / TROCA DE PERFIL -->
+<div class="perfil-picker-overlay" id="perfil-picker-overlay">
+  <div class="perfil-picker-box">
+    <button type="button" class="perfil-picker-fechar" id="perfil-picker-fechar" onclick="fecharEscolhaPerfil()" aria-label="Fechar" style="display:none">✕</button>
+    <div class="perfil-picker-titulo">Quem é você? 💕</div>
+    <div class="perfil-picker-opcoes">
+      <div class="perfil-picker-card">
+        <button type="button" class="perfil-picker-avatar-btn" onclick="escolherPerfil('joel')">
+          <div class="perfil-picker-avatar" id="pp-avatar-joel"></div>
+        </button>
+        <div class="perfil-picker-nome" id="pp-nome-joel">Joel</div>
+        <button type="button" class="perfil-picker-editar" onclick="trocarFotoPerfil('joel')">✎ Foto</button>
+      </div>
+      <div class="perfil-picker-card">
+        <button type="button" class="perfil-picker-avatar-btn" onclick="escolherPerfil('ranny')">
+          <div class="perfil-picker-avatar" id="pp-avatar-ranny"></div>
+        </button>
+        <div class="perfil-picker-nome" id="pp-nome-ranny">Ranny</div>
+        <button type="button" class="perfil-picker-editar" onclick="trocarFotoPerfil('ranny')">✎ Foto</button>
+      </div>
+    </div>
+    <div class="perfil-picker-dica">Toque no seu nome pra entrar como você. Dá pra trocar depois tocando no seu perfil na tela inicial.</div>
+  </div>
+</div>
+<input type="file" id="perfil-foto-input" accept="image/*" style="display:none" onchange="perfilFotoSelecionada(this)">
 
 <script>
 var SUPABASE_URL = "https://yokmbuheeqjbawrmpoco.supabase.co";
@@ -1388,6 +1433,7 @@ function fazerLogout() {
   session = null;
   localStorage.removeItem("sb_session");
   clearInterval(contadorNamoroTimer);
+  pararPollingChatGlobal();
   midias = []; textos = []; desejos = [];
   mostrarLogin();
 }
@@ -1471,7 +1517,6 @@ function iniciarPollingJogo() {
         if (jogo.finalizado) exibirTelaVencedor();
       }
     });
-    if (document.getElementById("jg-chat-toggle").style.display !== "none") jgChatPoll();
   }, 2500);
 }
 
@@ -1492,7 +1537,6 @@ function abrirJogo() {
       jogo = null;
       mostrarConfigJogo();
     }
-    if (jogo && !jogo.finalizado) jgChatPoll();
     iniciarPollingJogo();
   });
 }
@@ -1502,7 +1546,6 @@ function fecharJogo() {
     if (!confirm("Sair agora não apaga a partida — ela continua salva pra você (ou seu par) continuar depois. Fechar mesmo assim?")) return;
   }
   pararPollingJogo();
-  jgChatFecharPainel();
   document.getElementById("jogo-view").classList.remove("show");
 }
 
@@ -1516,8 +1559,6 @@ function mostrarConfigJogo() {
   document.getElementById("jg-carregando").style.display = "none";
   document.getElementById("jg-setup").style.display = "block";
   document.getElementById("jg-jogo").style.display = "none";
-  document.getElementById("jg-chat-toggle").style.display = "none";
-  jgChatFecharPainel();
 }
 
 function mostrarTelaJogoAtiva() {
@@ -1532,8 +1573,6 @@ function mostrarTelaJogoAtiva() {
   document.getElementById("jg-letra-b").textContent = jogo.nomeB.charAt(0).toUpperCase();
   document.getElementById("jg-dado-row").style.display = jogo.modoDado ? "flex" : "none";
   aplicarCoresJogo();
-  document.getElementById("jg-chat-toggle").style.display = "inline-block";
-  jgChatAtualizarQuemLabel();
 }
 
 // Converte "#rrggbb" (ou "#rgb") em "r,g,b" pra usar em rgba() via CSS var
@@ -1584,50 +1623,26 @@ function jgFormatarTempoRelativo(iso) {
   return "há " + Math.floor(diffH / 24) + "d";
 }
 
-// "Quem sou eu" é local a cada aparelho (não sincronizado) — reaproveita os nomes
-// já digitados na configuração do jogo (Jogador 1 / Jogador 2), só marca qual dos
-// dois lados este aparelho está representando no chat.
+// "Quem sou eu" no chat agora é o mesmo perfil escolhido pro app todo (Joel/Ranny) —
+// não precisa mais perguntar separado, só reaproveita perfilAtual().
 function jgChatQuemSou() {
-  return localStorage.getItem("jg_chat_quem");
+  return perfilAtual();
 }
 
 function jgChatAtualizarQuemLabel() {
   var quem = jgChatQuemSou();
   var el = document.getElementById("jg-chat-quem-atual");
   if (!el) return;
-  if (!quem) { el.textContent = "Quem é você? →"; return; }
-  var nome = quem === "a" ? ((jogo && jogo.nomeA) || "Jogador 1") : ((jogo && jogo.nomeB) || "Jogador 2");
-  el.textContent = "Você: " + nome + " (trocar)";
-}
-
-function jgChatAbrirEscolhaQuem() {
-  document.getElementById("jg-chat-quem-a").textContent = (jogo && jogo.nomeA) || "Jogador 1";
-  document.getElementById("jg-chat-quem-b").textContent = (jogo && jogo.nomeB) || "Jogador 2";
-  document.getElementById("jg-chat-quem-picker").style.display = "block";
-  document.getElementById("jg-chat-composer").style.display = "none";
-  document.getElementById("jg-chat-gravando-info").style.display = "none";
-}
-
-function jgChatEscolherQuem(quem) {
-  localStorage.setItem("jg_chat_quem", quem);
-  document.getElementById("jg-chat-quem-picker").style.display = "none";
-  document.getElementById("jg-chat-composer").style.display = "flex";
-  jgChatAtualizarQuemLabel();
-  jgChatRenderizarLista();
+  el.textContent = quem ? "Você: " + perfilNome(quem) + " (trocar)" : "Quem é você? →";
 }
 
 function jgChatTogglePainel() {
+  if (!jgChatQuemSou()) { abrirEscolhaPerfil(true); mostrarToast("Escolha seu perfil primeiro."); return; }
   var painel = document.getElementById("jg-chat-painel");
   var abrindo = !painel.classList.contains("show");
   painel.classList.toggle("show", abrindo);
   if (abrindo) {
     jgChatAtualizarQuemLabel();
-    if (!jgChatQuemSou()) {
-      jgChatAbrirEscolhaQuem();
-    } else {
-      document.getElementById("jg-chat-quem-picker").style.display = "none";
-      document.getElementById("jg-chat-composer").style.display = "flex";
-    }
     jgChatPoll();
   }
 }
@@ -1668,8 +1683,8 @@ function jgChatRenderizarLista() {
   }
   lista.innerHTML = jgChatMensagens.map(function(m) {
     var minha = quemSou && m.jogador === quemSou;
-    var classes = "jg-chat-msg " + (minha ? "minha" : "delas") + " jogador-" + m.jogador;
-    var nome = m.jogador === "a" ? ((jogo && jogo.nomeA) || "Jogador 1") : ((jogo && jogo.nomeB) || "Jogador 2");
+    var classes = "jg-chat-msg " + (minha ? "minha" : "delas");
+    var nome = perfilNome(m.jogador);
     var corpo;
     if (m.tipo === "audio") {
       corpo = '<div class="jg-chat-msg-bolha audio"><button type="button" class="jg-chat-play" data-id="' + m.id + '" onclick="jgChatTocarAudio(\'' + m.id + '\')">▶</button><span class="jg-chat-msg-dur">' + jgFormatarDuracao(m.duracao) + '</span></div>';
@@ -1689,7 +1704,7 @@ function jgChatInputKeydown(event) {
 
 function jgChatEnviarTexto() {
   var quem = jgChatQuemSou();
-  if (!quem) { jgChatAbrirEscolhaQuem(); mostrarToast("Escolha quem é você antes de mandar mensagem."); return; }
+  if (!quem) { abrirEscolhaPerfil(true); mostrarToast("Escolha seu perfil antes de mandar mensagem."); return; }
   var input = document.getElementById("jg-chat-input");
   var texto = input.value.trim();
   if (!texto) return;
@@ -1711,7 +1726,7 @@ function jgChatEnviarTexto() {
 
 function jgChatAlternarGravacao() {
   if (jgChatGravando) { jgChatPararGravacao(true); return; }
-  if (!jgChatQuemSou()) { jgChatAbrirEscolhaQuem(); mostrarToast("Escolha quem é você antes de gravar."); return; }
+  if (!jgChatQuemSou()) { abrirEscolhaPerfil(true); mostrarToast("Escolha seu perfil antes de gravar."); return; }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     mostrarToast("Esse navegador não permite gravar áudio.");
     return;
@@ -2858,6 +2873,7 @@ function ativarPullToRefreshGaleria() {
 }
 
 function carregarTudo() {
+  carregarPerfis();
   carregarMidias();
   carregarTextos();
   carregarDesejos();
@@ -2868,6 +2884,200 @@ function carregarTudo() {
   verificarAniversario();
   iniciarContadorNamoro();
   atualizarResumoArvore();
+  carregarNovidades();
+  iniciarPollingChatGlobal();
+}
+
+// Chat agora é do app inteiro, não só do jogo — fica de olho em mensagens novas o tempo
+// todo enquanto o app estiver aberto (não só dentro da tela do jogo).
+var chatPollingTimer = null;
+
+function iniciarPollingChatGlobal() {
+  clearInterval(chatPollingTimer);
+  chatPollingTimer = setInterval(function() {
+    if (perfilAtual()) jgChatPoll();
+  }, 4000);
+}
+
+function pararPollingChatGlobal() {
+  clearInterval(chatPollingTimer);
+}
+
+// ===== PERFIS (Joel / Ranny): identidade do aparelho + fotinho editável =====
+// Cada aparelho guarda localmente (localStorage) qual dos dois perfis é "você" aqui —
+// escolhido uma vez, com opção de trocar depois tocando no próprio perfil na Home.
+var perfis = {
+  joel: { id: "joel", nome: "Joel", foto_url: null },
+  ranny: { id: "ranny", nome: "Ranny", foto_url: null }
+};
+var perfilEditandoFoto = null;
+
+function perfilAtual() {
+  return localStorage.getItem("perfil_atual");
+}
+
+function perfilNome(id) {
+  return (perfis[id] && perfis[id].nome) || (id === "joel" ? "Joel" : id === "ranny" ? "Ranny" : "Alguém");
+}
+
+function perfilFoto(id) {
+  return perfis[id] ? perfis[id].foto_url : null;
+}
+
+function carregarPerfis() {
+  return api("/rest/v1/perfis?select=*")
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) {
+      if (Array.isArray(data)) {
+        data.forEach(function(p) { perfis[p.id] = p; });
+      }
+      atualizarUIPerfil();
+      if (!perfilAtual()) abrirEscolhaPerfil(false);
+    })
+    .catch(function() {});
+}
+
+function pintarAvatar(el, id) {
+  if (!el) return;
+  var foto = perfilFoto(id);
+  if (foto) {
+    el.style.backgroundImage = "url(" + foto + ")";
+    el.textContent = "";
+  } else {
+    el.style.backgroundImage = "none";
+    el.textContent = perfilNome(id).charAt(0).toUpperCase();
+  }
+}
+
+function atualizarUIPerfil() {
+  pintarAvatar(document.getElementById("pp-avatar-joel"), "joel");
+  pintarAvatar(document.getElementById("pp-avatar-ranny"), "ranny");
+  document.getElementById("pp-nome-joel").textContent = perfilNome("joel");
+  document.getElementById("pp-nome-ranny").textContent = perfilNome("ranny");
+  var atual = perfilAtual();
+  var bolha = document.getElementById("perfil-bubble-avatar");
+  if (bolha) {
+    if (atual) pintarAvatar(bolha, atual);
+    else { bolha.style.backgroundImage = "none"; bolha.textContent = "?"; }
+  }
+}
+
+// "fechavel": true quando é pra trocar de perfil (tem botão ✕); false na escolha
+// obrigatória da primeira vez (sem jeito de fechar sem escolher).
+function abrirEscolhaPerfil(fechavel) {
+  document.getElementById("perfil-picker-fechar").style.display = fechavel ? "block" : "none";
+  atualizarUIPerfil();
+  document.getElementById("perfil-picker-overlay").classList.add("show");
+}
+
+function fecharEscolhaPerfil() {
+  if (!perfilAtual()) return; // não deixa fechar sem escolher na primeira vez
+  document.getElementById("perfil-picker-overlay").classList.remove("show");
+}
+
+function escolherPerfil(id) {
+  localStorage.setItem("perfil_atual", id);
+  atualizarUIPerfil();
+  document.getElementById("perfil-picker-overlay").classList.remove("show");
+  mostrarToast("Oi, " + perfilNome(id) + "! 💕");
+  jgChatAtualizarQuemLabel();
+  jgChatRenderizarLista();
+}
+
+function trocarFotoPerfil(id) {
+  perfilEditandoFoto = id;
+  document.getElementById("perfil-foto-input").click();
+}
+
+function perfilFotoSelecionada(input) {
+  var file = input.files && input.files[0];
+  var id = perfilEditandoFoto;
+  input.value = "";
+  if (!file || !id) return;
+  prepararArquivo(file).then(function(fileFinal) {
+    var path = "perfis/" + id + ".jpg";
+    return fetch(SUPABASE_URL + "/storage/v1/object/midias/" + path, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + session.access_token,
+        "Content-Type": fileFinal.type || "image/jpeg",
+        "x-upsert": "true"
+      },
+      body: fileFinal
+    }).then(function(r) {
+      if (!r.ok) throw new Error("Falha no upload");
+      var url = SUPABASE_URL + "/storage/v1/object/public/midias/" + path + "?t=" + Date.now();
+      return api("/rest/v1/perfis?id=eq." + id, {
+        method: "PATCH",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + session.access_token,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify({ foto_url: url })
+      }).then(function() {
+        perfis[id] = perfis[id] || { id: id };
+        perfis[id].foto_url = url;
+        atualizarUIPerfil();
+        mostrarToast("✓ Foto atualizada!");
+      });
+    });
+  }).catch(function() {
+    mostrarToast("Não deu pra atualizar a foto agora.");
+  });
+}
+
+// ===== NOVIDADES: resumo na Home do que cada um foi adicionando pelo app =====
+// Só entram itens com "autor" preenchido — ou seja, adicionados a partir de quando esse
+// recurso existe. Coisas antigas (de antes dos perfis) não aparecem aqui.
+function carregarNovidades() {
+  var q = "&autor=not.is.null&order=criado_em.desc&limit=5";
+  Promise.all([
+    api("/rest/v1/midias?select=tipo,legenda_j,legenda_r,autor,criado_em" + q).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; }),
+    api("/rest/v1/textos?select=titulo,autor,criado_em" + q).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; }),
+    api("/rest/v1/desejos?select=titulo,autor,criado_em" + q).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; }),
+    api("/rest/v1/musicas?select=titulo,artista,autor,criado_em" + q).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; }),
+    api("/rest/v1/indicacoes?select=titulo,autor,criado_em" + q).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; })
+  ]).then(function(res) {
+    var itens = [];
+    (res[0] || []).forEach(function(m) {
+      var legenda = m.legenda_j || m.legenda_r;
+      itens.push({
+        icone: m.tipo === "video" ? "🎬" : "📷",
+        texto: (m.tipo === "video" ? "adicionou um vídeo" : "adicionou uma foto") + (legenda ? ' — "' + legenda + '"' : ""),
+        autor: m.autor, data: m.criado_em
+      });
+    });
+    (res[1] || []).forEach(function(t) {
+      itens.push({ icone: "✍️", texto: 'escreveu "' + (t.titulo || "um texto") + '"', autor: t.autor, data: t.criado_em });
+    });
+    (res[2] || []).forEach(function(d) {
+      itens.push({ icone: "✨", texto: 'adicionou o desejo "' + (d.titulo || "") + '"', autor: d.autor, data: d.criado_em });
+    });
+    (res[3] || []).forEach(function(m) {
+      itens.push({ icone: "🎵", texto: "adicionou a música " + (m.titulo || "") + (m.artista ? " — " + m.artista : ""), autor: m.autor, data: m.criado_em });
+    });
+    (res[4] || []).forEach(function(i) {
+      itens.push({ icone: "🎬", texto: 'indicou "' + (i.titulo || "") + '"', autor: i.autor, data: i.criado_em });
+    });
+
+    itens.sort(function(a, b) { return new Date(b.data) - new Date(a.data); });
+    itens = itens.slice(0, 6);
+
+    var card = document.getElementById("hcard-novidades");
+    var lista = document.getElementById("novidades-lista");
+    if (!card || !lista) return;
+    if (itens.length === 0) { card.style.display = "none"; return; }
+    card.style.display = "block";
+    lista.innerHTML = itens.map(function(item) {
+      var nome = perfilNome(item.autor);
+      return '<div class="novidades-item"><div class="novidades-icon">' + item.icone + '</div>' +
+        '<div class="novidades-texto"><b>' + nome + '</b> ' + item.texto + '</div>' +
+        '<div class="novidades-meta">' + jgFormatarTempoRelativo(item.data) + '</div></div>';
+    }).join("");
+  }).catch(function() {});
 }
 
 // ===== CONTADOR DE NAMORO (anos, meses, dias e relógio ao vivo) =====
@@ -3505,6 +3715,7 @@ function salvarFotos() {
     document.getElementById("file-input").value = "";
     mostrarToast("✓ Adicionado com sucesso!");
     carregarMidias();
+    carregarNovidades();
   }
 
   function processar(i) {
@@ -3559,7 +3770,8 @@ function salvarFotos() {
             path: "midias/" + path,
             legenda_j: item.legendaJ ? item.legendaJ.trim() : null,
             legenda_r: item.legendaR ? item.legendaR.trim() : null,
-            data_evento: item.data || null
+            data_evento: item.data || null,
+            autor: perfilAtual()
           })
         });
       })
@@ -3889,7 +4101,7 @@ function salvarTexto() {
           "Content-Type": "application/json",
           "Prefer": "return=minimal"
         },
-        body: JSON.stringify({ tipo: tipo, titulo: titulo, corpo: corpo })
+        body: JSON.stringify({ tipo: tipo, titulo: titulo, corpo: corpo, autor: perfilAtual() })
       });
 
   req.then(function() {
@@ -3899,6 +4111,7 @@ function salvarTexto() {
     editandoTextoId = null;
     mostrarToast(editando ? "✓ Texto atualizado!" : "✓ Texto salvo!");
     carregarTextos();
+    carregarNovidades();
   });
 }
 
@@ -4022,12 +4235,13 @@ function salvarDesejo() {
       "Content-Type": "application/json",
       "Prefer": "return=minimal"
     },
-    body: JSON.stringify({ titulo: titulo, feito: false })
+    body: JSON.stringify({ titulo: titulo, feito: false, autor: perfilAtual() })
   }).then(function() {
     fecharModal("modal-desejo");
     document.getElementById("des-titulo").value = "";
     mostrarToast("✓ Desejo adicionado!");
     carregarDesejos();
+    carregarNovidades();
   });
 }
 
@@ -4196,11 +4410,12 @@ function salvarIndicacao() {
       "Content-Type": "application/json",
       "Prefer": "return=minimal"
     },
-    body: JSON.stringify({ titulo: titulo, quem: quemSelecionado, assistido: false })
+    body: JSON.stringify({ titulo: titulo, quem: quemSelecionado, assistido: false, autor: perfilAtual() })
   }).then(function() {
     fecharModal("modal-indicacao");
     mostrarToast("✓ Indicação adicionada!");
     carregarIndicacoes();
+    carregarNovidades();
   });
 }
 
@@ -4767,7 +4982,8 @@ function adicionarMusica() {
               artista: artista,
               thumb: thumb,
               letra: letra || null,
-              traducao: traducao || null
+              traducao: traducao || null,
+              autor: perfilAtual()
             })
           });
         });
@@ -4778,6 +4994,7 @@ function adicionarMusica() {
       fecharModal("modal-musicas");
       mostrarToast("✓ Música adicionada!");
       carregarMusicas();
+      carregarNovidades();
     })
     .catch(function() {
       mostrarToast("Erro ao adicionar música.");
@@ -4816,13 +5033,15 @@ function adicionarMusicaSpotify(trackId) {
               artista: artista,
               thumb: thumb,
               letra: letra || null,
-              traducao: traducao || null
+              traducao: traducao || null,
+              autor: perfilAtual()
             })
           }).then(function() {
             document.getElementById("musica-link").value = "";
             fecharModal("modal-musicas");
             mostrarToast("✓ Música adicionada!");
             carregarMusicas();
+            carregarNovidades();
           });
         });
       });
