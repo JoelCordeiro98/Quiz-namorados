@@ -379,6 +379,21 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .dm-peca.joel{background:var(--red)}
 .dm-peca.ranny{background:#E6A81A}
 .dm-peca.rei::after{content:"♛";display:flex;align-items:center;justify-content:center;height:100%;color:rgba(0,0,0,0.55);font-size:0.95rem}
+
+/* ===== JOGO: XADREZ ===== */
+.xz-board{display:grid;grid-template-columns:repeat(8,38px);grid-template-rows:repeat(8,38px);border-radius:10px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.4);flex-shrink:0}
+.xz-sq{width:38px;height:38px;display:flex;align-items:center;justify-content:center;position:relative;font-size:1.65rem;line-height:1}
+.xz-sq.clara{background:#3a3226}
+.xz-sq.escura{background:#1a1512}
+.xz-sq.selecionavel{cursor:pointer}
+.xz-sq.destino::after{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(230,168,26,0.75);box-shadow:0 0 8px rgba(230,168,26,0.6)}
+.xz-sq.destino.captura::after{width:34px;height:34px;border-radius:8px;background:transparent;border:3px solid rgba(230,168,26,0.8);box-shadow:none}
+.xz-sq.origem{box-shadow:inset 0 0 0 3px rgba(230,168,26,0.85)}
+.xz-sq.ultimo{box-shadow:inset 0 0 0 2px rgba(255,255,255,0.4)}
+.xz-sq.xeque{box-shadow:inset 0 0 0 3px rgba(192,57,43,0.9)}
+.xz-peca{cursor:pointer;text-shadow:0 2px 3px rgba(0,0,0,0.6)}
+.xz-peca.joel{color:var(--red)}
+.xz-peca.ranny{color:#E6A81A}
 .jg-chat-badge{position:absolute;top:3px;right:3px;width:9px;height:9px;border-radius:50%;background:var(--redl);border:1.5px solid var(--blk2);display:none}
 .jg-chat-badge.show{display:block}
 .jg-chat-painel{position:fixed;left:0;right:0;bottom:0;z-index:760;background:var(--blk2);border-top:1.5px solid rgba(192,57,43,0.35);border-radius:20px 20px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,0.5);max-height:78vh;display:flex;flex-direction:column;transform:translateY(105%);transition:transform 0.3s ease}
@@ -606,6 +621,12 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
           <div class="hcard-icon">⚫</div>
           <div class="hcard-label">Jogo</div>
           <div class="hcard-title">Dama</div>
+          <div class="hcard-count">Jogar a dois</div>
+        </div>
+        <div class="hcard" onclick="abrirXadrez()">
+          <div class="hcard-icon">♟️</div>
+          <div class="hcard-label">Jogo</div>
+          <div class="hcard-title">Xadrez</div>
           <div class="hcard-count">Jogar a dois</div>
         </div>
       </div>
@@ -1190,6 +1211,48 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   </div>
 </div>
 
+<!-- JOGO: XADREZ -->
+<div class="leitura-view" id="xadrez-view">
+  <div class="jg-hdr">
+    <button class="leitura-fechar" onclick="fecharXadrez()" aria-label="Fechar">✕</button>
+    <div class="jg-hdr-titulo">Xadrez</div>
+    <div class="leitura-hdr-actions">
+      <button class="leitura-acao" onclick="reiniciarXadrezConfirmar()" aria-label="Reiniciar">↺</button>
+    </div>
+  </div>
+
+  <div class="jg-conteudo" id="xz-carregando" style="text-align:center;padding-top:3rem;color:rgba(255,255,255,0.5)">Carregando...</div>
+
+  <div class="jg-conteudo" id="xz-jogo" style="display:none">
+    <div class="jg-scoreboard">
+      <div class="jg-player-chip a">
+        <div class="jg-player-letra" style="background:var(--red)" id="xz-letra-joel">J</div>
+        <div class="jg-player-info">
+          <div class="jg-player-nome" id="xz-nome-joel">Joel</div>
+        </div>
+      </div>
+      <div class="jg-vs">×</div>
+      <div class="jg-player-chip b">
+        <div class="jg-player-info" style="text-align:right">
+          <div class="jg-player-nome" id="xz-nome-ranny">Ranny</div>
+        </div>
+        <div class="jg-player-letra" style="background:#E6A81A" id="xz-letra-ranny">R</div>
+      </div>
+    </div>
+    <div class="jg-turno" id="xz-turno">Vez de Joel</div>
+    <div class="jg-dica" id="xz-dica">Toque numa peça pra ver os movimentos possíveis</div>
+    <div class="jg-board-wrap"><div class="xz-board" id="xz-board"></div></div>
+  </div>
+</div>
+
+<div class="jg-vencedor-overlay" id="xz-vencedor-overlay">
+  <div class="jg-vencedor-box">
+    <div class="jg-vencedor-emoji">🏆</div>
+    <div class="jg-vencedor-titulo" id="xz-vencedor-titulo"></div>
+    <button class="btn-primary" onclick="fecharVencedorXadrez()">Jogar de novo</button>
+  </div>
+</div>
+
 <!-- ÁRVORE DO RELACIONAMENTO -->
 <div class="leitura-view" id="arvore-view">
   <div class="jg-hdr">
@@ -1504,6 +1567,7 @@ function fazerLogout() {
   clearInterval(contadorNamoroTimer);
   pararPollingChatGlobal();
   pararPollingDama();
+  pararPollingXadrez();
   midias = []; textos = []; desejos = [];
   mostrarLogin();
 }
@@ -1969,6 +2033,384 @@ function reiniciarDamaConfirmar() {
   sincronizarEstadoDama();
   document.getElementById("dm-vencedor-overlay").classList.remove("show");
   mostrarTelaDamaAtiva();
+}
+
+// ===== JOGO: XADREZ (regras completas: roque, en passant, promoção, xeque-mate) =====
+var xadrezEstado = null;
+var xadrezPollingTimer = null;
+var xadrezSelecionada = null;
+var XZ_SIMBOLOS = { p: "♟", n: "♞", b: "♝", r: "♜", q: "♛", k: "♚" };
+
+function xzOponente(j) { return j === "joel" ? "ranny" : "joel"; }
+function xzDentro(r, c) { return r >= 0 && r < 8 && c >= 0 && c < 8; }
+
+function xzTabuleiroInicial() {
+  var t = new Array(64).fill(null);
+  var ordem = ["r", "n", "b", "q", "k", "b", "n", "r"];
+  for (var col = 0; col < 8; col++) {
+    t[0 * 8 + col] = { d: "ranny", t: ordem[col], moved: false };
+    t[1 * 8 + col] = { d: "ranny", t: "p", moved: false };
+    t[6 * 8 + col] = { d: "joel", t: "p", moved: false };
+    t[7 * 8 + col] = { d: "joel", t: ordem[col], moved: false };
+  }
+  return t;
+}
+
+function xzNovoEstado() {
+  return { tabuleiro: xzTabuleiroInicial(), vez: "joel", vencedor: null, ultimo: null, enPassantAlvo: null, rev: 0 };
+}
+
+function xzClonar(tab) {
+  return tab.map(function(p) { return p ? { d: p.d, t: p.t, moved: p.moved } : null; });
+}
+
+// Movimentos possíveis de uma peça, sem levar em conta roque nem se deixa o próprio rei em xeque
+function xzMovimentosPseudo(tab, idx, enPassantAlvo) {
+  var p = tab[idx];
+  if (!p) return [];
+  var row = Math.floor(idx / 8), col = idx % 8;
+  var mov = [];
+  function addSe(r, c) {
+    if (!xzDentro(r, c)) return false;
+    var i = r * 8 + c;
+    var alvo = tab[i];
+    if (!alvo) { mov.push({ destino: i, tipo: "normal" }); return true; }
+    if (alvo.d !== p.d) mov.push({ destino: i, tipo: "captura", capturaIdx: i });
+    return false;
+  }
+  if (p.t === "p") {
+    var dr = p.d === "joel" ? -1 : 1;
+    var linhaInicial = p.d === "joel" ? 6 : 1;
+    var r1 = row + dr;
+    if (xzDentro(r1, col) && !tab[r1 * 8 + col]) {
+      mov.push({ destino: r1 * 8 + col, tipo: "normal" });
+      if (row === linhaInicial) {
+        var r2 = row + dr * 2;
+        if (!tab[r2 * 8 + col]) mov.push({ destino: r2 * 8 + col, tipo: "duplo" });
+      }
+    }
+    [-1, 1].forEach(function(dc) {
+      var rc = row + dr, cc = col + dc;
+      if (!xzDentro(rc, cc)) return;
+      var i = rc * 8 + cc;
+      var alvo = tab[i];
+      if (alvo && alvo.d !== p.d) mov.push({ destino: i, tipo: "captura", capturaIdx: i });
+      else if (i === enPassantAlvo) mov.push({ destino: i, tipo: "enpassant", capturaIdx: row * 8 + cc });
+    });
+  } else if (p.t === "n") {
+    [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]].forEach(function(d) {
+      addSe(row + d[0], col + d[1]);
+    });
+  } else if (p.t === "k") {
+    for (var dr2 = -1; dr2 <= 1; dr2++) {
+      for (var dc2 = -1; dc2 <= 1; dc2++) {
+        if (dr2 === 0 && dc2 === 0) continue;
+        addSe(row + dr2, col + dc2);
+      }
+    }
+  } else {
+    var direcoes = [];
+    if (p.t === "b" || p.t === "q") direcoes = direcoes.concat([[1, 1], [1, -1], [-1, 1], [-1, -1]]);
+    if (p.t === "r" || p.t === "q") direcoes = direcoes.concat([[1, 0], [-1, 0], [0, 1], [0, -1]]);
+    direcoes.forEach(function(dir) {
+      var r = row + dir[0], c = col + dir[1];
+      while (addSe(r, c)) { r += dir[0]; c += dir[1]; }
+    });
+  }
+  return mov;
+}
+
+// Se a casa "idx" está sob ataque de alguma peça do "porJogador"
+function xzCasaAtacada(tab, idx, porJogador) {
+  var linhaAlvo = Math.floor(idx / 8), colAlvo = idx % 8;
+  for (var i = 0; i < 64; i++) {
+    var p = tab[i];
+    if (!p || p.d !== porJogador) continue;
+    var row = Math.floor(i / 8), col = i % 8;
+    if (p.t === "p") {
+      var dr = p.d === "joel" ? -1 : 1;
+      if (row + dr === linhaAlvo && Math.abs(col - colAlvo) === 1) return true;
+      continue;
+    }
+    if (p.t === "n") {
+      var dR = Math.abs(row - linhaAlvo), dC = Math.abs(col - colAlvo);
+      if ((dR === 2 && dC === 1) || (dR === 1 && dC === 2)) return true;
+      continue;
+    }
+    if (p.t === "k") {
+      if (Math.max(Math.abs(row - linhaAlvo), Math.abs(col - colAlvo)) === 1) return true;
+      continue;
+    }
+    var direcoes = [];
+    if (p.t === "b" || p.t === "q") direcoes = direcoes.concat([[1, 1], [1, -1], [-1, 1], [-1, -1]]);
+    if (p.t === "r" || p.t === "q") direcoes = direcoes.concat([[1, 0], [-1, 0], [0, 1], [0, -1]]);
+    for (var di = 0; di < direcoes.length; di++) {
+      var dir = direcoes[di];
+      var r = row + dir[0], c = col + dir[1];
+      while (xzDentro(r, c)) {
+        if (r === linhaAlvo && c === colAlvo) return true;
+        if (tab[r * 8 + c]) break;
+        r += dir[0]; c += dir[1];
+      }
+    }
+  }
+  return false;
+}
+
+function xzAcharRei(tab, jogador) {
+  for (var i = 0; i < 64; i++) if (tab[i] && tab[i].d === jogador && tab[i].t === "k") return i;
+  return -1;
+}
+
+function xzReiEmXeque(tab, jogador) {
+  var idx = xzAcharRei(tab, jogador);
+  if (idx === -1) return false;
+  return xzCasaAtacada(tab, idx, xzOponente(jogador));
+}
+
+// Aplica um movimento diretamente num tabuleiro (usado tanto pra simular quanto pra jogar de verdade)
+function xzExecutarNoTabuleiro(tab, deIdx, mov) {
+  var p = tab[deIdx];
+  var destino = mov.destino;
+  if (mov.tipo === "enpassant") tab[mov.capturaIdx] = null;
+  tab[destino] = p;
+  tab[deIdx] = null;
+  if (p) p.moved = true;
+  if (mov.tipo === "roque-curto") {
+    var row = Math.floor(deIdx / 8);
+    tab[row * 8 + 5] = tab[row * 8 + 7];
+    tab[row * 8 + 7] = null;
+    if (tab[row * 8 + 5]) tab[row * 8 + 5].moved = true;
+  } else if (mov.tipo === "roque-longo") {
+    var row2 = Math.floor(deIdx / 8);
+    tab[row2 * 8 + 3] = tab[row2 * 8 + 0];
+    tab[row2 * 8 + 0] = null;
+    if (tab[row2 * 8 + 3]) tab[row2 * 8 + 3].moved = true;
+  }
+  if (p && p.t === "p") {
+    var rowDestino = Math.floor(destino / 8);
+    if ((p.d === "joel" && rowDestino === 0) || (p.d === "ranny" && rowDestino === 7)) p.t = "q";
+  }
+}
+
+// Movimentos realmente legais de uma peça: inclui roque e descarta o que deixaria o próprio rei em xeque
+function xzMovimentosLegais(estado, idx) {
+  var tab = estado.tabuleiro;
+  var p = tab[idx];
+  if (!p) return [];
+  var jogador = p.d;
+  var pseudo = xzMovimentosPseudo(tab, idx, estado.enPassantAlvo);
+  if (p.t === "k" && !p.moved && !xzReiEmXeque(tab, jogador)) {
+    var row = Math.floor(idx / 8);
+    var torreCurta = tab[row * 8 + 7];
+    if (torreCurta && torreCurta.t === "r" && !torreCurta.moved && !tab[row * 8 + 5] && !tab[row * 8 + 6] &&
+        !xzCasaAtacada(tab, row * 8 + 5, xzOponente(jogador)) && !xzCasaAtacada(tab, row * 8 + 6, xzOponente(jogador))) {
+      pseudo.push({ destino: row * 8 + 6, tipo: "roque-curto" });
+    }
+    var torreLonga = tab[row * 8 + 0];
+    if (torreLonga && torreLonga.t === "r" && !torreLonga.moved && !tab[row * 8 + 1] && !tab[row * 8 + 2] && !tab[row * 8 + 3] &&
+        !xzCasaAtacada(tab, row * 8 + 3, xzOponente(jogador)) && !xzCasaAtacada(tab, row * 8 + 2, xzOponente(jogador))) {
+      pseudo.push({ destino: row * 8 + 2, tipo: "roque-longo" });
+    }
+  }
+  var legais = [];
+  pseudo.forEach(function(m) {
+    var copia = xzClonar(tab);
+    xzExecutarNoTabuleiro(copia, idx, m);
+    if (!xzReiEmXeque(copia, jogador)) legais.push(m);
+  });
+  return legais;
+}
+
+function xzTodosMovimentosLegais(estado, jogador) {
+  var lista = [];
+  for (var i = 0; i < 64; i++) {
+    var p = estado.tabuleiro[i];
+    if (!p || p.d !== jogador) continue;
+    xzMovimentosLegais(estado, i).forEach(function(m) { lista.push({ de: i, mov: m }); });
+  }
+  return lista;
+}
+
+function xzAplicarMovimento(estado, deIdx, mov) {
+  var tab = estado.tabuleiro;
+  var jogador = tab[deIdx].d;
+  xzExecutarNoTabuleiro(tab, deIdx, mov);
+  estado.ultimo = { de: deIdx, para: mov.destino };
+  estado.enPassantAlvo = (mov.tipo === "duplo") ? Math.floor((deIdx + mov.destino) / 2) : null;
+  estado.vez = xzOponente(jogador);
+  var adv = estado.vez;
+  if (xzTodosMovimentosLegais(estado, adv).length === 0) {
+    estado.vencedor = xzReiEmXeque(tab, adv) ? jogador : "empate";
+  }
+  return estado;
+}
+
+function sincronizarEstadoXadrez() {
+  if (!xadrezEstado) return;
+  xadrezEstado.rev = (xadrezEstado.rev || 0) + 1;
+  api("/rest/v1/jogo_xadrez?on_conflict=id", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "resolution=merge-duplicates,return=minimal"
+    },
+    body: JSON.stringify({ id: 1, estado: xadrezEstado })
+  }).catch(function() {});
+}
+
+function buscarEstadoXadrezRemoto() {
+  return api("/rest/v1/jogo_xadrez?id=eq.1&select=estado")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (Array.isArray(data) && data[0] && data[0].estado) return data[0].estado;
+      return null;
+    })
+    .catch(function() { return null; });
+}
+
+function iniciarPollingXadrez() {
+  clearInterval(xadrezPollingTimer);
+  xadrezPollingTimer = setInterval(function() {
+    if (!document.getElementById("xadrez-view").classList.contains("show")) return;
+    buscarEstadoXadrezRemoto().then(function(remoto) {
+      if (!remoto) return;
+      if (!xadrezEstado || (remoto.rev || 0) > (xadrezEstado.rev || 0)) {
+        xadrezEstado = remoto;
+        xadrezSelecionada = null;
+        mostrarTelaXadrezAtiva();
+      }
+    });
+  }, 2500);
+}
+function pararPollingXadrez() { clearInterval(xadrezPollingTimer); }
+
+function abrirXadrez() {
+  if (!perfilAtual()) { abrirEscolhaPerfil(true); mostrarToast("Escolha seu perfil primeiro."); return; }
+  document.getElementById("xadrez-view").classList.add("show");
+  document.getElementById("xz-carregando").style.display = "block";
+  document.getElementById("xz-jogo").style.display = "none";
+  buscarEstadoXadrezRemoto().then(function(remoto) {
+    if (remoto) {
+      xadrezEstado = remoto;
+    } else if (!xadrezEstado) {
+      xadrezEstado = xzNovoEstado();
+      sincronizarEstadoXadrez();
+    }
+    xadrezSelecionada = null;
+    mostrarTelaXadrezAtiva();
+    iniciarPollingXadrez();
+  });
+}
+
+function fecharXadrez() {
+  pararPollingXadrez();
+  document.getElementById("xadrez-view").classList.remove("show");
+}
+
+function mostrarTelaXadrezAtiva() {
+  document.getElementById("xz-carregando").style.display = "none";
+  document.getElementById("xz-jogo").style.display = "block";
+  document.getElementById("xz-nome-joel").textContent = perfilNome("joel");
+  document.getElementById("xz-nome-ranny").textContent = perfilNome("ranny");
+  renderTabuleiroXadrez();
+  atualizarTurnoXadrezUI();
+  if (xadrezEstado.vencedor) exibirVencedorXadrez();
+}
+
+function atualizarTurnoXadrezUI() {
+  var turnoEl = document.getElementById("xz-turno");
+  var dicaEl = document.getElementById("xz-dica");
+  if (xadrezEstado.vencedor) { turnoEl.textContent = ""; dicaEl.textContent = ""; return; }
+  var vez = xadrezEstado.vez;
+  var souEu = perfilAtual() === vez;
+  var emXeque = xzReiEmXeque(xadrezEstado.tabuleiro, vez);
+  turnoEl.textContent = (souEu ? "Sua vez" : ("Vez de " + perfilNome(vez))) + (emXeque ? " — Xeque!" : "");
+  dicaEl.textContent = souEu ? "Toque numa peça pra ver os movimentos possíveis" : ("Aguardando " + perfilNome(vez) + "...");
+}
+
+function renderTabuleiroXadrez() {
+  var board = document.getElementById("xz-board");
+  board.innerHTML = "";
+  var tab = xadrezEstado.tabuleiro;
+  var meuTurno = perfilAtual() === xadrezEstado.vez && !xadrezEstado.vencedor;
+  var movs = xadrezSelecionada !== null ? xzMovimentosLegais(xadrezEstado, xadrezSelecionada) : [];
+  var destinosMap = {};
+  movs.forEach(function(m) { destinosMap[m.destino] = m; });
+  var reiEmXequeIdx = (!xadrezEstado.vencedor && xzReiEmXeque(tab, xadrezEstado.vez)) ? xzAcharRei(tab, xadrezEstado.vez) : -1;
+
+  for (var row = 0; row < 8; row++) {
+    for (var col = 0; col < 8; col++) {
+      var idx = row * 8 + col;
+      var sq = document.createElement("div");
+      var escura = (row + col) % 2 === 1;
+      sq.className = "xz-sq " + (escura ? "escura" : "clara");
+      if (xadrezEstado.ultimo && (xadrezEstado.ultimo.de === idx || xadrezEstado.ultimo.para === idx)) sq.classList.add("ultimo");
+      if (idx === xadrezSelecionada) sq.classList.add("origem");
+      if (destinosMap[idx]) {
+        sq.classList.add("destino");
+        if (destinosMap[idx].tipo === "captura" || destinosMap[idx].tipo === "enpassant") sq.classList.add("captura");
+      }
+      if (idx === reiEmXequeIdx) sq.classList.add("xeque");
+      var p = tab[idx];
+      if (p) {
+        var peca = document.createElement("div");
+        peca.className = "xz-peca " + p.d;
+        peca.textContent = XZ_SIMBOLOS[p.t];
+        sq.appendChild(peca);
+      }
+      if (meuTurno) {
+        sq.classList.add("selecionavel");
+        sq.onclick = (function(i) { return function() { xzTocarCasa(i); }; })(idx);
+      }
+      board.appendChild(sq);
+    }
+  }
+}
+
+function xzTocarCasa(idx) {
+  if (!xadrezEstado || xadrezEstado.vencedor) return;
+  if (perfilAtual() !== xadrezEstado.vez) return;
+  var tab = xadrezEstado.tabuleiro;
+
+  if (xadrezSelecionada !== null) {
+    var movs = xzMovimentosLegais(xadrezEstado, xadrezSelecionada);
+    var alvo = movs.filter(function(m) { return m.destino === idx; })[0];
+    if (alvo) {
+      xzAplicarMovimento(xadrezEstado, xadrezSelecionada, alvo);
+      xadrezSelecionada = null;
+      sincronizarEstadoXadrez();
+      mostrarTelaXadrezAtiva();
+      return;
+    }
+  }
+
+  var p = tab[idx];
+  xadrezSelecionada = (p && p.d === xadrezEstado.vez) ? idx : null;
+  renderTabuleiroXadrez();
+}
+
+function exibirVencedorXadrez() {
+  var titulo = xadrezEstado.vencedor === "empate"
+    ? "Empate — rei afogado! 🤝"
+    : perfilNome(xadrezEstado.vencedor) + " venceu por xeque-mate! 🏆";
+  document.getElementById("xz-vencedor-titulo").textContent = titulo;
+  document.getElementById("xz-vencedor-overlay").classList.add("show");
+}
+
+function fecharVencedorXadrez() {
+  document.getElementById("xz-vencedor-overlay").classList.remove("show");
+}
+
+function reiniciarXadrezConfirmar() {
+  if (!confirm("Reiniciar a partida de Xadrez do zero?")) return;
+  xadrezEstado = xzNovoEstado();
+  xadrezSelecionada = null;
+  sincronizarEstadoXadrez();
+  document.getElementById("xz-vencedor-overlay").classList.remove("show");
+  mostrarTelaXadrezAtiva();
 }
 
 // ===== JOGO: CHAT (TEXTO + ÁUDIO), acumula até ser apagado manualmente =====
