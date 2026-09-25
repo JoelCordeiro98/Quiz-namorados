@@ -807,7 +807,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div class="form-group">
       <label>Selecione fotos ou vídeos</label>
       <div class="upload-area" onclick="document.getElementById('file-input').click()">
-        <input type="file" id="file-input" accept="*/*" multiple onchange="previewFiles(this)">
+        <input type="file" id="file-input" accept="image/*,video/*" multiple onchange="previewFiles(this)">
         <div class="upload-icon">📁</div>
         <div class="upload-text">Toque para selecionar arquivos</div>
       </div>
