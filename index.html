@@ -3416,6 +3416,21 @@ function alternarOrdemGaleria() {
   renderGaleria();
 }
 
+// Mesma ideia da função acima, só que preenchendo um <img> de verdade (usado no
+// lightbox) em vez do background de uma div (usado na grade da galeria).
+function carregarImgComRetentativa(img, url, tentativa) {
+  tentativa = tentativa || 0;
+  img.onload = null;
+  img.onerror = function() {
+    if (tentativa < 5) {
+      setTimeout(function() {
+        carregarImgComRetentativa(img, url, tentativa + 1);
+      }, 700 * (tentativa + 1));
+    }
+  };
+  img.src = tentativa > 0 ? (url + (url.indexOf("?") >= 0 ? "&" : "?") + "_r=" + tentativa) : url;
+}
+
 // Tenta carregar a imagem algumas vezes antes de desistir. Logo depois de uma foto ser
 // enviada, o arquivo às vezes ainda não está 100% disponível no storage/CDN — sem essa
 // espera, a primeira tentativa falha (onerror) e a foto fica pra sempre com o quadrado
@@ -3831,10 +3846,10 @@ function renderLboxItem() {
     cont.appendChild(v);
   } else {
     var img = document.createElement("img");
-    img.src = m.url;
     img.onclick = function(e) { e.stopPropagation(); };
     cont.appendChild(img);
     ativarZoomImagem(img);
+    carregarImgComRetentativa(img, m.url);
   }
   atualizarLboxCaption(m);
 }
