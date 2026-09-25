@@ -1304,6 +1304,13 @@ var desejos = [];
 var curLbox = 0;
 var itensSelecionados = [];
 
+// Guarda uma URL local (gerada a partir do próprio arquivo, sem precisar da rede) pra
+// cada foto/vídeo recém-enviado, indexada pelo "path" salvo no banco. Isso evita
+// depender de buscar o arquivo de volta do storage logo após o upload — às vezes o
+// arquivo ainda não está disponível pra leitura no storage/CDN nesse primeiro instante,
+// e a foto ficava aparecendo preta até a página ser recarregada mais tarde.
+var urlsLocaisRecentes = {};
+
 var MIME_POR_EXT = {
   mp4: "video/mp4", mov: "video/quicktime", m4v: "video/x-m4v",
   avi: "video/x-msvideo", webm: "video/webm", mkv: "video/x-matroska", "3gp": "video/3gpp",
@@ -3491,12 +3498,19 @@ function renderGaleria() {
         gerarCapaVideo(m, div);
       }
     } else {
-      div.setAttribute("data-src", m.url);
+      div.setAttribute("data-src", urlEfetivaMidia(m));
       galeriaObserver.observe(div);
     }
     div.onclick = function() { abrirLightbox(idx); };
     grid.appendChild(div);
   });
+}
+
+// Se essa foto/vídeo foi enviado agora mesmo nesta sessão, usa a URL local (do próprio
+// arquivo, sem precisar de rede) em vez da URL do storage — evita o quadrado preto
+// enquanto o arquivo ainda não propagou no storage/CDN.
+function urlEfetivaMidia(m) {
+  return (m.path && urlsLocaisRecentes[m.path]) || m.url;
 }
 
 // ===== CAPA AUTOMÁTICA DE VÍDEO (captura um frame com <video>+<canvas>) =====
@@ -3623,7 +3637,7 @@ function renderHeroPhotos(items) {
           }
           div.textContent = "▶";
         } else {
-          div.style.backgroundImage = "url(" + items[i].url + ")";
+          div.style.backgroundImage = "url(" + urlEfetivaMidia(items[i]) + ")";
         }
       }
       hero.appendChild(div);
@@ -3790,6 +3804,7 @@ function salvarFotos() {
       })
       .then(function() {
         var publicUrl = SUPABASE_URL + "/storage/v1/object/public/midias/" + path;
+        urlsLocaisRecentes["midias/" + path] = URL.createObjectURL(file);
         return api("/rest/v1/midias", {
           method: "POST",
           headers: {
@@ -3838,7 +3853,7 @@ function renderLboxItem() {
   resetZoom();
   if (m.tipo === "video") {
     var v = document.createElement("video");
-    v.src = m.url; v.controls = true;
+    v.src = urlEfetivaMidia(m); v.controls = true;
     v.setAttribute("playsinline", "");
     v.setAttribute("webkit-playsinline", "");
     v.preload = "metadata";
@@ -3849,7 +3864,7 @@ function renderLboxItem() {
     img.onclick = function(e) { e.stopPropagation(); };
     cont.appendChild(img);
     ativarZoomImagem(img);
-    carregarImgComRetentativa(img, m.url);
+    carregarImgComRetentativa(img, urlEfetivaMidia(m));
   }
   atualizarLboxCaption(m);
 }
