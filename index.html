@@ -366,7 +366,19 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .jg-vencedor-titulo{font-family:"Playfair Display",serif;font-size:1.4rem;margin-bottom:0.5rem}
 .jg-vencedor-placar{color:rgba(255,255,255,0.6);font-size:0.9rem;margin-bottom:1.5rem}
 
-/* ===== JOGO: CHAT (TEXTO + ÁUDIO) ===== */
+/* ===== JOGO: DAMA ===== */
+.dm-board{display:grid;grid-template-columns:repeat(8,38px);grid-template-rows:repeat(8,38px);border-radius:10px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.4);flex-shrink:0}
+.dm-sq{width:38px;height:38px;display:flex;align-items:center;justify-content:center;position:relative}
+.dm-sq.clara{background:#3a3226}
+.dm-sq.escura{background:#1a1512}
+.dm-sq.selecionavel{cursor:pointer}
+.dm-sq.destino::after{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(230,168,26,0.75);box-shadow:0 0 8px rgba(230,168,26,0.6)}
+.dm-sq.origem{box-shadow:inset 0 0 0 3px rgba(230,168,26,0.85)}
+.dm-sq.ultimo{box-shadow:inset 0 0 0 2px rgba(255,255,255,0.4)}
+.dm-peca{width:30px;height:30px;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.5),inset 0 -3px 4px rgba(0,0,0,0.25),inset 0 2px 3px rgba(255,255,255,0.2);cursor:pointer}
+.dm-peca.joel{background:var(--red)}
+.dm-peca.ranny{background:#E6A81A}
+.dm-peca.rei::after{content:"♛";display:flex;align-items:center;justify-content:center;height:100%;color:rgba(0,0,0,0.55);font-size:0.95rem}
 .jg-chat-badge{position:absolute;top:3px;right:3px;width:9px;height:9px;border-radius:50%;background:var(--redl);border:1.5px solid var(--blk2);display:none}
 .jg-chat-badge.show{display:block}
 .jg-chat-painel{position:fixed;left:0;right:0;bottom:0;z-index:760;background:var(--blk2);border-top:1.5px solid rgba(192,57,43,0.35);border-radius:20px 20px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,0.5);max-height:78vh;display:flex;flex-direction:column;transform:translateY(105%);transition:transform 0.3s ease}
@@ -588,6 +600,12 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
           <div class="hcard-icon">🎮</div>
           <div class="hcard-label">Jogo</div>
           <div class="hcard-title">Pontos e Caixas</div>
+          <div class="hcard-count">Jogar a dois</div>
+        </div>
+        <div class="hcard" onclick="abrirDama()">
+          <div class="hcard-icon">⚫</div>
+          <div class="hcard-label">Jogo</div>
+          <div class="hcard-title">Dama</div>
           <div class="hcard-count">Jogar a dois</div>
         </div>
       </div>
@@ -1128,6 +1146,50 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   </div>
 </div>
 
+<!-- JOGO: DAMA -->
+<div class="leitura-view" id="dama-view">
+  <div class="jg-hdr">
+    <button class="leitura-fechar" onclick="fecharDama()" aria-label="Fechar">✕</button>
+    <div class="jg-hdr-titulo">Dama</div>
+    <div class="leitura-hdr-actions">
+      <button class="leitura-acao" onclick="reiniciarDamaConfirmar()" aria-label="Reiniciar">↺</button>
+    </div>
+  </div>
+
+  <div class="jg-conteudo" id="dm-carregando" style="text-align:center;padding-top:3rem;color:rgba(255,255,255,0.5)">Carregando...</div>
+
+  <div class="jg-conteudo" id="dm-jogo" style="display:none">
+    <div class="jg-scoreboard">
+      <div class="jg-player-chip a">
+        <div class="jg-player-letra" style="background:var(--red)" id="dm-letra-joel">J</div>
+        <div class="jg-player-info">
+          <div class="jg-player-nome" id="dm-nome-joel">Joel</div>
+          <div class="jg-player-pontos" id="dm-pecas-joel">12</div>
+        </div>
+      </div>
+      <div class="jg-vs">×</div>
+      <div class="jg-player-chip b">
+        <div class="jg-player-info" style="text-align:right">
+          <div class="jg-player-nome" id="dm-nome-ranny">Ranny</div>
+          <div class="jg-player-pontos" id="dm-pecas-ranny">12</div>
+        </div>
+        <div class="jg-player-letra" style="background:#E6A81A" id="dm-letra-ranny">R</div>
+      </div>
+    </div>
+    <div class="jg-turno" id="dm-turno">Vez de Joel</div>
+    <div class="jg-dica" id="dm-dica">Toque numa peça pra ver os movimentos possíveis</div>
+    <div class="jg-board-wrap"><div class="dm-board" id="dm-board"></div></div>
+  </div>
+</div>
+
+<div class="jg-vencedor-overlay" id="dm-vencedor-overlay">
+  <div class="jg-vencedor-box">
+    <div class="jg-vencedor-emoji">🏆</div>
+    <div class="jg-vencedor-titulo" id="dm-vencedor-titulo"></div>
+    <button class="btn-primary" onclick="fecharVencedorDama()">Jogar de novo</button>
+  </div>
+</div>
+
 <!-- ÁRVORE DO RELACIONAMENTO -->
 <div class="leitura-view" id="arvore-view">
   <div class="jg-hdr">
@@ -1441,6 +1503,7 @@ function fazerLogout() {
   localStorage.removeItem("sb_session");
   clearInterval(contadorNamoroTimer);
   pararPollingChatGlobal();
+  pararPollingDama();
   midias = []; textos = []; desejos = [];
   mostrarLogin();
 }
@@ -1600,6 +1663,312 @@ function aplicarCoresJogo() {
   view.style.setProperty("--jg-cor-b", corB);
   view.style.setProperty("--jg-cor-a-rgb", hexParaRgb(corA));
   view.style.setProperty("--jg-cor-b-rgb", hexParaRgb(corB));
+}
+
+// ===== JOGO: DAMA (regras brasileiras: dama voadora e captura obrigatória) =====
+var damaEstado = null;
+var damaPollingTimer = null;
+var damaSelecionada = null;
+
+function dmCasaEscura(row, col) { return (row + col) % 2 === 1; }
+function dmDentro(row, col) { return row >= 0 && row < 8 && col >= 0 && col < 8; }
+function dmOponente(j) { return j === "joel" ? "ranny" : "joel"; }
+function dmDirecao(j) { return j === "joel" ? 1 : -1; } // joel começa em cima e desce; ranny começa embaixo e sobe
+
+function dmTabuleiroInicial() {
+  var t = new Array(64).fill(null);
+  for (var row = 0; row < 8; row++) {
+    for (var col = 0; col < 8; col++) {
+      if (!dmCasaEscura(row, col)) continue;
+      if (row <= 2) t[row * 8 + col] = { d: "joel", r: false };
+      else if (row >= 5) t[row * 8 + col] = { d: "ranny", r: false };
+    }
+  }
+  return t;
+}
+
+function dmNovoEstado() {
+  return { tabuleiro: dmTabuleiroInicial(), vez: "joel", capturaEm: null, vencedor: null, ultimo: null, rev: 0 };
+}
+
+// Movimentos (simples e capturas) só dessa peça, sem considerar obrigatoriedade
+function dmMovimentosDaPeca(tab, idx) {
+  var p = tab[idx];
+  if (!p) return { simples: [], capturas: [] };
+  var row = Math.floor(idx / 8), col = idx % 8;
+  var simples = [], capturas = [];
+  var dirs = p.r ? [[1, 1], [1, -1], [-1, 1], [-1, -1]] : [[dmDirecao(p.d), 1], [dmDirecao(p.d), -1]];
+  dirs.forEach(function(dir) {
+    var dr = dir[0], dc = dir[1];
+    if (p.r) {
+      var r = row + dr, c = col + dc;
+      while (dmDentro(r, c) && !tab[r * 8 + c]) { simples.push(r * 8 + c); r += dr; c += dc; }
+      if (dmDentro(r, c) && tab[r * 8 + c] && tab[r * 8 + c].d !== p.d) {
+        var capIdx = r * 8 + c;
+        var r2 = r + dr, c2 = c + dc;
+        while (dmDentro(r2, c2) && !tab[r2 * 8 + c2]) {
+          capturas.push({ destino: r2 * 8 + c2, capturada: capIdx });
+          r2 += dr; c2 += dc;
+        }
+      }
+    } else {
+      var r1 = row + dr, c1 = col + dc;
+      if (!dmDentro(r1, c1)) return;
+      if (!tab[r1 * 8 + c1]) { simples.push(r1 * 8 + c1); return; }
+      if (tab[r1 * 8 + c1].d !== p.d) {
+        var r2b = row + dr * 2, c2b = col + dc * 2;
+        if (dmDentro(r2b, c2b) && !tab[r2b * 8 + c2b]) {
+          capturas.push({ destino: r2b * 8 + c2b, capturada: r1 * 8 + c1 });
+        }
+      }
+    }
+  });
+  return { simples: simples, capturas: capturas };
+}
+
+function dmTodasCapturas(tab, jogador) {
+  var lista = [];
+  for (var i = 0; i < 64; i++) {
+    var p = tab[i];
+    if (!p || p.d !== jogador) continue;
+    dmMovimentosDaPeca(tab, i).capturas.forEach(function(c) { lista.push(c); });
+  }
+  return lista;
+}
+
+// Movimentos válidos de uma peça já considerando a regra de captura obrigatória
+function dmMovimentosValidos(tab, idx, jogador) {
+  var p = tab[idx];
+  if (!p || p.d !== jogador) return { simples: [], capturas: [] };
+  var mv = dmMovimentosDaPeca(tab, idx);
+  if (dmTodasCapturas(tab, jogador).length > 0) return { simples: [], capturas: mv.capturas };
+  return mv;
+}
+
+function dmContarPecas(tab, jogador) {
+  var n = 0;
+  for (var i = 0; i < 64; i++) if (tab[i] && tab[i].d === jogador) n++;
+  return n;
+}
+
+function dmJogadorTemMovimento(tab, jogador) {
+  for (var i = 0; i < 64; i++) {
+    if (!tab[i] || tab[i].d !== jogador) continue;
+    var mv = dmMovimentosValidos(tab, i, jogador);
+    if (mv.simples.length > 0 || mv.capturas.length > 0) return true;
+  }
+  return false;
+}
+
+function dmAplicarMovimento(estado, deIdx, paraIdx) {
+  var tab = estado.tabuleiro;
+  var p = tab[deIdx];
+  var rowDe = Math.floor(deIdx / 8), colDe = deIdx % 8;
+  var rowPara = Math.floor(paraIdx / 8), colPara = paraIdx % 8;
+  var dr = rowPara > rowDe ? 1 : -1;
+  var dc = colPara > colDe ? 1 : -1;
+  var capturouAlgo = false;
+  if (Math.abs(rowPara - rowDe) >= 2) {
+    var r = rowDe + dr, c = colDe + dc;
+    while (r !== rowPara || c !== colPara) {
+      if (tab[r * 8 + c]) { tab[r * 8 + c] = null; capturouAlgo = true; }
+      r += dr; c += dc;
+    }
+  }
+  tab[paraIdx] = p;
+  tab[deIdx] = null;
+  var linhaFinal = p.d === "joel" ? 7 : 0;
+  if (rowPara === linhaFinal) p.r = true;
+  estado.ultimo = { de: deIdx, para: paraIdx };
+
+  if (capturouAlgo && dmMovimentosDaPeca(tab, paraIdx).capturas.length > 0) {
+    estado.capturaEm = paraIdx;
+    return estado;
+  }
+  estado.capturaEm = null;
+  estado.vez = dmOponente(p.d);
+  if (dmContarPecas(tab, estado.vez) === 0 || !dmJogadorTemMovimento(tab, estado.vez)) {
+    estado.vencedor = p.d;
+  }
+  return estado;
+}
+
+function sincronizarEstadoDama() {
+  if (!damaEstado) return;
+  damaEstado.rev = (damaEstado.rev || 0) + 1;
+  api("/rest/v1/jogo_dama?on_conflict=id", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "resolution=merge-duplicates,return=minimal"
+    },
+    body: JSON.stringify({ id: 1, estado: damaEstado })
+  }).catch(function() {});
+}
+
+function buscarEstadoDamaRemoto() {
+  return api("/rest/v1/jogo_dama?id=eq.1&select=estado")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (Array.isArray(data) && data[0] && data[0].estado) return data[0].estado;
+      return null;
+    })
+    .catch(function() { return null; });
+}
+
+function iniciarPollingDama() {
+  clearInterval(damaPollingTimer);
+  damaPollingTimer = setInterval(function() {
+    if (!document.getElementById("dama-view").classList.contains("show")) return;
+    buscarEstadoDamaRemoto().then(function(remoto) {
+      if (!remoto) return;
+      if (!damaEstado || (remoto.rev || 0) > (damaEstado.rev || 0)) {
+        damaEstado = remoto;
+        damaSelecionada = null;
+        mostrarTelaDamaAtiva();
+      }
+    });
+  }, 2500);
+}
+function pararPollingDama() { clearInterval(damaPollingTimer); }
+
+function abrirDama() {
+  if (!perfilAtual()) { abrirEscolhaPerfil(true); mostrarToast("Escolha seu perfil primeiro."); return; }
+  document.getElementById("dama-view").classList.add("show");
+  document.getElementById("dm-carregando").style.display = "block";
+  document.getElementById("dm-jogo").style.display = "none";
+  buscarEstadoDamaRemoto().then(function(remoto) {
+    if (remoto) {
+      damaEstado = remoto;
+    } else if (!damaEstado) {
+      damaEstado = dmNovoEstado();
+      sincronizarEstadoDama();
+    }
+    damaSelecionada = null;
+    mostrarTelaDamaAtiva();
+    iniciarPollingDama();
+  });
+}
+
+function fecharDama() {
+  pararPollingDama();
+  document.getElementById("dama-view").classList.remove("show");
+}
+
+function mostrarTelaDamaAtiva() {
+  document.getElementById("dm-carregando").style.display = "none";
+  document.getElementById("dm-jogo").style.display = "block";
+  renderTabuleiroDama();
+  atualizarPlacarDama();
+  atualizarTurnoDamaUI();
+  if (damaEstado.vencedor) exibirVencedorDama();
+}
+
+function atualizarPlacarDama() {
+  document.getElementById("dm-nome-joel").textContent = perfilNome("joel");
+  document.getElementById("dm-nome-ranny").textContent = perfilNome("ranny");
+  document.getElementById("dm-pecas-joel").textContent = dmContarPecas(damaEstado.tabuleiro, "joel");
+  document.getElementById("dm-pecas-ranny").textContent = dmContarPecas(damaEstado.tabuleiro, "ranny");
+}
+
+function atualizarTurnoDamaUI() {
+  var turnoEl = document.getElementById("dm-turno");
+  var dicaEl = document.getElementById("dm-dica");
+  if (damaEstado.vencedor) { turnoEl.textContent = ""; dicaEl.textContent = ""; return; }
+  var vez = damaEstado.vez;
+  var souEu = perfilAtual() === vez;
+  turnoEl.textContent = souEu ? "Sua vez" : ("Vez de " + perfilNome(vez));
+  if (souEu && dmTodasCapturas(damaEstado.tabuleiro, vez).length > 0) {
+    dicaEl.textContent = "Captura obrigatória! Toque na peça que pode capturar.";
+  } else {
+    dicaEl.textContent = souEu ? "Toque numa peça pra ver os movimentos possíveis" : ("Aguardando " + perfilNome(vez) + "...");
+  }
+}
+
+function renderTabuleiroDama() {
+  var board = document.getElementById("dm-board");
+  board.innerHTML = "";
+  var tab = damaEstado.tabuleiro;
+  var meuTurno = perfilAtual() === damaEstado.vez && !damaEstado.vencedor;
+  var mv = damaSelecionada !== null ? dmMovimentosValidos(tab, damaSelecionada, damaEstado.vez) : { simples: [], capturas: [] };
+  var destinos = mv.simples.concat(mv.capturas.map(function(c) { return c.destino; }));
+
+  for (var row = 0; row < 8; row++) {
+    for (var col = 0; col < 8; col++) {
+      var idx = row * 8 + col;
+      var sq = document.createElement("div");
+      var escura = dmCasaEscura(row, col);
+      sq.className = "dm-sq " + (escura ? "escura" : "clara");
+      if (damaEstado.ultimo && (damaEstado.ultimo.de === idx || damaEstado.ultimo.para === idx)) sq.classList.add("ultimo");
+      if (idx === damaSelecionada) sq.classList.add("origem");
+      if (destinos.indexOf(idx) !== -1) sq.classList.add("destino");
+      var p = tab[idx];
+      if (p) {
+        var peca = document.createElement("div");
+        peca.className = "dm-peca " + p.d + (p.r ? " rei" : "");
+        sq.appendChild(peca);
+      }
+      if (escura && meuTurno) {
+        sq.classList.add("selecionavel");
+        sq.onclick = (function(i) { return function() { dmTocarCasa(i); }; })(idx);
+      }
+      board.appendChild(sq);
+    }
+  }
+}
+
+function dmTocarCasa(idx) {
+  if (!damaEstado || damaEstado.vencedor) return;
+  if (perfilAtual() !== damaEstado.vez) return;
+  var tab = damaEstado.tabuleiro;
+
+  if (damaEstado.capturaEm !== null && damaEstado.capturaEm !== undefined) {
+    damaSelecionada = damaEstado.capturaEm;
+    var mvCont = dmMovimentosDaPeca(tab, damaSelecionada);
+    if (mvCont.capturas.some(function(c) { return c.destino === idx; })) {
+      dmAplicarMovimento(damaEstado, damaSelecionada, idx);
+      damaSelecionada = (damaEstado.capturaEm !== null) ? damaEstado.capturaEm : null;
+      sincronizarEstadoDama();
+      mostrarTelaDamaAtiva();
+    }
+    return;
+  }
+
+  if (damaSelecionada !== null) {
+    var mvAtual = dmMovimentosValidos(tab, damaSelecionada, damaEstado.vez);
+    var destinos = mvAtual.simples.concat(mvAtual.capturas.map(function(c) { return c.destino; }));
+    if (destinos.indexOf(idx) !== -1) {
+      dmAplicarMovimento(damaEstado, damaSelecionada, idx);
+      damaSelecionada = (damaEstado.capturaEm !== null) ? damaEstado.capturaEm : null;
+      sincronizarEstadoDama();
+      mostrarTelaDamaAtiva();
+      return;
+    }
+  }
+
+  var p = tab[idx];
+  damaSelecionada = (p && p.d === damaEstado.vez) ? idx : null;
+  renderTabuleiroDama();
+}
+
+function exibirVencedorDama() {
+  document.getElementById("dm-vencedor-titulo").textContent = perfilNome(damaEstado.vencedor) + " venceu! 🏆";
+  document.getElementById("dm-vencedor-overlay").classList.add("show");
+}
+
+function fecharVencedorDama() {
+  document.getElementById("dm-vencedor-overlay").classList.remove("show");
+}
+
+function reiniciarDamaConfirmar() {
+  if (!confirm("Reiniciar a partida de Dama do zero?")) return;
+  damaEstado = dmNovoEstado();
+  damaSelecionada = null;
+  sincronizarEstadoDama();
+  document.getElementById("dm-vencedor-overlay").classList.remove("show");
+  mostrarTelaDamaAtiva();
 }
 
 // ===== JOGO: CHAT (TEXTO + ÁUDIO), acumula até ser apagado manualmente =====
