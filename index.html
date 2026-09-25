@@ -3416,6 +3416,31 @@ function alternarOrdemGaleria() {
   renderGaleria();
 }
 
+// Tenta carregar a imagem algumas vezes antes de desistir. Logo depois de uma foto ser
+// enviada, o arquivo às vezes ainda não está 100% disponível no storage/CDN — sem essa
+// espera, a primeira tentativa falha (onerror) e a foto fica pra sempre com o quadrado
+// preto, mesmo já estando lá (bastaria recarregar a página pra aparecer).
+function carregarImagemComRetentativa(div, url, tentativa) {
+  tentativa = tentativa || 0;
+  var img = new Image();
+  img.onload = function() {
+    div.style.backgroundImage = "url(" + url + ")";
+    div.classList.add("loaded");
+  };
+  img.onerror = function() {
+    if (tentativa < 4) {
+      setTimeout(function() {
+        carregarImagemComRetentativa(div, url, tentativa + 1);
+      }, 700 * (tentativa + 1));
+    } else {
+      div.classList.add("loaded");
+      div.classList.add("erro-img");
+    }
+  };
+  // cache-bust só a partir da 2ª tentativa, pra não pegar uma resposta 404 cacheada
+  img.src = tentativa > 0 ? (url + (url.indexOf("?") >= 0 ? "&" : "?") + "_r=" + tentativa) : url;
+}
+
 function renderGaleria() {
   var grid = document.getElementById("photo-grid");
   grid.innerHTML = "";
@@ -3433,13 +3458,7 @@ function renderGaleria() {
       var div = entry.target;
       var url = div.getAttribute("data-src");
       if (url) {
-        var img = new Image();
-        img.onload = function() {
-          div.style.backgroundImage = "url(" + url + ")";
-          div.classList.add("loaded");
-        };
-        img.onerror = function() { div.classList.add("loaded"); };
-        img.src = url;
+        carregarImagemComRetentativa(div, url);
         div.removeAttribute("data-src");
       }
       galeriaObserver.unobserve(div);
