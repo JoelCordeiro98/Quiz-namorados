@@ -91,6 +91,8 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .novidades-texto{flex:1;min-width:0;font-size:0.78rem;color:rgba(255,255,255,0.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .novidades-texto b{color:#fff}
 .novidades-meta{font-size:0.64rem;color:var(--gray);flex-shrink:0;white-space:nowrap}
+.novidades-apagar{flex-shrink:0;width:22px;height:22px;border-radius:50%;border:none;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);font-size:0.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.novidades-apagar:hover{background:rgba(192,57,43,0.3);color:#fff}
 .hero-title em{color:var(--redl);font-style:italic}
 .diario-section{padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);text-align:center;position:relative}
 .mascote{position:absolute;pointer-events:none;mix-blend-mode:screen;z-index:1;-webkit-user-drag:none;user-select:none}
@@ -3850,39 +3852,63 @@ function perfilFotoSelecionada(input) {
 // ===== NOVIDADES: resumo na Home do que cada um foi adicionando pelo app =====
 // Só entram itens com "autor" preenchido — ou seja, adicionados a partir de quando esse
 // recurso existe. Coisas antigas (de antes dos perfis) não aparecem aqui.
+// Lista de novidades apagadas manualmente (guardada por aparelho, não soma junto com as
+// que já saíram da lista por terem passado da meia-noite).
+function novidadesApagadasLer() {
+  try { return JSON.parse(localStorage.getItem("novidades_apagadas") || "[]"); } catch (e) { return []; }
+}
+function novidadesApagadasSalvar(lista) {
+  try { localStorage.setItem("novidades_apagadas", JSON.stringify(lista)); } catch (e) {}
+}
+function apagarNovidade(chave, ev) {
+  if (ev) ev.stopPropagation();
+  var lista = novidadesApagadasLer();
+  if (lista.indexOf(chave) === -1) lista.push(chave);
+  novidadesApagadasSalvar(lista);
+  carregarNovidades();
+}
+
 function carregarNovidades() {
-  var q = "&autor=not.is.null&order=criado_em.desc&limit=5";
+  // Só mostra o que foi adicionado hoje (desde 00:00, no horário do aparelho) — assim a
+  // lista não fica lotada com coisa antiga, e o card some sozinho depois da meia-noite.
+  var inicioHoje = new Date();
+  inicioHoje.setHours(0, 0, 0, 0);
+  var q = "&autor=not.is.null&criado_em=gte." + inicioHoje.toISOString() + "&order=criado_em.desc&limit=50";
   Promise.all([
-    api("/rest/v1/midias?select=tipo,legenda_j,legenda_r,autor,criado_em" + q).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; }),
-    api("/rest/v1/textos?select=titulo,autor,criado_em" + q).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; }),
-    api("/rest/v1/desejos?select=titulo,autor,criado_em" + q).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; }),
-    api("/rest/v1/musicas?select=titulo,artista,autor,criado_em" + q).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; }),
-    api("/rest/v1/indicacoes?select=titulo,autor,criado_em" + q).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; })
+    api("/rest/v1/midias?select=id,tipo,legenda_j,legenda_r,autor,criado_em" + q).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; }),
+    api("/rest/v1/textos?select=id,titulo,autor,criado_em" + q).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; }),
+    api("/rest/v1/desejos?select=id,titulo,autor,criado_em" + q).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; }),
+    api("/rest/v1/musicas?select=id,titulo,artista,autor,criado_em" + q).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; }),
+    api("/rest/v1/indicacoes?select=id,titulo,autor,criado_em" + q).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; })
   ]).then(function(res) {
     var itens = [];
     (res[0] || []).forEach(function(m) {
       var legenda = m.legenda_j || m.legenda_r;
       itens.push({
+        chave: "midias:" + m.id,
         icone: m.tipo === "video" ? "🎬" : "📷",
         texto: (m.tipo === "video" ? "adicionou um vídeo" : "adicionou uma foto") + (legenda ? ' — "' + legenda + '"' : ""),
         autor: m.autor, data: m.criado_em
       });
     });
     (res[1] || []).forEach(function(t) {
-      itens.push({ icone: "✍️", texto: 'escreveu "' + (t.titulo || "um texto") + '"', autor: t.autor, data: t.criado_em });
+      itens.push({ chave: "textos:" + t.id, icone: "✍️", texto: 'escreveu "' + (t.titulo || "um texto") + '"', autor: t.autor, data: t.criado_em });
     });
     (res[2] || []).forEach(function(d) {
-      itens.push({ icone: "✨", texto: 'adicionou o desejo "' + (d.titulo || "") + '"', autor: d.autor, data: d.criado_em });
+      itens.push({ chave: "desejos:" + d.id, icone: "✨", texto: 'adicionou o desejo "' + (d.titulo || "") + '"', autor: d.autor, data: d.criado_em });
     });
     (res[3] || []).forEach(function(m) {
-      itens.push({ icone: "🎵", texto: "adicionou a música " + (m.titulo || "") + (m.artista ? " — " + m.artista : ""), autor: m.autor, data: m.criado_em });
+      itens.push({ chave: "musicas:" + m.id, icone: "🎵", texto: "adicionou a música " + (m.titulo || "") + (m.artista ? " — " + m.artista : ""), autor: m.autor, data: m.criado_em });
     });
     (res[4] || []).forEach(function(i) {
-      itens.push({ icone: "🎬", texto: 'indicou "' + (i.titulo || "") + '"', autor: i.autor, data: i.criado_em });
+      itens.push({ chave: "indicacoes:" + i.id, icone: "🎬", texto: 'indicou "' + (i.titulo || "") + '"', autor: i.autor, data: i.criado_em });
     });
 
+    var apagadas = novidadesApagadasLer();
+    itens = itens.filter(function(item) { return apagadas.indexOf(item.chave) === -1; });
+
     itens.sort(function(a, b) { return new Date(b.data) - new Date(a.data); });
-    itens = itens.slice(0, 6);
+    itens = itens.slice(0, 12);
 
     var card = document.getElementById("hcard-novidades");
     var lista = document.getElementById("novidades-lista");
@@ -3893,7 +3919,8 @@ function carregarNovidades() {
       var nome = perfilNome(item.autor);
       return '<div class="novidades-item"><div class="novidades-icon">' + item.icone + '</div>' +
         '<div class="novidades-texto"><b>' + nome + '</b> ' + item.texto + '</div>' +
-        '<div class="novidades-meta">' + jgFormatarTempoRelativo(item.data) + '</div></div>';
+        '<div class="novidades-meta">' + jgFormatarTempoRelativo(item.data) + '</div>' +
+        '<button type="button" class="novidades-apagar" onclick="apagarNovidade(\'' + item.chave + '\', event)" aria-label="Apagar novidade">✕</button></div>';
     }).join("");
   }).catch(function() {});
 }
