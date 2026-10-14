@@ -3225,9 +3225,18 @@ function avRenderizarFrutas(pensHist, favoritos, perguntasHist) {
   avPoolCompleto = avMontarPoolFrutas(pensHist, perguntasHist);
   if (avPoolCompleto.length === 0) return;
 
-  var embaralhado = avPoolCompleto.slice();
+  // Os frutos do dia são sorteados com uma semente baseada na data: ficam os mesmos o dia
+  // todo (nos dois aparelhos) e só mudam depois da meia-noite. A lista é ordenada antes
+  // pra o sorteio não depender da ordem em que o Supabase devolveu os itens.
+  var embaralhado = avPoolCompleto.slice().sort(function(a, b) {
+    var ka = a.tipo + "|" + a.refId, kb = b.tipo + "|" + b.refId;
+    return ka < kb ? -1 : (ka > kb ? 1 : 0);
+  });
+  var sementeDia = 0, diaStr = hojeStr();
+  for (var c = 0; c < diaStr.length; c++) sementeDia = (Math.imul(sementeDia, 31) + diaStr.charCodeAt(c)) | 0;
+  var rndDia = pgRandomSeed(sementeDia);
   for (var i = embaralhado.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
+    var j = Math.floor(rndDia() * (i + 1));
     var tmp = embaralhado[i]; embaralhado[i] = embaralhado[j]; embaralhado[j] = tmp;
   }
 
