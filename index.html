@@ -1637,11 +1637,23 @@ function buscarEstadoJogoRemoto() {
     .catch(function() { return null; });
 }
 
+// Pergunta só o número da jogada (rev) — bem menor que baixar o tabuleiro inteiro. O estado
+// completo só é baixado quando o outro aparelho realmente jogou.
+function buscarRevRemoto(tabela) {
+  return api("/rest/v1/" + tabela + "?id=eq.1&select=rev:estado->>rev")
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) { return (Array.isArray(data) && data[0]) ? (parseInt(data[0].rev, 10) || 0) : null; })
+    .catch(function() { return null; });
+}
+
 function iniciarPollingJogo() {
   clearInterval(jogoPollingTimer);
   jogoPollingTimer = setInterval(function() {
-    if (!document.getElementById("jogo-view").classList.contains("show")) return;
-    buscarEstadoJogoRemoto().then(function(remoto) {
+    if (document.hidden || !document.getElementById("jogo-view").classList.contains("show")) return;
+    buscarRevRemoto("jogo_pontos").then(function(revRemoto) {
+      if (revRemoto === null || (jogo && revRemoto <= (jogo.rev || 0))) return;
+      return buscarEstadoJogoRemoto();
+    }).then(function(remoto) {
       if (!remoto) return;
       if (!jogo || (remoto.rev || 0) > (jogo.rev || 0)) {
         jogo = remoto;
@@ -1653,7 +1665,7 @@ function iniciarPollingJogo() {
         if (jogo.finalizado) exibirTelaVencedor();
       }
     });
-  }, 2500);
+  }, 4000);
 }
 
 function pararPollingJogo() { clearInterval(jogoPollingTimer); }
@@ -1887,8 +1899,11 @@ function buscarEstadoDamaRemoto() {
 function iniciarPollingDama() {
   clearInterval(damaPollingTimer);
   damaPollingTimer = setInterval(function() {
-    if (!document.getElementById("dama-view").classList.contains("show")) return;
-    buscarEstadoDamaRemoto().then(function(remoto) {
+    if (document.hidden || !document.getElementById("dama-view").classList.contains("show")) return;
+    buscarRevRemoto("jogo_dama").then(function(revRemoto) {
+      if (revRemoto === null || (damaEstado && revRemoto <= (damaEstado.rev || 0))) return;
+      return buscarEstadoDamaRemoto();
+    }).then(function(remoto) {
       if (!remoto) return;
       if (!damaEstado || (remoto.rev || 0) > (damaEstado.rev || 0)) {
         damaEstado = remoto;
@@ -1896,7 +1911,7 @@ function iniciarPollingDama() {
         mostrarTelaDamaAtiva();
       }
     });
-  }, 2500);
+  }, 4000);
 }
 function pararPollingDama() { clearInterval(damaPollingTimer); }
 
@@ -2276,8 +2291,11 @@ function buscarEstadoXadrezRemoto() {
 function iniciarPollingXadrez() {
   clearInterval(xadrezPollingTimer);
   xadrezPollingTimer = setInterval(function() {
-    if (!document.getElementById("xadrez-view").classList.contains("show")) return;
-    buscarEstadoXadrezRemoto().then(function(remoto) {
+    if (document.hidden || !document.getElementById("xadrez-view").classList.contains("show")) return;
+    buscarRevRemoto("jogo_xadrez").then(function(revRemoto) {
+      if (revRemoto === null || (xadrezEstado && revRemoto <= (xadrezEstado.rev || 0))) return;
+      return buscarEstadoXadrezRemoto();
+    }).then(function(remoto) {
       if (!remoto) return;
       if (!xadrezEstado || (remoto.rev || 0) > (xadrezEstado.rev || 0)) {
         xadrezEstado = remoto;
@@ -2285,7 +2303,7 @@ function iniciarPollingXadrez() {
         mostrarTelaXadrezAtiva();
       }
     });
-  }, 2500);
+  }, 4000);
 }
 function pararPollingXadrez() { clearInterval(xadrezPollingTimer); }
 
@@ -2463,7 +2481,7 @@ function jgChatTogglePainel() {
   painel.classList.toggle("show", abrindo);
   if (abrindo) {
     jgChatAtualizarQuemLabel();
-    jgChatPoll();
+    jgChatPoll(true);
   }
 }
 
@@ -2473,23 +2491,41 @@ function jgChatFecharPainel() {
   if (jgChatGravando) jgChatCancelarGravacao();
 }
 
-function jgChatPoll() {
-  return api("/rest/v1/jogo_mensagens?select=*&order=criado_em.asc&limit=100")
-    .then(function(r) { return r.ok ? r.json() : null; })
-    .then(function(data) {
-      if (!Array.isArray(data)) return;
-      jgChatMensagens = data;
-      var ultimoId = data.length ? data[data.length - 1].id : null;
-      var painelAberto = document.getElementById("jg-chat-painel").classList.contains("show");
-      if (painelAberto) {
-        jgChatRenderizarLista();
-        if (ultimoId) localStorage.setItem("jg_chat_visto", ultimoId);
-        document.getElementById("jg-chat-badge").classList.remove("show");
-      } else if (ultimoId && ultimoId !== localStorage.getItem("jg_chat_visto")) {
-        document.getElementById("jg-chat-badge").classList.add("show");
-      }
-    })
-    .catch(function() {});
+var jgChatUltimoIdRemoto = null;
+
+// Consulta leve: só o id da última mensagem. A lista completa só é baixada quando tem
+// mensagem nova (ou quando o painel acabou de abrir / "forcar").
+function jgChatPoll(forcar) {
+  var painelAberto = document.getElementById("jg-chat-painel").classList.contains("show");
+  var cabeca = forcar
+    ? Promise.resolve(undefined)
+    : api("/rest/v1/jogo_mensagens?select=id&order=criado_em.desc&limit=1")
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(d) { return Array.isArray(d) ? (d[0] ? d[0].id : "") : null; })
+        .catch(function() { return null; });
+  return cabeca.then(function(idRemoto) {
+    if (idRemoto === null) return;
+    var temNovidade = forcar || idRemoto !== jgChatUltimoIdRemoto;
+    if (!temNovidade && !(painelAberto && !jgChatMensagens.length && idRemoto)) {
+      return;
+    }
+    return api("/rest/v1/jogo_mensagens?select=*&order=criado_em.desc&limit=60")
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (!Array.isArray(data)) return;
+        data.reverse();
+        jgChatMensagens = data;
+        var ultimoId = data.length ? data[data.length - 1].id : "";
+        jgChatUltimoIdRemoto = ultimoId;
+        if (painelAberto) {
+          jgChatRenderizarLista();
+          if (ultimoId) localStorage.setItem("jg_chat_visto", ultimoId);
+          document.getElementById("jg-chat-badge").classList.remove("show");
+        } else if (ultimoId && ultimoId !== localStorage.getItem("jg_chat_visto")) {
+          document.getElementById("jg-chat-badge").classList.add("show");
+        }
+      });
+  }).catch(function() {});
 }
 
 function jgChatRenderizarLista() {
@@ -2540,7 +2576,7 @@ function jgChatEnviarTexto() {
     body: JSON.stringify({ jogador: quem, tipo: "texto", texto: texto })
   }).then(function(r) {
     if (!r.ok) { mostrarToast("Não deu pra enviar a mensagem."); return; }
-    jgChatPoll();
+    jgChatPoll(true);
   }).catch(function() { mostrarToast("Não deu pra enviar a mensagem."); });
 }
 
@@ -2641,7 +2677,7 @@ function jgChatEnviarAudio(blob, duracaoSeg) {
     });
   }).then(function() {
     vibrar();
-    jgChatPoll();
+    jgChatPoll(true);
   }).catch(function(e) {
     console.error("Erro ao enviar áudio:", e);
     mostrarToast("Não deu pra enviar o áudio agora.");
@@ -3714,9 +3750,14 @@ var chatPollingTimer = null;
 
 function iniciarPollingChatGlobal() {
   clearInterval(chatPollingTimer);
+  var tick = 0;
   chatPollingTimer = setInterval(function() {
-    if (perfilAtual()) jgChatPoll();
-  }, 4000);
+    if (document.hidden || !perfilAtual()) return;
+    tick++;
+    var aberto = document.getElementById("jg-chat-painel").classList.contains("show");
+    // painel aberto: a cada 5s; fechado: a cada ~25s (só pra acender a bolinha de "nova mensagem")
+    if (aberto || tick % 5 === 0) jgChatPoll();
+  }, 5000);
 }
 
 function pararPollingChatGlobal() {
@@ -4336,7 +4377,7 @@ function renderGaleria() {
         gerarCapaVideo(m, div);
       }
     } else {
-      div.setAttribute("data-src", urlEfetivaMidia(m));
+      div.setAttribute("data-src", urlGradeMidia(m));
       galeriaObserver.observe(div);
     }
     div.onclick = function() { abrirLightbox(idx); };
@@ -4349,6 +4390,11 @@ function renderGaleria() {
 // enquanto o arquivo ainda não propagou no storage/CDN.
 function urlEfetivaMidia(m) {
   return (m.path && urlsLocaisRecentes[m.path]) || m.url;
+}
+
+// Pra grade/miniaturas: usa a miniatura leve (thumb_url) quando a foto tiver uma
+function urlGradeMidia(m) {
+  return (m.path && urlsLocaisRecentes[m.path]) || m.thumb_url || m.url;
 }
 
 // ===== CAPA AUTOMÁTICA DE VÍDEO (captura um frame com <video>+<canvas>) =====
@@ -4475,7 +4521,7 @@ function renderHeroPhotos(items) {
           }
           div.textContent = "▶";
         } else {
-          div.style.backgroundImage = "url(" + urlEfetivaMidia(items[i]) + ")";
+          div.style.backgroundImage = "url(" + urlGradeMidia(items[i]) + ")";
         }
       }
       hero.appendChild(div);
@@ -4583,6 +4629,29 @@ function renderUploadPreview() {
   });
 }
 
+// Reduz a foto antes de subir (lado maior até "maxLado", JPEG). Fotos de celular têm 3-8 MB;
+// redimensionadas ficam ~200-400 KB — é isso que mais economiza a cota de tráfego do Supabase.
+function comprimirImagem(file, maxLado, qualidade) {
+  return new Promise(function(resolve) {
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function() {
+      var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+      var escala = Math.min(1, maxLado / Math.max(w, h));
+      var canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(w * escala));
+      canvas.height = Math.max(1, Math.round(h * escala));
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(function(blob) {
+        URL.revokeObjectURL(url);
+        resolve(blob || null);
+      }, "image/jpeg", qualidade);
+    };
+    img.onerror = function() { URL.revokeObjectURL(url); resolve(null); };
+    img.src = url;
+  });
+}
+
 function salvarFotos() {
   if (itensSelecionados.length === 0) { mostrarToast("Selecione pelo menos um arquivo!"); return; }
   var btn = document.getElementById("btn-salvar-foto");
@@ -4610,11 +4679,31 @@ function salvarFotos() {
     var file = item.file;
     var mime = tipoArquivo(file);
     var isVideo = mime.startsWith("video/");
+    var thumbBlob = null;
+
+    var preparo = Promise.resolve();
+    if (!isVideo) {
+      // Foto: versão principal (até 1800px) + miniatura (até 420px) pra grade da galeria
+      preparo = Promise.all([comprimirImagem(file, 1800, 0.82), comprimirImagem(file, 420, 0.7)]).then(function(r) {
+        if (r[0] && r[0].size < file.size) {
+          var nomeJpg = (file.name || "foto").replace(/\.[^.]+$/, "") + ".jpg";
+          file = new File([r[0]], nomeJpg, { type: "image/jpeg" });
+          mime = "image/jpeg";
+        }
+        thumbBlob = r[1];
+      });
+    }
+    preparo.then(function() { enviarItem(i, item, file, mime, isVideo, thumbBlob); });
+  }
+
+  function enviarItem(i, item, file, mime, isVideo, thumbBlob) {
     var extOriginal = (file.name.split(".").pop() || "bin").toLowerCase();
 
     var nomeBase = file.name.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9._]/g, "_");
     var path = Date.now() + "_" + i + "_" + nomeBase + "." + extOriginal;
     var storageUrl = SUPABASE_URL + "/storage/v1/object/midias/" + path;
+    var thumbPath = "thumbs/" + Date.now() + "_" + i + ".jpg";
+    var thumbPublicUrl = null;
 
     document.getElementById("up-text").textContent = "Enviando " + (i + 1) + " de " + total + "...";
 
@@ -4641,6 +4730,21 @@ function salvarFotos() {
         });
       })
       .then(function() {
+        if (!thumbBlob) return;
+        return fetch(SUPABASE_URL + "/storage/v1/object/midias/" + thumbPath, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": "Bearer " + session.access_token,
+            "Content-Type": "image/jpeg",
+            "x-upsert": "true"
+          },
+          body: thumbBlob
+        }).then(function(r) {
+          if (r.ok) thumbPublicUrl = SUPABASE_URL + "/storage/v1/object/public/midias/" + thumbPath;
+        }).catch(function() {});
+      })
+      .then(function() {
         var publicUrl = SUPABASE_URL + "/storage/v1/object/public/midias/" + path;
         urlsLocaisRecentes["midias/" + path] = URL.createObjectURL(file);
         return api("/rest/v1/midias", {
@@ -4655,6 +4759,7 @@ function salvarFotos() {
             url: publicUrl,
             tipo: isVideo ? "video" : "foto",
             path: "midias/" + path,
+            thumb_url: thumbPublicUrl,
             legenda_j: item.legendaJ ? item.legendaJ.trim() : null,
             legenda_r: item.legendaR ? item.legendaR.trim() : null,
             data_evento: item.data || null,
