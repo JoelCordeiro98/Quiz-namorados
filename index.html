@@ -491,7 +491,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .aniv-popup.show{display:flex}
 .aniv-popup-box{background:var(--blk2);border:1.5px solid var(--red);border-radius:24px;padding:2.2rem 1.8rem;max-width:360px;width:100%;text-align:center;box-shadow:0 0 60px rgba(192,57,43,0.35)}
 .aniv-popup-heart{font-size:2.6rem;color:var(--redl);animation:heartbeat 1s infinite;margin-bottom:1rem}
-.aniv-popup-msg{font-family:"Playfair Display",serif;font-size:1.1rem;line-height:1.6;color:#fff;margin-bottom:1.5rem}
+.aniv-popup-msg{font-family:"Playfair Display",serif;font-size:1.02rem;line-height:1.6;color:#fff;margin-bottom:1.5rem;white-space:pre-line;max-height:55vh;overflow-y:auto;text-align:left}
 </style>
 </head>
 <body>
@@ -4023,7 +4023,7 @@ function abrirPopupAniversario() {
   var anual = hoje.getMonth() === 4; // maio (0-indexado)
   var msg = anual
     ? "🎉 Feliz Aniversário de Namoro! Mais um ano de amor e cumplicidade juntos. Te amo! ♥"
-    : "💕 Mais um mês juntos! Cada dia 15 é um lembrete do quanto nosso amor cresce. ♥";
+    : "Que neste dia 15, após momentos difíceis, alguns desentendimentos, tristezas e conversas difíceis, possamos novamente estar aqui, nunca desistindo daquilo que sentimos e acreditamos, do amor que construímos juntos e que o mantemos forte e saudável, mesmo diante das dificuldades e do cenário que estamos, contudo... Quero dizer que te amo, te amo mais do que consigo descrever, mas eu também sinto seu amor, e esse sem dúvidas é um dos maiores motivos para que eu siga em frente em querer tanto fazer com que tudo isso que almejamos dê certo... Feliz dia 15!\nEu te amo <3";
   document.getElementById("aniv-popup-msg").textContent = msg;
   document.getElementById("aniv-popup").classList.add("show");
 }
