@@ -277,6 +277,42 @@ to authenticated
 using (true)
 with check (true);
 
+-- Estado do jogo de Dama (linha única, sincronizada entre os dois aparelhos, igual o
+-- jogo_pontos). "estado" guarda o tabuleiro (64 posições), de quem é a vez, se tem
+-- captura obrigatória em andamento e quem ganhou.
+create table if not exists jogo_dama (
+  id int primary key default 1 check (id = 1),
+  estado jsonb,
+  atualizado_em timestamptz default now()
+);
+
+alter table jogo_dama enable row level security;
+
+drop policy if exists "authenticated full access jogo_dama" on jogo_dama;
+create policy "authenticated full access jogo_dama"
+on jogo_dama for all
+to authenticated
+using (true)
+with check (true);
+
+-- Estado do jogo de Xadrez (linha única, sincronizada entre os dois aparelhos, igual o
+-- jogo_pontos e o jogo_dama). "estado" guarda o tabuleiro (64 posições), de quem é a
+-- vez, direito de roque/en passant e quem ganhou.
+create table if not exists jogo_xadrez (
+  id int primary key default 1 check (id = 1),
+  estado jsonb,
+  atualizado_em timestamptz default now()
+);
+
+alter table jogo_xadrez enable row level security;
+
+drop policy if exists "authenticated full access jogo_xadrez" on jogo_xadrez;
+create policy "authenticated full access jogo_xadrez"
+on jogo_xadrez for all
+to authenticated
+using (true)
+with check (true);
+
 -- "Novidades" na Home: cada tabela de conteúdo ganha uma coluna "autor" (id de perfis)
 -- guardando quem adicionou aquele item, preenchida automaticamente pelo app a partir do
 -- perfil escolhido no aparelho. Itens antigos ficam com autor nulo (não aparecem nas
@@ -286,3 +322,12 @@ alter table textos add column if not exists autor text references perfis(id);
 alter table desejos add column if not exists autor text references perfis(id);
 alter table musicas add column if not exists autor text references perfis(id);
 alter table indicacoes add column if not exists autor text references perfis(id);
+
+-- Editar o "no que estou pensando" por 1 hora depois de postar: guarda a hora em que cada um
+-- postou (a janela de edição conta a partir daí).
+alter table pensamentos add column if not exists postado_ele_em timestamptz;
+alter table pensamentos add column if not exists postado_ela_em timestamptz;
+
+-- Pergunta do Dia agora é feita por vocês (quem perguntar primeiro no dia define a pergunta).
+-- "perguntou_por" guarda quem fez (id de perfis: 'joel' ou 'ranny').
+alter table pergunta_respostas add column if not exists perguntou_por text;
