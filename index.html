@@ -644,7 +644,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
         <div class="hcard-pergunta-icon">💬</div>
         <div class="hcard-pergunta-info">
           <div class="hcard-pergunta-title">Pergunta do Dia</div>
-          <div class="hcard-pergunta-sub">Toque pra responder</div>
+          <div class="hcard-pergunta-sub">Toque pra perguntar ou responder</div>
         </div>
         <div class="hcard-pergunta-arrow">›</div>
       </div>
@@ -1308,6 +1308,17 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div style="width:38px"></div>
   </div>
   <div class="av-conteudo">
+    <div id="pg-perguntar" style="display:none">
+      <div class="pg-numero">Pergunta do dia</div>
+      <div class="pg-pergunta">Ninguém perguntou hoje — faça a pergunta do dia 💬</div>
+      <div class="diario-campo" style="margin-top:1.5rem">
+        <textarea id="pg-nova-pergunta" name="pg-nova-pergunta" placeholder="Escreva uma pergunta pra vocês dois responderem hoje..." autocomplete="off"></textarea>
+        <button type="button" class="diario-postar" id="pg-enviar-pergunta" onclick="pgFazerPergunta()">Fazer a pergunta</button>
+      </div>
+      <div class="pg-completo">Vale até a meia-noite. Quem perguntar primeiro define a pergunta de hoje.</div>
+    </div>
+
+    <div id="pg-qa" style="display:none">
     <div class="pg-numero" id="pg-numero"></div>
     <div class="pg-pergunta" id="pg-pergunta"></div>
 
@@ -1329,6 +1340,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </div>
     <div class="diario-salvo" id="pg-salvo">Salvo ♥</div>
     <div class="pg-completo" id="pg-completo" style="display:none">✓ Pergunta respondida por completo hoje! Ela vai virar uma lembrança na árvore.</div>
+    </div>
   </div>
 </div>
 
@@ -3444,45 +3456,8 @@ function fecharArvore() {
 }
 
 // ===== PERGUNTA DO DIA =====
-// 30 perguntas cadastradas (dá pra adicionar mais depois, é só crescer esse array).
-// A ordem em que elas aparecem é embaralhada uma vez com uma semente fixa — os dois
-// aparelhos calculam exatamente a mesma ordem sem precisar de nenhuma consulta ao
-// Supabase pra isso. Ela troca sozinha à meia-noite (baseada na data local).
-var PERGUNTAS_DIARIAS = [
-  "Qual foi a primeira coisa em mim que realmente chamou sua atenção?",
-  "Qual momento nosso você gostaria de viver pela primeira vez novamente?",
-  "Qual mania minha você reclama, mas sentiria falta se eu parasse?",
-  "Se pudéssemos viajar amanhã sem nos preocupar com dinheiro, para onde você me levaria?",
-  "Qual foi o momento em que você percebeu: \"eu tô gostando mesmo dessa pessoa\"?",
-  "Qual coisa pequena que eu faço consegue melhorar seu dia?",
-  "Se nosso relacionamento fosse um filme, qual seria o título?",
-  "Qual foto nossa você escolheria se pudesse guardar apenas uma?",
-  "O que você acha que eu mais amo em você?",
-  "Qual foi a situação mais engraçada ou vergonhosa que já vivemos juntos?",
-  "Qual característica minha você espera que nunca mude?",
-  "Se tivéssemos 24 horas completamente livres só para nós dois, o que você gostaria de fazer?",
-  "Qual música imediatamente faz você lembrar de mim?",
-  "O que você acha que nós fazemos melhor como casal?",
-  "Qual experiência você ainda sonha viver comigo?",
-  "Qual foi o encontro ou passeio nosso que mais te marcou?",
-  "Se pudesse me fazer uma pergunta e eu fosse obrigado(a) a responder com total sinceridade, o que perguntaria? 👀",
-  "Qual elogio meu você mais gosta de receber?",
-  "Qual é uma coisa sobre você que acha que eu ainda não percebi?",
-  "Quando estamos longe, do que você sente mais saudade em mim?",
-  "Qual atitude minha você acha irresistível, mesmo que eu nem perceba? 😏",
-  "Qual foi a situação em que você ficou com mais ciúmes de mim, mesmo que tenha disfarçado? 👀",
-  "Se estivéssemos nos conhecendo hoje, acha que você ainda se apaixonaria por mim?",
-  "Qual é o lugar mais inesperado onde você gostaria de receber um beijo meu?",
-  "Qual roupa ou estilo meu você acha mais atraente?",
-  "Qual momento entre nós fez você pensar: \"essa pessoa me conhece de verdade\"?",
-  "Se pudesse escolher uma coisa diferente para fazermos juntos hoje à noite, o que escolheria? 😏",
-  "Qual lembrança nossa ainda consegue fazer você sorrir sozinho(a)?",
-  "O que você gostaria que fizéssemos mais vezes no nosso relacionamento?",
-  "Sem pensar muito: se eu estivesse na sua frente agora e dissesse \"você pode pedir qualquer coisa\", o que você pediria? 👀❤️"
-];
-
-var PERGUNTAS_INICIO = new Date(2026, 8, 9); // 9 de setembro de 2026 — "dia 1"
-
+// Agora quem faz a pergunta são vocês: o primeiro que perguntar no dia deixa a pergunta
+// valendo até a meia-noite, e os dois respondem. (As 30 perguntas antigas saíram.)
 // PRNG determinístico (mulberry32) — mesma semente sempre gera a mesma sequência,
 // então os dois aparelhos calculam a mesma ordem embaralhada sem sincronizar nada.
 function pgRandomSeed(seed) {
@@ -3494,55 +3469,30 @@ function pgRandomSeed(seed) {
   };
 }
 
-function pgGerarOrdem(n) {
-  var idx = [];
-  for (var i = 0; i < n; i++) idx.push(i);
-  var rand = pgRandomSeed(20260909);
-  for (var i2 = idx.length - 1; i2 > 0; i2--) {
-    var j = Math.floor(rand() * (i2 + 1));
-    var tmp = idx[i2]; idx[i2] = idx[j]; idx[j] = tmp;
-  }
-  return idx;
-}
-
-var PERGUNTAS_ORDEM = pgGerarOrdem(PERGUNTAS_DIARIAS.length);
-
-function pgHojeMeiaNoite() {
-  var d = new Date();
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-}
-
-function pgDiasDesdeInicio() {
-  var dias = Math.round((pgHojeMeiaNoite() - PERGUNTAS_INICIO) / 86400000);
-  return Math.max(0, dias);
-}
-
-// Retorna a pergunta de hoje: texto, número dela na lista embaralhada e quantas
-// "voltas" completas já foram dadas (pra quando passar das 30, antes de você adicionar mais)
-function pgPerguntaDeHoje() {
-  var dias = pgDiasDesdeInicio();
-  var pos = dias % PERGUNTAS_ORDEM.length;
-  var volta = Math.floor(dias / PERGUNTAS_ORDEM.length);
-  return { texto: PERGUNTAS_DIARIAS[PERGUNTAS_ORDEM[pos]], numero: pos + 1, volta: volta };
-}
-
 var pgPerguntaTextoAtual = "";
 var pgPostadoEle = false, pgPostadoEla = false;
 var pgPessoalmenteEle = false, pgPessoalmenteEla = false;
 var pgLidoEle = false, pgLidoEla = false;
 
 function abrirPergunta() {
-  var pd = pgPerguntaDeHoje();
-  pgPerguntaTextoAtual = pd.texto;
-  document.getElementById("pg-pergunta").textContent = pd.texto;
-  document.getElementById("pg-numero").textContent = "Pergunta " + pd.numero + " de " + PERGUNTAS_DIARIAS.length +
-    (pd.volta > 0 ? " · rodada " + (pd.volta + 1) : "");
   document.getElementById("pergunta-view").classList.add("show");
   carregarPergunta();
 }
 
 function fecharPergunta() {
   document.getElementById("pergunta-view").classList.remove("show");
+}
+
+var pgPerguntouPor = null;
+
+// Mostra ou o convite pra perguntar (ninguém perguntou hoje) ou a pergunta + caixas de resposta
+function pgMostrarModo(temPergunta) {
+  document.getElementById("pg-perguntar").style.display = temPergunta ? "none" : "block";
+  document.getElementById("pg-qa").style.display = temPergunta ? "block" : "none";
+  if (temPergunta) {
+    document.getElementById("pg-pergunta").textContent = pgPerguntaTextoAtual;
+    document.getElementById("pg-numero").textContent = pgPerguntouPor ? "Pergunta de " + perfilNome(pgPerguntouPor) : "Pergunta do dia";
+  }
 }
 
 function carregarPergunta() {
@@ -3553,6 +3503,8 @@ function carregarPergunta() {
     })
     .then(function(data) {
       var row = Array.isArray(data) ? data[0] : null;
+      pgPerguntaTextoAtual = row ? (row.pergunta_texto || "") : "";
+      pgPerguntouPor = row ? (row.perguntou_por || null) : null;
       document.getElementById("pg-resposta-ele").value = row ? (row.resposta_ele || "") : "";
       document.getElementById("pg-resposta-ela").value = row ? (row.resposta_ela || "") : "";
       pgPostadoEle = row ? !!row.postado_ele : false;
@@ -3561,12 +3513,49 @@ function carregarPergunta() {
       pgPessoalmenteEla = row ? !!row.pessoalmente_ela : false;
       pgLidoEle = row ? !!row.lido_ele : false;
       pgLidoEla = row ? !!row.lido_ela : false;
+      pgMostrarModo(!!(row && row.pergunta_texto));
       pgAtualizarEstado();
     })
     .catch(function(e) {
       console.error("carregarPergunta falhou:", e);
-      mostrarToast("Não consegui carregar sua resposta salva. Verifique a conexão.");
+      mostrarToast("Não consegui carregar a pergunta. Verifique a conexão.");
     });
+}
+
+// Quem perguntar primeiro ganha o dia: o insert ignora se já existir pergunta hoje
+function pgFazerPergunta() {
+  if (!perfilAtual()) { abrirEscolhaPerfil(true); mostrarToast("Escolha seu perfil primeiro."); return; }
+  var texto = document.getElementById("pg-nova-pergunta").value.trim();
+  if (!texto) { mostrarToast("Escreva a pergunta primeiro!"); return; }
+  var btn = document.getElementById("pg-enviar-pergunta");
+  btn.disabled = true;
+  api("/rest/v1/pergunta_respostas?on_conflict=dia", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "resolution=ignore-duplicates,return=representation"
+    },
+    body: JSON.stringify({ dia: hojeStr(), pergunta_texto: texto, perguntou_por: perfilAtual() })
+  }).then(function(r) {
+    if (!r.ok) throw new Error("http " + r.status);
+    return r.json();
+  }).then(function(data) {
+    btn.disabled = false;
+    if (Array.isArray(data) && data.length === 0) {
+      mostrarToast("Alguém já fez a pergunta de hoje 💕");
+    } else {
+      document.getElementById("pg-nova-pergunta").value = "";
+      vibrar();
+      mostrarToast("✓ Pergunta feita! Vale até a meia-noite.");
+    }
+    carregarPergunta();
+  }).catch(function(e) {
+    btn.disabled = false;
+    console.error("pgFazerPergunta falhou:", e);
+    mostrarToast("Não deu pra enviar a pergunta agora. Tente de novo.");
+  });
 }
 
 function pgAtualizarEstado() {
@@ -4060,6 +4049,9 @@ var lidoEle = false;
 var lidoEla = false;
 var postadoEle = false;
 var postadoEla = false;
+var postadoEleEm = null; // quando foi postado (ms) — vale 1h pra editar caso tenha postado sem querer
+var postadoElaEm = null;
+var JANELA_EDICAO_MS = 60 * 60 * 1000;
 
 function carregarPensamento() {
   api("/rest/v1/pensamentos?data=eq." + hojeStr() + "&select=*")
@@ -4073,6 +4065,8 @@ function carregarPensamento() {
       lidoEla = row ? !!row.lido_ela : false;
       postadoEle = row ? !!row.postado_ele : false;
       postadoEla = row ? !!row.postado_ela : false;
+      postadoEleEm = (row && row.postado_ele_em) ? new Date(row.postado_ele_em).getTime() : null;
+      postadoElaEm = (row && row.postado_ela_em) ? new Date(row.postado_ela_em).getTime() : null;
       atualizarBotoesLido();
       atualizarEstadoPostado();
     });
@@ -4083,18 +4077,38 @@ function atualizarBotoesLido() {
   document.getElementById("lido-ela").classList.toggle("lido", lidoEla);
 }
 
-function atualizarEstadoPostado() {
-  var txtEle = document.getElementById("pensamento-ele");
-  var txtEla = document.getElementById("pensamento-ela");
-  var btnEle = document.getElementById("postar-ele");
-  var btnEla = document.getElementById("postar-ela");
-  txtEle.readOnly = postadoEle;
-  txtEla.readOnly = postadoEla;
-  btnEle.disabled = postadoEle;
-  btnEle.textContent = postadoEle ? "🔒 Postado" : "Postar";
-  btnEla.disabled = postadoEla;
-  btnEla.textContent = postadoEla ? "🔒 Postado" : "Postar";
+// Minutos que ainda restam pra editar o que foi postado (0 = já travou)
+function minutosRestantesEdicao(quem) {
+  var em = quem === "ele" ? postadoEleEm : postadoElaEm;
+  if (!em) return 0;
+  var resta = JANELA_EDICAO_MS - (Date.now() - em);
+  return resta > 0 ? Math.ceil(resta / 60000) : 0;
 }
+
+function atualizarEstadoPostado() {
+  ["ele", "ela"].forEach(function(quem) {
+    var postado = quem === "ele" ? postadoEle : postadoEla;
+    var txt = document.getElementById("pensamento-" + quem);
+    var btn = document.getElementById("postar-" + quem);
+    var min = postado ? minutosRestantesEdicao(quem) : 0;
+    txt.readOnly = postado;
+    if (!postado) {
+      btn.disabled = false;
+      btn.textContent = "Postar";
+    } else if (min > 0) {
+      btn.disabled = false;
+      btn.textContent = "✎ Editar (" + min + " min)";
+    } else {
+      btn.disabled = true;
+      btn.textContent = "🔒 Postado";
+    }
+  });
+}
+
+// Atualiza o contador de minutos do botão "Editar" enquanto o app estiver aberto
+setInterval(function() {
+  if ((postadoEle && minutosRestantesEdicao("ele") >= 0) || (postadoEla && minutosRestantesEdicao("ela") >= 0)) atualizarEstadoPostado();
+}, 30000);
 
 // Vibração leve como feedback tátil (sem efeito em navegadores/aparelhos sem suporte, ex. iOS)
 function vibrar(ms) {
@@ -4102,13 +4116,30 @@ function vibrar(ms) {
 }
 
 function postarPensamento(quem) {
+  var postado = quem === "ele" ? postadoEle : postadoEla;
+  // Já postado e ainda dentro de 1h: o botão vira "Editar" e só destrava o campo
+  if (postado) {
+    if (minutosRestantesEdicao(quem) === 0) return;
+    if (quem === "ele") postadoEle = false; else postadoEla = false;
+    atualizarEstadoPostado();
+    var campo = document.getElementById("pensamento-" + quem);
+    campo.focus();
+    mostrarToast("Pode editar — toque em Postar de novo quando terminar.");
+    return;
+  }
   var texto = document.getElementById("pensamento-" + quem).value.trim();
   if (!texto) { mostrarToast("Escreva algo antes de postar!"); return; }
-  if (quem === "ele") { postadoEle = true; } else { postadoEla = true; }
+  if (quem === "ele") {
+    postadoEle = true;
+    if (!postadoEleEm) postadoEleEm = Date.now(); // a janela de 1h conta da 1ª vez que postou
+  } else {
+    postadoEla = true;
+    if (!postadoElaEm) postadoElaEm = Date.now();
+  }
   atualizarEstadoPostado();
   salvarPensamento();
   vibrar();
-  mostrarToast("✓ Postado! Só dá pra editar de novo amanhã.");
+  mostrarToast("✓ Postado! Dá pra editar por 1 hora.");
 }
 
 function toggleLido(quem) {
@@ -4141,7 +4172,9 @@ function salvarPensamento() {
       "Content-Type": "application/json",
       "Prefer": "resolution=merge-duplicates,return=minimal"
     },
-    body: JSON.stringify({ data: hojeStr(), ele: ele, ela: ela, lido_ele: lidoEle, lido_ela: lidoEla, postado_ele: postadoEle, postado_ela: postadoEla })
+    body: JSON.stringify({ data: hojeStr(), ele: ele, ela: ela, lido_ele: lidoEle, lido_ela: lidoEla, postado_ele: postadoEle, postado_ela: postadoEla,
+      postado_ele_em: postadoEleEm ? new Date(postadoEleEm).toISOString() : null,
+      postado_ela_em: postadoElaEm ? new Date(postadoElaEm).toISOString() : null })
   }).then(function(r) {
     if (r.ok) {
       var el = document.getElementById("diario-salvo");
