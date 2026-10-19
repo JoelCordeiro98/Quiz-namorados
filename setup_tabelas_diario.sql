@@ -331,3 +331,6 @@ alter table pensamentos add column if not exists postado_ela_em timestamptz;
 -- Pergunta do Dia agora é feita por vocês (quem perguntar primeiro no dia define a pergunta).
 -- "perguntou_por" guarda quem fez (id de perfis: 'joel' ou 'ranny').
 alter table pergunta_respostas add column if not exists perguntou_por text;
+
+-- Estilo de leitura dos textos (design escolhido ao criar: padrao, carta, romantico, noturno, maquina)
+alter table textos add column if not exists estilo text default 'padrao';

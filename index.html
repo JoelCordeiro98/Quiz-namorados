@@ -298,17 +298,39 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .leitura-fechar{background:rgba(255,255,255,0.08);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:1rem;cursor:pointer}
 .leitura-hdr-actions{display:flex;gap:0.5rem}
 .leitura-acao{background:rgba(255,255,255,0.08);border:none;color:rgba(255,255,255,0.8);width:38px;height:38px;border-radius:50%;font-size:1rem;cursor:pointer}
-/* ===== CARTA (texto do tipo "Carta": visual de papel) ===== */
-.leitura-view.carta{background:radial-gradient(ellipse at top,#f6ecd4 0%,#e9d9b6 100%)}
-.leitura-view.carta .leitura-hdr{background:linear-gradient(to bottom,rgba(233,217,182,0.95),transparent)}
-.leitura-view.carta .leitura-fechar,.leitura-view.carta .leitura-acao{background:rgba(90,60,30,0.12);color:#5a3c1e}
-.leitura-view.carta .leitura-conteudo{background:rgba(255,252,243,0.55);border:1px solid rgba(120,85,45,0.22);border-radius:6px;box-shadow:0 6px 28px rgba(80,50,20,0.25),inset 0 0 40px rgba(180,140,80,0.12);margin:0.5rem 1rem 3rem;padding:1.8rem 1.6rem 2.2rem;max-width:540px}
-.leitura-view.carta .leitura-tipo{display:none}
-.leitura-view.carta .leitura-titulo{font-family:"Dancing Script",cursive;font-weight:700;font-size:2rem;text-align:left;color:#6b2d1f;margin-bottom:1.2rem}
-.leitura-view.carta .leitura-corpo{color:#3b2a1a;font-size:1.1rem;line-height:1.95}
-.carta-data{display:none;text-align:right;font-family:"Playfair Display",serif;font-style:italic;font-size:0.85rem;color:#8a6a45;margin-bottom:1.2rem}
-.carta-assinatura{display:none;text-align:right;margin-top:2rem;font-family:"Dancing Script",cursive;font-size:1.5rem;line-height:1.5;color:#6b2d1f}
-.leitura-view.carta .carta-data,.leitura-view.carta .carta-assinatura{display:block}
+/* ===== ESTILOS DE LEITURA (design do texto, independente da categoria) ===== */
+.carta-data,.carta-assinatura{display:none}
+/* Carta: papel creme, saudação e assinatura manuscritas */
+.leitura-view.estilo-carta{background:radial-gradient(ellipse at top,#f6ecd4 0%,#e9d9b6 100%)}
+.leitura-view.estilo-carta .leitura-hdr{background:linear-gradient(to bottom,rgba(233,217,182,0.95),transparent)}
+.leitura-view.estilo-carta .leitura-fechar,.leitura-view.estilo-carta .leitura-acao{background:rgba(90,60,30,0.12);color:#5a3c1e}
+.leitura-view.estilo-carta .leitura-conteudo{background:rgba(255,252,243,0.55);border:1px solid rgba(120,85,45,0.22);border-radius:6px;box-shadow:0 6px 28px rgba(80,50,20,0.25),inset 0 0 40px rgba(180,140,80,0.12);margin:0.5rem 1rem 3rem;padding:1.8rem 1.6rem 2.2rem;max-width:540px}
+.leitura-view.estilo-carta .leitura-tipo{display:none}
+.leitura-view.estilo-carta .leitura-titulo{font-family:"Dancing Script",cursive;font-weight:700;font-size:2rem;text-align:left;color:#6b2d1f;margin-bottom:1.2rem}
+.leitura-view.estilo-carta .leitura-corpo{color:#3b2a1a;font-size:1.1rem;line-height:1.95}
+.carta-data{text-align:right;font-family:"Playfair Display",serif;font-style:italic;font-size:0.85rem;color:#8a6a45;margin-bottom:1.2rem}
+.carta-assinatura{text-align:right;margin-top:2rem;font-family:"Dancing Script",cursive;font-size:1.5rem;line-height:1.5;color:#6b2d1f;white-space:pre-line}
+.leitura-view.estilo-carta .carta-data,.leitura-view.estilo-carta .carta-assinatura{display:block}
+/* Romântico: tons de rosa e vinho, tudo centralizado, itálico */
+.leitura-view.estilo-romantico{background:radial-gradient(ellipse at top,#4a1226 0%,#1e0610 70%)}
+.leitura-view.estilo-romantico .leitura-tipo{color:#ffb3c6}
+.leitura-view.estilo-romantico .leitura-titulo{font-family:"Dancing Script",cursive;font-weight:700;font-size:2.3rem;color:#ffd1dc}
+.leitura-view.estilo-romantico .leitura-titulo::after{content:"♥";display:block;font-size:1rem;color:#ff6b8f;margin-top:0.6rem}
+.leitura-view.estilo-romantico .leitura-corpo{text-align:center;font-style:italic;color:#ffe6ec;line-height:2}
+/* Noturno: azul-noite com brilho de estrelas */
+.leitura-view.estilo-noturno{background:radial-gradient(ellipse at top,#1b2a55 0%,#070b1d 75%)}
+.leitura-view.estilo-noturno .leitura-tipo{color:#9fb4ff}
+.leitura-view.estilo-noturno .leitura-titulo{color:#dfe7ff;text-align:center;text-shadow:0 0 18px rgba(140,170,255,0.5)}
+.leitura-view.estilo-noturno .leitura-titulo::before{content:"✦  ✧  ✦";display:block;font-size:0.8rem;letter-spacing:6px;color:#9fb4ff;margin-bottom:0.8rem}
+.leitura-view.estilo-noturno .leitura-corpo{text-align:center;color:#c9d6ff;line-height:2}
+/* Máquina de escrever: papel claro, fonte monoespaçada */
+.leitura-view.estilo-maquina{background:#d9d4c7}
+.leitura-view.estilo-maquina .leitura-hdr{background:linear-gradient(to bottom,rgba(217,212,199,0.95),transparent)}
+.leitura-view.estilo-maquina .leitura-fechar,.leitura-view.estilo-maquina .leitura-acao{background:rgba(0,0,0,0.1);color:#222}
+.leitura-view.estilo-maquina .leitura-conteudo{background:#fbfaf6;box-shadow:0 4px 20px rgba(0,0,0,0.25);margin:0.5rem 1rem 3rem;padding:1.8rem 1.5rem 2.2rem;max-width:540px}
+.leitura-view.estilo-maquina .leitura-tipo{color:#777;font-family:"Courier New",monospace}
+.leitura-view.estilo-maquina .leitura-titulo{font-family:"Courier New",monospace;font-weight:700;font-size:1.5rem;color:#1a1a1a;text-align:left;border-bottom:2px solid #1a1a1a;padding-bottom:0.6rem}
+.leitura-view.estilo-maquina .leitura-corpo{font-family:"Courier New",monospace;font-size:0.98rem;line-height:1.85;color:#2a2a2a}
 .leitura-conteudo{max-width:560px;margin:0 auto;padding:0.5rem 1.8rem 4rem;text-align:center}
 .leitura-tipo{font-size:0.68rem;letter-spacing:3px;text-transform:uppercase;color:var(--redl);margin-bottom:0.9rem}
 .leitura-titulo{font-family:"Playfair Display",serif;font-size:1.9rem;line-height:1.3;margin-bottom:2rem}
@@ -879,12 +901,21 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     <div class="modal-title" id="modal-texto-title">✍️ Adicionar Texto</div>
     <div class="form-group">
       <label>Tipo</label>
-      <select id="txt-tipo" onchange="atualizarCamposCarta()">
+      <select id="txt-tipo">
         <option value="Mensagem">Mensagem</option>
         <option value="Poema">Poema</option>
         <option value="Declaração">Declaração</option>
         <option value="Reflexão">Reflexão</option>
-        <option value="Carta">✉️ Carta</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Estilo de leitura</label>
+      <select id="txt-estilo" onchange="atualizarCamposCarta()">
+        <option value="padrao">Padrão</option>
+        <option value="carta">✉️ Carta (papel e assinatura)</option>
+        <option value="romantico">💗 Romântico</option>
+        <option value="noturno">🌙 Noturno</option>
+        <option value="maquina">⌨️ Máquina de escrever</option>
       </select>
     </div>
     <div class="form-group">
@@ -5088,7 +5119,7 @@ function renderTextos() {
     var div = document.createElement("div");
     div.className = "texto-card";
     var preview = t.corpo ? t.corpo.substring(0, 100) + (t.corpo.length > 100 ? "..." : "") : "";
-    div.innerHTML = '<div class="tc-tipo">' + (t.tipo === "Carta" ? "✉️ Carta" : (t.tipo || "Texto")) + '</div>' +
+    div.innerHTML = '<div class="tc-tipo">' + ((t.tipo || "Texto") + (estiloDoTexto(t) !== "padrao" ? " · " + ESTILOS_TEXTO[estiloDoTexto(t)].icone : "")) + '</div>' +
       '<div class="tc-titulo">' + (t.titulo || "") + '</div>' +
       '<div class="tc-preview">' + preview + '</div>' +
       '<div class="tc-footer">Toque para ler ›</div>';
@@ -5097,11 +5128,27 @@ function renderTextos() {
   });
 }
 
+var ESTILOS_TEXTO = {
+  padrao: { nome: "Padrão", icone: "" },
+  carta: { nome: "Carta", icone: "✉️" },
+  romantico: { nome: "Romântico", icone: "💗" },
+  noturno: { nome: "Noturno", icone: "🌙" },
+  maquina: { nome: "Máquina de escrever", icone: "⌨️" }
+};
+// Textos antigos criados quando "Carta" era uma categoria continuam abrindo como carta
+function estiloDoTexto(t) {
+  if (t && t.estilo && ESTILOS_TEXTO[t.estilo]) return t.estilo;
+  if (t && t.tipo === "Carta") return "carta";
+  return "padrao";
+}
+
 function abrirTexto(idx) {
   var t = textos[idx];
-  var ehCarta = t.tipo === "Carta";
+  var estilo = estiloDoTexto(t);
+  var ehCarta = estilo === "carta";
   var view = document.getElementById("leitura-view");
-  view.classList.toggle("carta", ehCarta);
+  Object.keys(ESTILOS_TEXTO).forEach(function(k) { view.classList.remove("estilo-" + k); });
+  if (estilo !== "padrao") view.classList.add("estilo-" + estilo);
   document.getElementById("leitura-tipo").textContent = t.tipo || "Texto";
   document.getElementById("leitura-titulo").textContent = t.titulo || "";
   document.getElementById("leitura-corpo").textContent = t.corpo || "";
@@ -5110,7 +5157,6 @@ function abrirTexto(idx) {
     document.getElementById("carta-data").textContent = d.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" });
     var nome = t.autor ? perfilNome(t.autor) : "";
     document.getElementById("carta-assinatura").textContent = "Com todo o meu amor," + (nome ? "\n" + nome : "") + " ♥";
-    document.getElementById("carta-assinatura").style.whiteSpace = "pre-line";
   }
   document.getElementById("leitura-del").onclick = function() { deletarTexto(t.id); };
   document.getElementById("leitura-edit").onclick = function() { fecharLeitura(); abrirModalTextoEdicao(t); };
@@ -5120,8 +5166,8 @@ function abrirTexto(idx) {
 
 // Na carta o "título" vira a saudação (ex.: "Para a Ranny,")
 function atualizarCamposCarta() {
-  var carta = document.getElementById("txt-tipo").value === "Carta";
-  document.getElementById("txt-titulo-label").textContent = carta ? "Para quem? (saudação)" : "Título";
+  var carta = document.getElementById("txt-estilo").value === "carta";
+  document.getElementById("txt-titulo-label").textContent = carta ? "Saudação (ex.: Para a Ranny,)" : "Título";
   document.getElementById("txt-titulo").placeholder = carta ? "Ex.: Para a Ranny," : "Título do texto...";
 }
 
@@ -5134,7 +5180,8 @@ var editandoTextoId = null;
 function abrirModalTextoEdicao(t) {
   editandoTextoId = t.id;
   document.getElementById("modal-texto-title").textContent = "✎ Editar Texto";
-  document.getElementById("txt-tipo").value = t.tipo || "Mensagem";
+  document.getElementById("txt-tipo").value = (t.tipo && t.tipo !== "Carta") ? t.tipo : "Mensagem";
+  document.getElementById("txt-estilo").value = estiloDoTexto(t);
   document.getElementById("txt-titulo").value = t.titulo || "";
   document.getElementById("txt-corpo").value = t.corpo || "";
   atualizarCamposCarta();
@@ -5145,7 +5192,8 @@ function salvarTexto() {
   var tipo = document.getElementById("txt-tipo").value;
   var titulo = document.getElementById("txt-titulo").value.trim();
   var corpo = document.getElementById("txt-corpo").value.trim();
-  if (!titulo || !corpo) { mostrarToast(tipo === "Carta" ? "Preencha a saudação e a carta!" : "Preencha título e conteúdo!"); return; }
+  var estilo = document.getElementById("txt-estilo").value;
+  if (!titulo || !corpo) { mostrarToast(estilo === "carta" ? "Preencha a saudação e a carta!" : "Preencha título e conteúdo!"); return; }
 
   var editando = editandoTextoId;
   var req = editando
@@ -5157,7 +5205,7 @@ function salvarTexto() {
           "Content-Type": "application/json",
           "Prefer": "return=minimal"
         },
-        body: JSON.stringify({ tipo: tipo, titulo: titulo, corpo: corpo })
+        body: JSON.stringify({ tipo: tipo, titulo: titulo, corpo: corpo, estilo: estilo })
       })
     : api("/rest/v1/textos", {
         method: "POST",
@@ -5167,7 +5215,7 @@ function salvarTexto() {
           "Content-Type": "application/json",
           "Prefer": "return=minimal"
         },
-        body: JSON.stringify({ tipo: tipo, titulo: titulo, corpo: corpo, autor: perfilAtual() })
+        body: JSON.stringify(estilo === "padrao" ? { tipo: tipo, titulo: titulo, corpo: corpo, autor: perfilAtual() } : { tipo: tipo, titulo: titulo, corpo: corpo, autor: perfilAtual(), estilo: estilo })
       });
 
   req.then(function() {
@@ -6235,6 +6283,7 @@ function abrirModalTexto() {
   editandoTextoId = null;
   document.getElementById("modal-texto-title").textContent = "✍️ Adicionar Texto";
   document.getElementById("txt-tipo").value = "Mensagem";
+  document.getElementById("txt-estilo").value = "padrao";
   document.getElementById("txt-titulo").value = "";
   document.getElementById("txt-corpo").value = "";
   atualizarCamposCarta();
