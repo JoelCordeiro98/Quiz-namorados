@@ -323,6 +323,38 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .leitura-view.estilo-noturno .leitura-titulo{color:#dfe7ff;text-align:center;text-shadow:0 0 18px rgba(140,170,255,0.5)}
 .leitura-view.estilo-noturno .leitura-titulo::before{content:"✦  ✧  ✦";display:block;font-size:0.8rem;letter-spacing:6px;color:#9fb4ff;margin-bottom:0.8rem}
 .leitura-view.estilo-noturno .leitura-corpo{text-align:center;color:#c9d6ff;line-height:2}
+/* Pergaminho: papel antigo, bordas queimadas, letra com cara de manuscrito antigo */
+.leitura-view.estilo-pergaminho{background:radial-gradient(ellipse at center,#d8b97a 0%,#a8834a 100%)}
+.leitura-view.estilo-pergaminho .leitura-hdr{background:linear-gradient(to bottom,rgba(168,131,74,0.95),transparent)}
+.leitura-view.estilo-pergaminho .leitura-fechar,.leitura-view.estilo-pergaminho .leitura-acao{background:rgba(60,35,10,0.18);color:#3a2308}
+.leitura-view.estilo-pergaminho .leitura-conteudo{background:radial-gradient(ellipse at center,#f1dfb0 0%,#e2c88d 100%);border:2px solid rgba(90,55,20,0.45);border-radius:10px;box-shadow:0 8px 30px rgba(50,25,5,0.45),inset 0 0 55px rgba(120,70,20,0.35);margin:0.5rem 1rem 3rem;padding:2rem 1.7rem 2.4rem;max-width:540px}
+.leitura-view.estilo-pergaminho .leitura-tipo{color:#7a4a1c}
+.leitura-view.estilo-pergaminho .leitura-titulo{font-family:"Dancing Script",cursive;font-weight:700;font-size:2.1rem;color:#4a2a0c}
+.leitura-view.estilo-pergaminho .leitura-titulo::after{content:"❦";display:block;font-size:1.1rem;color:#8a5a28;margin-top:0.5rem}
+.leitura-view.estilo-pergaminho .leitura-corpo{color:#3a2308;line-height:2}
+/* Pôr do sol: gradiente laranja, rosa e roxo */
+.leitura-view.estilo-sol{background:linear-gradient(to bottom,#2b1b4a 0%,#8a2f5a 40%,#e0653a 80%,#f6a64a 100%)}
+.leitura-view.estilo-sol .leitura-tipo{color:#ffd9a0}
+.leitura-view.estilo-sol .leitura-titulo{color:#fff3d6;text-align:center;text-shadow:0 2px 14px rgba(80,20,40,0.5)}
+.leitura-view.estilo-sol .leitura-titulo::after{content:"☀";display:block;font-size:1.2rem;color:#ffd27a;margin-top:0.5rem}
+.leitura-view.estilo-sol .leitura-corpo{text-align:center;color:#fff5e6;line-height:2;text-shadow:0 1px 8px rgba(70,20,30,0.45)}
+/* Floral: fundo verde-rosado suave, flores nos enfeites */
+.leitura-view.estilo-floral{background:linear-gradient(160deg,#f9e3ea 0%,#f4d6df 45%,#dcebd5 100%)}
+.leitura-view.estilo-floral .leitura-hdr{background:linear-gradient(to bottom,rgba(249,227,234,0.95),transparent)}
+.leitura-view.estilo-floral .leitura-fechar,.leitura-view.estilo-floral .leitura-acao{background:rgba(120,50,80,0.12);color:#6e2c4b}
+.leitura-view.estilo-floral .leitura-conteudo{background:rgba(255,255,255,0.55);border:1.5px solid rgba(200,120,150,0.4);border-radius:18px;box-shadow:0 6px 24px rgba(150,70,100,0.22);margin:0.5rem 1rem 3rem;padding:1.8rem 1.5rem 2.2rem;max-width:540px}
+.leitura-view.estilo-floral .leitura-conteudo::before{content:"❀ ✿ ❀";display:block;text-align:center;letter-spacing:8px;color:#d4789a;margin-bottom:1rem}
+.leitura-view.estilo-floral .leitura-conteudo::after{content:"✿ ❀ ✿";display:block;text-align:center;letter-spacing:8px;color:#7fae7a;margin-top:1.8rem}
+.leitura-view.estilo-floral .leitura-tipo{color:#b0486f}
+.leitura-view.estilo-floral .leitura-titulo{font-family:"Dancing Script",cursive;font-weight:700;font-size:2.1rem;color:#8a2e55}
+.leitura-view.estilo-floral .leitura-corpo{text-align:center;color:#4a2a3a;line-height:2}
+/* Minimalista: fundo preto puro, só o texto, bastante respiro */
+.leitura-view.estilo-minimalista{background:#000}
+.leitura-view.estilo-minimalista .leitura-hdr{background:transparent}
+.leitura-view.estilo-minimalista .leitura-conteudo{max-width:480px;padding-top:2rem}
+.leitura-view.estilo-minimalista .leitura-tipo{display:none}
+.leitura-view.estilo-minimalista .leitura-titulo{font-family:"Lato",sans-serif;font-weight:300;font-size:1.25rem;letter-spacing:4px;text-transform:uppercase;text-align:left;color:#fff;margin-bottom:2.4rem}
+.leitura-view.estilo-minimalista .leitura-corpo{font-family:"Lato",sans-serif;font-weight:300;font-size:1.05rem;line-height:2.1;color:rgba(255,255,255,0.8)}
 /* Máquina de escrever: papel claro, fonte monoespaçada */
 .leitura-view.estilo-maquina{background:#d9d4c7}
 .leitura-view.estilo-maquina .leitura-hdr{background:linear-gradient(to bottom,rgba(217,212,199,0.95),transparent)}
@@ -916,6 +948,10 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
         <option value="romantico">💗 Romântico</option>
         <option value="noturno">🌙 Noturno</option>
         <option value="maquina">⌨️ Máquina de escrever</option>
+        <option value="pergaminho">📜 Pergaminho</option>
+        <option value="sol">🌅 Pôr do sol</option>
+        <option value="floral">🌸 Floral</option>
+        <option value="minimalista">▫️ Minimalista</option>
       </select>
     </div>
     <div class="form-group">
@@ -5133,7 +5169,11 @@ var ESTILOS_TEXTO = {
   carta: { nome: "Carta", icone: "✉️" },
   romantico: { nome: "Romântico", icone: "💗" },
   noturno: { nome: "Noturno", icone: "🌙" },
-  maquina: { nome: "Máquina de escrever", icone: "⌨️" }
+  maquina: { nome: "Máquina de escrever", icone: "⌨️" },
+  pergaminho: { nome: "Pergaminho", icone: "📜" },
+  sol: { nome: "Pôr do sol", icone: "🌅" },
+  floral: { nome: "Floral", icone: "🌸" },
+  minimalista: { nome: "Minimalista", icone: "▫️" }
 };
 // Textos antigos criados quando "Carta" era uma categoria continuam abrindo como carta
 function estiloDoTexto(t) {
