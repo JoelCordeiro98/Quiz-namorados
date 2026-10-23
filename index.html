@@ -1203,7 +1203,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       <input type="checkbox" id="jg-modo-dado" onchange="jgAtualizarOpcoesSetup()">
     </label>
     <label class="jg-toggle-row">
-      <span>🧩 Começar com um labirinto de traços já desenhado (só nos jogos sem dado)</span>
+      <span>🎲 Começar com traços aleatórios já espalhados, sem se tocar (só nos jogos sem dado)</span>
       <input type="checkbox" id="jg-labirinto" checked>
     </label>
     <button class="btn-primary" onclick="iniciarJogo()">Começar jogo ♥</button>
@@ -2856,38 +2856,29 @@ function jgAtualizarOpcoesSetup() {
 function jgPerfilDe(turno) { return turno === "a" ? "joel" : "ranny"; }
 function jgMinhaVez() { return !!jogo && perfilAtual() === jgPerfilDe(jogo.turno); }
 
-// Gera um labirinto de traços já desenhados (cinza, de ninguém). Parte de todas as paredes
-// fechadas, abre caminhos por busca em profundidade (todas as caixas ficam ligadas) e
-// ainda abre algumas paredes extras pra criar ciclos. As bordas de fora ficam fechadas.
-// Sobram só os traços dos "caminhos" pra vocês desenharem.
-function jgGerarLabirinto(linhas, colunas, bordasH, bordasV) {
-  for (var r = 0; r <= linhas; r++) for (var c = 0; c < colunas; c++) bordasH[r][c] = "m";
-  for (var r2 = 0; r2 < linhas; r2++) for (var c2 = 0; c2 <= colunas; c2++) bordasV[r2][c2] = "m";
-  var visitada = [];
-  for (var i = 0; i < linhas; i++) visitada.push(new Array(colunas).fill(false));
-  var pilha = [[Math.floor(Math.random() * linhas), Math.floor(Math.random() * colunas)]];
-  visitada[pilha[0][0]][pilha[0][1]] = true;
-  while (pilha.length) {
-    var atual = pilha[pilha.length - 1];
-    var r0 = atual[0], c0 = atual[1];
-    var vizinhos = [];
-    if (r0 > 0 && !visitada[r0 - 1][c0]) vizinhos.push([r0 - 1, c0, "h", r0, c0]);
-    if (r0 < linhas - 1 && !visitada[r0 + 1][c0]) vizinhos.push([r0 + 1, c0, "h", r0 + 1, c0]);
-    if (c0 > 0 && !visitada[r0][c0 - 1]) vizinhos.push([r0, c0 - 1, "v", r0, c0]);
-    if (c0 < colunas - 1 && !visitada[r0][c0 + 1]) vizinhos.push([r0, c0 + 1, "v", r0, c0 + 1]);
-    if (!vizinhos.length) { pilha.pop(); continue; }
-    var v = vizinhos[Math.floor(Math.random() * vizinhos.length)];
-    if (v[2] === "h") bordasH[v[3]][v[4]] = null; else bordasV[v[3]][v[4]] = null;
-    visitada[v[0]][v[1]] = true;
-    pilha.push([v[0], v[1]]);
+// Espalha traços já desenhados (cinzas, de ninguém) em posições aleatórias, sem nenhum
+// ponto em comum entre eles: cada ponto do tabuleiro recebe no máximo UM traço, então eles
+// ficam soltos, isolados, e o jogo é ligar um no outro. Como dois traços nunca se tocam,
+// nenhuma caixa começa com mais de 2 lados (os dois opostos) — nunca nasce caixa pronta nem
+// com 3 lados. Vale pra qualquer lugar do tabuleiro, inclusive as bordas de fora.
+function jgGerarTracosAleatorios(linhas, colunas, bordasH, bordasV) {
+  var candidatos = [];
+  for (var r = 0; r <= linhas; r++) for (var c = 0; c < colunas; c++) candidatos.push(["h", r, c]);
+  for (var r2 = 0; r2 < linhas; r2++) for (var c2 = 0; c2 <= colunas; c2++) candidatos.push(["v", r2, c2]);
+  for (var i = candidatos.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = candidatos[i]; candidatos[i] = candidatos[j]; candidatos[j] = tmp;
   }
-  // paredes internas extras abertas (cerca de 12%) pra não ficar só um caminho único
-  for (var rr = 1; rr < linhas; rr++) for (var cc = 0; cc < colunas; cc++) {
-    if (bordasH[rr][cc] && Math.random() < 0.12) bordasH[rr][cc] = null;
-  }
-  for (var rv = 0; rv < linhas; rv++) for (var cv = 1; cv < colunas; cv++) {
-    if (bordasV[rv][cv] && Math.random() < 0.12) bordasV[rv][cv] = null;
-  }
+  var pontoUsado = {};
+  candidatos.forEach(function(e) {
+    if (Math.random() > 0.6) return; // deixa o tabuleiro respirar: nem todo traço possível entra
+    var p1, p2;
+    if (e[0] === "h") { p1 = e[1] + "," + e[2]; p2 = e[1] + "," + (e[2] + 1); }
+    else { p1 = e[1] + "," + e[2]; p2 = (e[1] + 1) + "," + e[2]; }
+    if (pontoUsado[p1] || pontoUsado[p2]) return;
+    pontoUsado[p1] = true; pontoUsado[p2] = true;
+    if (e[0] === "h") bordasH[e[1]][e[2]] = "m"; else bordasV[e[1]][e[2]] = "m";
+  });
 }
 
 function iniciarJogo() {
@@ -2904,7 +2895,7 @@ function iniciarJogo() {
   for (var r = 0; r <= linhas; r++) bordasH.push(new Array(colunas).fill(null));
   for (var r2 = 0; r2 < linhas; r2++) bordasV.push(new Array(colunas + 1).fill(null));
   for (var r3 = 0; r3 < linhas; r3++) caixas.push(new Array(colunas).fill(null));
-  if (labirinto) jgGerarLabirinto(linhas, colunas, bordasH, bordasV);
+  if (labirinto) jgGerarTracosAleatorios(linhas, colunas, bordasH, bordasV);
 
   jogo = {
     linhas: linhas, colunas: colunas,
