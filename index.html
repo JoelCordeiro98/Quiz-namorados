@@ -407,8 +407,12 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .jg-dado-btn{background:var(--red);border:none;color:#fff;padding:0.6rem 1.1rem;border-radius:50px;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:"Lato",sans-serif}
 .jg-dado-btn:disabled{opacity:0.4;cursor:default}
 .jg-dado-resultado{font-family:"Playfair Display",serif;font-size:1.1rem;color:#fff}
-.jg-board-wrap{overflow-x:auto;display:flex;justify-content:center;padding:0.5rem 0 1rem}
-.jg-board{position:relative;flex-shrink:0;touch-action:none}
+.jg-board-wrap{overflow:auto;max-height:64vh;padding:0.5rem;margin-bottom:0.6rem;border-radius:14px;background:rgba(255,255,255,0.02);-webkit-overflow-scrolling:touch}
+.jg-sizer{position:relative;margin:0 auto}
+.jg-board{position:absolute;left:0;top:0;transform-origin:0 0;touch-action:none}
+.jg-zoom-row{display:flex;align-items:center;justify-content:center;gap:0.6rem;margin-bottom:0.5rem}
+.jg-zoom-row button{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:#fff;min-width:38px;height:34px;padding:0 0.7rem;border-radius:10px;font-size:1rem;cursor:pointer;font-family:"Lato",sans-serif}
+.jg-zoom-row span{font-size:0.75rem;color:rgba(255,255,255,0.55);min-width:3.2rem;text-align:center}
 .jg-dot{position:absolute;width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.6);transform:translate(-50%,-50%);pointer-events:none;transition:transform 0.15s,background 0.15s}
 .jg-dot.ativo{background:var(--jg-cor-a, var(--redl));transform:translate(-50%,-50%) scale(1.9)}
 .jg-edge{position:absolute;pointer-events:none}
@@ -419,6 +423,7 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .jg-edge.jg-v::after{top:0;bottom:0;left:50%;width:5px;transform:translateX(-50%)}
 .jg-edge.marked-a::after{background:var(--jg-cor-a, var(--redl))}
 .jg-edge.marked-b::after{background:var(--jg-cor-b, #e6a81a)}
+.jg-edge.marked-m::after{background:rgba(255,255,255,0.5)}
 .jg-edge.marked{cursor:default}
 .jg-edge.ultima::after{box-shadow:0 0 0 2px #fff, 0 0 8px 2px rgba(255,255,255,0.7)}
 .jg-box{position:absolute;display:flex;align-items:center;justify-content:center;font-family:"Playfair Display",serif;font-weight:700;border-radius:6px;background:transparent;transition:background 0.25s,color 0.25s;color:transparent;transform:translate(-50%,-50%)}
@@ -1167,21 +1172,11 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   <div class="jg-conteudo" id="jg-setup">
     <div class="jg-field-row">
       <div class="jg-field" style="flex:1">
-        <label>Nome do Jogador 1</label>
-        <input type="text" id="jg-nome-a" name="jg-nome-a" placeholder="Jogador 1" maxlength="14" autocomplete="off">
-      </div>
-      <div class="jg-field" style="flex:0 0 52px">
-        <label>Cor</label>
+        <label>Cor de <span id="jg-setup-nome-a">Joel</span></label>
         <input type="color" id="jg-cor-a" class="jg-color-input" value="#E74C3C">
       </div>
-    </div>
-    <div class="jg-field-row">
       <div class="jg-field" style="flex:1">
-        <label>Nome do Jogador 2</label>
-        <input type="text" id="jg-nome-b" name="jg-nome-b" placeholder="Jogador 2" maxlength="14" autocomplete="off">
-      </div>
-      <div class="jg-field" style="flex:0 0 52px">
-        <label>Cor</label>
+        <label>Cor de <span id="jg-setup-nome-b">Ranny</span></label>
         <input type="color" id="jg-cor-b" class="jg-color-input" value="#E6A81A">
       </div>
     </div>
@@ -1205,7 +1200,11 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
     </div>
     <label class="jg-toggle-row">
       <span>🎲 Modo dado (o dado define quantos traços dá pra fazer por vez)</span>
-      <input type="checkbox" id="jg-modo-dado">
+      <input type="checkbox" id="jg-modo-dado" onchange="jgAtualizarOpcoesSetup()">
+    </label>
+    <label class="jg-toggle-row">
+      <span>🧩 Começar com um labirinto de traços já desenhado (só nos jogos sem dado)</span>
+      <input type="checkbox" id="jg-labirinto" checked>
     </label>
     <button class="btn-primary" onclick="iniciarJogo()">Começar jogo ♥</button>
   </div>
@@ -1229,13 +1228,19 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       </div>
     </div>
     <div class="jg-turno" id="jg-turno">Vez de Jogador 1</div>
-    <div class="jg-dica">Arraste de um ponto até o vizinho pra desenhar o traço</div>
+    <div class="jg-dica">Arraste de um ponto até o vizinho pra desenhar o traço · pinça com 2 dedos pra dar zoom</div>
+    <div class="jg-zoom-row">
+      <button type="button" onclick="jgZoomPasso(-1)" aria-label="Diminuir zoom">−</button>
+      <span id="jg-zoom-pct">100%</span>
+      <button type="button" onclick="jgZoomPasso(1)" aria-label="Aumentar zoom">+</button>
+      <button type="button" onclick="jgZoomAjustar()">⤢ Ajustar</button>
+    </div>
     <div class="jg-dado-row" id="jg-dado-row" style="display:none">
       <button class="jg-dado-btn" id="jg-dado-btn" onclick="rolarDado()">🎲 Rolar dado</button>
       <div class="jg-dado-resultado" id="jg-dado-resultado"></div>
     </div>
     <div class="jg-board-wrap" id="jg-board-wrap">
-      <div class="jg-board" id="jg-board"></div>
+      <div class="jg-sizer" id="jg-sizer"><div class="jg-board" id="jg-board"></div></div>
     </div>
     <div class="jg-legenda">
       <span><i class="jg-dot-cor a"></i><span id="jg-legenda-a">Jogador 1</span></span>
@@ -1770,6 +1775,9 @@ function iniciarPollingJogo() {
 function pararPollingJogo() { clearInterval(jogoPollingTimer); }
 
 function abrirJogo() {
+  if (!perfilAtual()) { abrirEscolhaPerfil(true); mostrarToast("Escolha seu perfil primeiro."); return; }
+  document.getElementById("jg-setup-nome-a").textContent = perfilNome("joel");
+  document.getElementById("jg-setup-nome-b").textContent = perfilNome("ranny");
   document.getElementById("jogo-view").classList.add("show");
   mostrarCarregandoJogo();
   buscarEstadoJogoRemoto().then(function(remoto) {
@@ -2831,29 +2839,78 @@ function jgChatApagar(id) {
 
 function ajustarGrade(campo, delta) {
   var novo = jogoConfig[campo] + delta;
-  if (novo < 2 || novo > 9) return;
+  if (novo < 2 || novo > 20) return;
   jogoConfig[campo] = novo;
   document.getElementById(campo === "colunas" ? "jg-colunas" : "jg-linhas").textContent = novo;
 }
 
+// Com dado ligado o labirinto não faz sentido (o jogo é outro), então desliga e trava
+function jgAtualizarOpcoesSetup() {
+  var dado = document.getElementById("jg-modo-dado").checked;
+  var lab = document.getElementById("jg-labirinto");
+  if (dado) lab.checked = false;
+  lab.disabled = dado;
+}
+
+// Quem é quem: jogador A é o Joel e o B é a Ranny, igual nos jogos de tabuleiro
+function jgPerfilDe(turno) { return turno === "a" ? "joel" : "ranny"; }
+function jgMinhaVez() { return !!jogo && perfilAtual() === jgPerfilDe(jogo.turno); }
+
+// Gera um labirinto de traços já desenhados (cinza, de ninguém). Parte de todas as paredes
+// fechadas, abre caminhos por busca em profundidade (todas as caixas ficam ligadas) e
+// ainda abre algumas paredes extras pra criar ciclos. As bordas de fora ficam fechadas.
+// Sobram só os traços dos "caminhos" pra vocês desenharem.
+function jgGerarLabirinto(linhas, colunas, bordasH, bordasV) {
+  for (var r = 0; r <= linhas; r++) for (var c = 0; c < colunas; c++) bordasH[r][c] = "m";
+  for (var r2 = 0; r2 < linhas; r2++) for (var c2 = 0; c2 <= colunas; c2++) bordasV[r2][c2] = "m";
+  var visitada = [];
+  for (var i = 0; i < linhas; i++) visitada.push(new Array(colunas).fill(false));
+  var pilha = [[Math.floor(Math.random() * linhas), Math.floor(Math.random() * colunas)]];
+  visitada[pilha[0][0]][pilha[0][1]] = true;
+  while (pilha.length) {
+    var atual = pilha[pilha.length - 1];
+    var r0 = atual[0], c0 = atual[1];
+    var vizinhos = [];
+    if (r0 > 0 && !visitada[r0 - 1][c0]) vizinhos.push([r0 - 1, c0, "h", r0, c0]);
+    if (r0 < linhas - 1 && !visitada[r0 + 1][c0]) vizinhos.push([r0 + 1, c0, "h", r0 + 1, c0]);
+    if (c0 > 0 && !visitada[r0][c0 - 1]) vizinhos.push([r0, c0 - 1, "v", r0, c0]);
+    if (c0 < colunas - 1 && !visitada[r0][c0 + 1]) vizinhos.push([r0, c0 + 1, "v", r0, c0 + 1]);
+    if (!vizinhos.length) { pilha.pop(); continue; }
+    var v = vizinhos[Math.floor(Math.random() * vizinhos.length)];
+    if (v[2] === "h") bordasH[v[3]][v[4]] = null; else bordasV[v[3]][v[4]] = null;
+    visitada[v[0]][v[1]] = true;
+    pilha.push([v[0], v[1]]);
+  }
+  // paredes internas extras abertas (cerca de 12%) pra não ficar só um caminho único
+  for (var rr = 1; rr < linhas; rr++) for (var cc = 0; cc < colunas; cc++) {
+    if (bordasH[rr][cc] && Math.random() < 0.12) bordasH[rr][cc] = null;
+  }
+  for (var rv = 0; rv < linhas; rv++) for (var cv = 1; cv < colunas; cv++) {
+    if (bordasV[rv][cv] && Math.random() < 0.12) bordasV[rv][cv] = null;
+  }
+}
+
 function iniciarJogo() {
-  var nomeA = document.getElementById("jg-nome-a").value.trim() || "Jogador 1";
-  var nomeB = document.getElementById("jg-nome-b").value.trim() || "Jogador 2";
+  if (!perfilAtual()) { abrirEscolhaPerfil(true); mostrarToast("Escolha seu perfil primeiro."); return; }
+  var nomeA = perfilNome("joel");
+  var nomeB = perfilNome("ranny");
   var corA = document.getElementById("jg-cor-a").value || "#E74C3C";
   var corB = document.getElementById("jg-cor-b").value || "#E6A81A";
   var modoDado = document.getElementById("jg-modo-dado").checked;
+  var labirinto = !modoDado && document.getElementById("jg-labirinto").checked;
   var linhas = jogoConfig.linhas, colunas = jogoConfig.colunas;
 
   var bordasH = [], bordasV = [], caixas = [];
   for (var r = 0; r <= linhas; r++) bordasH.push(new Array(colunas).fill(null));
   for (var r2 = 0; r2 < linhas; r2++) bordasV.push(new Array(colunas + 1).fill(null));
   for (var r3 = 0; r3 < linhas; r3++) caixas.push(new Array(colunas).fill(null));
+  if (labirinto) jgGerarLabirinto(linhas, colunas, bordasH, bordasV);
 
   jogo = {
     linhas: linhas, colunas: colunas,
     nomeA: nomeA, nomeB: nomeB,
     corA: corA, corB: corB,
-    modoDado: modoDado,
+    modoDado: modoDado, labirinto: labirinto,
     bordasH: bordasH, bordasV: bordasV, caixas: caixas,
     turno: "a", pontosA: 0, pontosB: 0,
     ultimaJogada: null, finalizado: false,
@@ -2861,7 +2918,7 @@ function iniciarJogo() {
   };
 
   mostrarTelaJogoAtiva();
-  renderTabuleiro();
+  renderTabuleiro(true);
   atualizarTurnoUI();
   if (modoDado) prepararRodadaDado();
   sincronizarEstadoJogo();
@@ -2878,7 +2935,7 @@ function prepararRodadaDado() {
 function atualizarUIDado() {
   document.getElementById("jg-dado-row").style.display = jogo.modoDado ? "flex" : "none";
   if (!jogo.modoDado) return;
-  var podeRolar = jogo.dadoRestante <= 0;
+  var podeRolar = jogo.dadoRestante <= 0 && jgMinhaVez();
   document.getElementById("jg-dado-btn").disabled = !podeRolar;
   document.getElementById("jg-dado-btn").textContent = "🎲 Rolar dado";
   document.getElementById("jg-dado-resultado").textContent = jogo.dadoRestante > 0
@@ -2903,6 +2960,7 @@ function sortearDado() {
 
 function rolarDado() {
   if (!jogo || jogo.dadoRestante > 0) return;
+  if (!jgMinhaVez()) { mostrarToast("Não é a sua vez — é a vez de " + perfilNome(jgPerfilDe(jogo.turno)) + "."); return; }
   var valor = sortearDado();
   jogo.dadoRestante = valor;
   vibrar();
@@ -2911,16 +2969,54 @@ function rolarDado() {
   sincronizarEstadoJogo();
 }
 
-function renderTabuleiro() {
+var JG_CELL_BASE = 44;      // tamanho "lógico" de cada caixa; o zoom escala o tabuleiro todo
+var jgZoom = 1, jgZoomMin = 0.3, jgZoomMax = 3.2;
+var jgBoardKey = "";
+var jgEdgesH = [], jgEdgesV = [], jgBoxes = [];
+
+function jgZoomFit() {
+  var wrap = document.getElementById("jg-board-wrap");
+  var disp = Math.max(160, (wrap.clientWidth || 320) - 16);
+  return Math.min(1.25, disp / (JG_CELL_BASE * jogo.colunas));
+}
+
+// Aplica o zoom mantendo (se der) o ponto sob o dedo/centro no mesmo lugar da tela
+function jgAplicarZoom(novo, focoClientX, focoClientY) {
   var wrap = document.getElementById("jg-board-wrap");
   var board = document.getElementById("jg-board");
-  board.innerHTML = "";
+  var sizer = document.getElementById("jg-sizer");
+  if (!jogo) return;
+  novo = Math.max(jgZoomMin, Math.min(jgZoomMax, novo));
+  var wr = wrap.getBoundingClientRect();
+  var fx = (focoClientX != null) ? focoClientX - wr.left : wrap.clientWidth / 2;
+  var fy = (focoClientY != null) ? focoClientY - wr.top : wrap.clientHeight / 2;
+  var contX = (wrap.scrollLeft + fx) / jgZoom, contY = (wrap.scrollTop + fy) / jgZoom;
+  jgZoom = novo;
+  var w = JG_CELL_BASE * jogo.colunas, h = JG_CELL_BASE * jogo.linhas;
+  sizer.style.width = (w * jgZoom) + "px";
+  sizer.style.height = (h * jgZoom) + "px";
+  board.style.transform = "scale(" + jgZoom + ")";
+  wrap.scrollLeft = contX * jgZoom - fx;
+  wrap.scrollTop = contY * jgZoom - fy;
+  var pct = document.getElementById("jg-zoom-pct");
+  if (pct) pct.textContent = Math.round(jgZoom * 100) + "%";
+}
 
-  var larguraDisp = wrap.clientWidth || 320;
-  var cell = Math.max(26, Math.min(58, Math.floor((larguraDisp - 24) / jogo.colunas)));
+function jgZoomPasso(dir) { jgAplicarZoom(jgZoom * (dir > 0 ? 1.25 : 0.8)); }
+function jgZoomAjustar() { jgAplicarZoom(jgZoomFit()); document.getElementById("jg-board-wrap").scrollTo(0, 0); }
+
+function renderTabuleiro() {
+  var board = document.getElementById("jg-board");
+  var chave = jogo.linhas + "x" + jogo.colunas;
+  // Mesmo tamanho de antes: não reconstrói (mantém zoom e posição); só atualiza as cores
+  if (chave === jgBoardKey && board.childNodes.length) { atualizarVisualBordas(); return; }
+  jgBoardKey = chave;
+  board.innerHTML = "";
+  var cell = JG_CELL_BASE;
   jgTabuleiroCell = cell;
   board.style.width = (cell * jogo.colunas) + "px";
   board.style.height = (cell * jogo.linhas) + "px";
+  var frag = document.createDocumentFragment();
 
   for (var r = 0; r <= jogo.linhas; r++) {
     for (var c = 0; c <= jogo.colunas; c++) {
@@ -2929,13 +3025,15 @@ function renderTabuleiro() {
       dot.dataset.r = r; dot.dataset.c = c;
       dot.style.left = (c * cell) + "px";
       dot.style.top = (r * cell) + "px";
-      board.appendChild(dot);
+      frag.appendChild(dot);
     }
   }
 
   var margemToque = Math.max(14, Math.floor(cell * 0.32));
+  jgEdgesH = []; jgEdgesV = []; jgBoxes = [];
 
   for (var rh = 0; rh <= jogo.linhas; rh++) {
+    var linhaH = [];
     for (var ch = 0; ch < jogo.colunas; ch++) {
       var eh = document.createElement("div");
       eh.className = "jg-edge jg-h";
@@ -2943,12 +3041,14 @@ function renderTabuleiro() {
       eh.style.top = (rh * cell) + "px";
       eh.style.width = cell + "px";
       eh.style.height = margemToque + "px";
-      eh.dataset.tipo = "h"; eh.dataset.r = rh; eh.dataset.c = ch;
-      board.appendChild(eh);
+      linhaH.push(eh);
+      frag.appendChild(eh);
     }
+    jgEdgesH.push(linhaH);
   }
 
   for (var rv = 0; rv < jogo.linhas; rv++) {
+    var linhaV = [];
     for (var cv = 0; cv <= jogo.colunas; cv++) {
       var ev = document.createElement("div");
       ev.className = "jg-edge jg-v";
@@ -2956,53 +3056,58 @@ function renderTabuleiro() {
       ev.style.top = (rv * cell + cell / 2) + "px";
       ev.style.height = cell + "px";
       ev.style.width = margemToque + "px";
-      ev.dataset.tipo = "v"; ev.dataset.r = rv; ev.dataset.c = cv;
-      board.appendChild(ev);
+      linhaV.push(ev);
+      frag.appendChild(ev);
     }
+    jgEdgesV.push(linhaV);
   }
 
   for (var rb = 0; rb < jogo.linhas; rb++) {
+    var linhaB = [];
     for (var cb = 0; cb < jogo.colunas; cb++) {
       var box = document.createElement("div");
       box.className = "jg-box";
-      box.id = "jg-box-" + rb + "-" + cb;
       box.style.left = (cb * cell + cell / 2) + "px";
       box.style.top = (rb * cell + cell / 2) + "px";
       box.style.width = (cell - 6) + "px";
       box.style.height = (cell - 6) + "px";
       box.style.fontSize = Math.max(11, Math.floor(cell * 0.4)) + "px";
-      board.appendChild(box);
+      linhaB.push(box);
+      frag.appendChild(box);
     }
+    jgBoxes.push(linhaB);
   }
+  board.appendChild(frag);
 
+  jgAplicarZoom(jgZoomFit());
+  document.getElementById("jg-board-wrap").scrollTo(0, 0);
   atualizarVisualBordas();
+}
+
+function jgPintarBorda(el, dono, ehUltima) {
+  if (!el) return;
+  el.classList.toggle("marked", !!dono);
+  el.classList.toggle("marked-a", dono === "a");
+  el.classList.toggle("marked-b", dono === "b");
+  el.classList.toggle("marked-m", dono === "m");
+  el.classList.toggle("ultima", ehUltima);
 }
 
 function atualizarVisualBordas() {
   var ultima = jogo.ultimaJogada;
   jogo.bordasH.forEach(function(linha, r) {
     linha.forEach(function(dono, c) {
-      var el = document.querySelector('.jg-edge.jg-h[data-r="' + r + '"][data-c="' + c + '"]');
-      if (!el) return;
-      el.classList.toggle("marked", !!dono);
-      el.classList.toggle("marked-a", dono === "a");
-      el.classList.toggle("marked-b", dono === "b");
-      el.classList.toggle("ultima", !!(ultima && ultima.tipo === "h" && ultima.r === r && ultima.c === c));
+      jgPintarBorda(jgEdgesH[r] && jgEdgesH[r][c], dono, !!(ultima && ultima.tipo === "h" && ultima.r === r && ultima.c === c));
     });
   });
   jogo.bordasV.forEach(function(linha, r) {
     linha.forEach(function(dono, c) {
-      var el = document.querySelector('.jg-edge.jg-v[data-r="' + r + '"][data-c="' + c + '"]');
-      if (!el) return;
-      el.classList.toggle("marked", !!dono);
-      el.classList.toggle("marked-a", dono === "a");
-      el.classList.toggle("marked-b", dono === "b");
-      el.classList.toggle("ultima", !!(ultima && ultima.tipo === "v" && ultima.r === r && ultima.c === c));
+      jgPintarBorda(jgEdgesV[r] && jgEdgesV[r][c], dono, !!(ultima && ultima.tipo === "v" && ultima.r === r && ultima.c === c));
     });
   });
   jogo.caixas.forEach(function(linha, r) {
     linha.forEach(function(dono, c) {
-      var el = document.getElementById("jg-box-" + r + "-" + c);
+      var el = jgBoxes[r] && jgBoxes[r][c];
       if (!el) return;
       el.className = "jg-box" + (dono ? " " + dono : "");
       el.textContent = dono ? (dono === "a" ? jogo.nomeA : jogo.nomeB).charAt(0).toUpperCase() : "";
@@ -3022,7 +3127,8 @@ var jgArrastoAtivo = false;
 
 function jgPontoMaisProximo(clientX, clientY, board) {
   var rect = board.getBoundingClientRect();
-  var x = clientX - rect.left, y = clientY - rect.top;
+  // o retângulo já vem escalado pelo zoom — volta pras medidas "lógicas" do tabuleiro
+  var x = (clientX - rect.left) / jgZoom, y = (clientY - rect.top) / jgZoom;
   var cell = jgTabuleiroCell;
   var c = Math.round(x / cell), r = Math.round(y / cell);
   if (r < 0 || r > jogo.linhas || c < 0 || c > jogo.colunas) return null;
@@ -3038,9 +3144,41 @@ function jgDestacarDot(r, c, ligar) {
 function ativarArrasteJogo() {
   var board = document.getElementById("jg-board");
   if (!board) return;
+  var wrap = document.getElementById("jg-board-wrap");
+  var toques = {};          // pointerId -> {x,y}
+  var pinca = null;         // {dist, zoom, contX, contY} enquanto 2 dedos estão na tela
+
+  function qtd() { return Object.keys(toques).length; }
+  function doisPontos() {
+    var ids = Object.keys(toques);
+    return [toques[ids[0]], toques[ids[1]]];
+  }
+
+  function cancelarDesenho() {
+    if (jgArrastoOrigem) jgDestacarDot(jgArrastoOrigem.r, jgArrastoOrigem.c, false);
+    jgArrastoAtivo = false;
+    jgArrastoOrigem = null;
+  }
 
   board.addEventListener("pointerdown", function(e) {
+    toques[e.pointerId] = { x: e.clientX, y: e.clientY };
+    if (qtd() === 2) {
+      // dois dedos: vira pinça (zoom) + arrasto (rolagem) e cancela qualquer traço começado
+      cancelarDesenho();
+      var pts = doisPontos();
+      var cx = (pts[0].x + pts[1].x) / 2, cy = (pts[0].y + pts[1].y) / 2;
+      var wr = wrap.getBoundingClientRect();
+      pinca = {
+        dist: Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1,
+        zoom: jgZoom,
+        contX: (wrap.scrollLeft + cx - wr.left) / jgZoom,
+        contY: (wrap.scrollTop + cy - wr.top) / jgZoom
+      };
+      return;
+    }
+    if (qtd() > 2) return;
     if (!jogo || jogo.finalizado) return;
+    if (!jgMinhaVez()) { mostrarToast("Não é a sua vez — é a vez de " + perfilNome(jgPerfilDe(jogo.turno)) + "."); return; }
     if (jogo.modoDado && jogo.dadoRestante <= 0) { mostrarToast("Role o dado primeiro!"); return; }
     var dot = jgPontoMaisProximo(e.clientX, e.clientY, board);
     if (!dot) return;
@@ -3050,7 +3188,37 @@ function ativarArrasteJogo() {
     if (board.setPointerCapture) { try { board.setPointerCapture(e.pointerId); } catch (err) {} }
   }, { passive: true });
 
-  board.addEventListener("pointerup", function(e) {
+  board.addEventListener("pointermove", function(e) {
+    if (!toques[e.pointerId]) return;
+    toques[e.pointerId] = { x: e.clientX, y: e.clientY };
+    if (pinca && qtd() === 2) {
+      var pts = doisPontos();
+      var dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1;
+      var cx = (pts[0].x + pts[1].x) / 2, cy = (pts[0].y + pts[1].y) / 2;
+      var novo = Math.max(jgZoomMin, Math.min(jgZoomMax, pinca.zoom * dist / pinca.dist));
+      var wr = wrap.getBoundingClientRect();
+      var fx = cx - wr.left, fy = cy - wr.top;
+      jgZoom = novo;
+      var sizer = document.getElementById("jg-sizer");
+      sizer.style.width = (JG_CELL_BASE * jogo.colunas * jgZoom) + "px";
+      sizer.style.height = (JG_CELL_BASE * jogo.linhas * jgZoom) + "px";
+      board.style.transform = "scale(" + jgZoom + ")";
+      // mantém o ponto do tabuleiro que estava sob os dedos debaixo deles (zoom + rolagem juntos)
+      wrap.scrollLeft = pinca.contX * jgZoom - fx;
+      wrap.scrollTop = pinca.contY * jgZoom - fy;
+      var pct = document.getElementById("jg-zoom-pct");
+      if (pct) pct.textContent = Math.round(jgZoom * 100) + "%";
+    }
+  }, { passive: true });
+
+  function soltou(e, cancelado) {
+    var tinha = !!toques[e.pointerId];
+    delete toques[e.pointerId];
+    if (pinca) {
+      if (qtd() < 2) pinca = null;
+      return; // soltar um dedo da pinça nunca desenha traço
+    }
+    if (!tinha || cancelado) { cancelarDesenho(); return; }
     if (!jgArrastoAtivo) return;
     jgArrastoAtivo = false;
     var origem = jgArrastoOrigem;
@@ -3063,17 +3231,14 @@ function ativarArrasteJogo() {
     if (Math.abs(dr) + Math.abs(dc) !== 1) return; // só entre pontos vizinhos (sem diagonal, sem pular)
     if (dr === 0) marcarBorda("h", origem.r, Math.min(origem.c, destino.c));
     else marcarBorda("v", Math.min(origem.r, destino.r), origem.c);
-  }, { passive: true });
-
-  board.addEventListener("pointercancel", function() {
-    if (jgArrastoOrigem) jgDestacarDot(jgArrastoOrigem.r, jgArrastoOrigem.c, false);
-    jgArrastoAtivo = false;
-    jgArrastoOrigem = null;
-  }, { passive: true });
+  }
+  board.addEventListener("pointerup", function(e) { soltou(e, false); }, { passive: true });
+  board.addEventListener("pointercancel", function(e) { soltou(e, true); }, { passive: true });
 }
 
 function marcarBorda(tipo, r, c) {
   if (!jogo || jogo.finalizado) return;
+  if (!jgMinhaVez()) { mostrarToast("Não é a sua vez — é a vez de " + perfilNome(jgPerfilDe(jogo.turno)) + "."); return; }
   if (jogo.modoDado && jogo.dadoRestante <= 0) { mostrarToast("Role o dado primeiro!"); return; }
   var atual = tipo === "h" ? jogo.bordasH[r][c] : jogo.bordasV[r][c];
   if (atual) return;
@@ -3125,10 +3290,12 @@ function atualizarPlacar() {
 }
 
 function atualizarTurnoUI() {
+  var souEu = jgMinhaVez();
   var nome = jogo.turno === "a" ? jogo.nomeA : jogo.nomeB;
-  document.getElementById("jg-turno").textContent = "Vez de " + nome;
+  document.getElementById("jg-turno").textContent = souEu ? "Sua vez" : ("Vez de " + nome);
   document.getElementById("jg-chip-a").classList.toggle("vez", jogo.turno === "a");
   document.getElementById("jg-chip-b").classList.toggle("vez", jogo.turno === "b");
+  if (jogo.modoDado) atualizarUIDado();
 }
 
 function finalizarJogo() {
