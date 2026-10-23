@@ -10,9 +10,15 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Nosso Espaço ♥</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&family=Dancing+Script:wght@500;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+button,a,.hcard,.texto-card,.musica-item,.bitem{touch-action:manipulation}
+html{-webkit-text-size-adjust:100%}
+.texto-card,.musica-item{content-visibility:auto;contain-intrinsic-size:auto 96px}
+.lightbox img{will-change:transform}
 :root{--red:#C0392B;--redl:#E74C3C;--redd:#922B21;--blk:#0d0d0d;--blk2:#161616;--blk3:#1f1f1f;--white:#fff;--gray:#888}
 body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--blk2)}::-webkit-scrollbar-thumb{background:var(--redd);border-radius:4px}
@@ -3808,19 +3814,23 @@ function ativarPullToRefreshGaleria() {
 }
 
 function carregarTudo() {
+  // Primeiro o que aparece na tela inicial...
   carregarPerfis();
-  carregarMidias();
-  carregarTextos();
-  carregarDesejos();
   carregarPensamento();
   carregarFotoDestaque();
-  carregarIndicacoes();
-  carregarMusicas();
+  carregarMidias();
   verificarAniversario();
   iniciarContadorNamoro();
-  atualizarResumoArvore();
-  carregarNovidades();
   iniciarPollingChatGlobal();
+  // ...e o restante logo em seguida, pra não disputar a rede/processador na abertura do app
+  setTimeout(function() {
+    carregarTextos();
+    carregarDesejos();
+    carregarIndicacoes();
+    carregarMusicas();
+    atualizarResumoArvore();
+    carregarNovidades();
+  }, 350);
 }
 
 // Chat agora é do app inteiro, não só do jogo — fica de olho em mensagens novas o tempo
@@ -4056,6 +4066,7 @@ function iniciarContadorNamoro() {
 }
 
 function atualizarContadorNamoro() {
+  if (document.hidden) return;
   var tagEl = document.getElementById("hero-anos");
   var contEl = document.getElementById("hero-contador");
   if (!tagEl || !contEl) return;
@@ -4080,7 +4091,8 @@ function atualizarContadorNamoro() {
   }
   if (meses < 0) { meses += 12; anos--; }
 
-  tagEl.textContent = "♥ " + anos + (anos === 1 ? " Ano Junto" : " Anos Juntos");
+  var textoAnos = "♥ " + anos + (anos === 1 ? " Ano Junto" : " Anos Juntos");
+  if (tagEl.textContent !== textoAnos) tagEl.textContent = textoAnos;
 
   var partes = [];
   if (meses > 0) partes.push(meses + (meses === 1 ? " mês" : " meses"));
@@ -5696,6 +5708,14 @@ function spSalvarTokens(data) {
   localStorage.setItem("sp_expires_at", String(Date.now() + (data.expires_in * 1000) - 60000));
 }
 
+// O Web Playback SDK do Spotify não funciona em navegador de iPhone/iPad (limitação do
+// Spotify). Nesses aparelhos as músicas abrem direto no app do Spotify (que já toca sem
+// anúncio na conta Premium).
+function spEhIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+function spUsaPlayerWeb() { return spConectado() && !spEhIOS(); }
+
 function spConectado() {
   return !!localStorage.getItem("sp_refresh_token");
 }
@@ -5725,7 +5745,9 @@ function spObterToken() {
 function atualizarBarraSpotify() {
   var bar = document.getElementById("sp-connect-bar");
   if (!bar) return;
-  if (spConectado()) {
+  if (spEhIOS()) {
+    bar.innerHTML = '<span>🎧 No iPhone as músicas do Spotify abrem direto no app do Spotify</span>';
+  } else if (spConectado()) {
     bar.innerHTML = '<span class="sp-connect-status">🎧 Spotify conectado</span>' +
       '<button type="button" class="sp-connect-btn sp-desconectar" onclick="spDesconectar()">Desconectar</button>';
   } else {
@@ -5951,7 +5973,7 @@ function renderMusicaPagina() {
     div.className = "musica-item";
     var botaoSpotify = "";
     if (m.fonte === "spotify") {
-      if (spConectado()) {
+      if (spUsaPlayerWeb()) {
         var tocando = spFaixaTocandoAgora() === m.spotify_uri;
         botaoSpotify = '<button type="button" class="musica-item-spotify' + (tocando ? ' tocando' : '') + '" onclick="event.stopPropagation();spAlternarPlayPause(\'' + m.spotify_uri + '\')" aria-label="Tocar no Spotify">' + (tocando ? "⏸" : "▶") + '</button>';
       } else {
@@ -6155,48 +6177,69 @@ function adicionarMusica() {
     });
 }
 
-function adicionarMusicaSpotify(trackId) {
-  if (!spConectado()) { mostrarToast("Conecte sua conta Spotify primeiro pra adicionar músicas de lá."); return; }
-  spObterToken().then(function(token) {
-    if (!token) { mostrarToast("Sua sessão do Spotify expirou. Conecte de novo."); return; }
-    return fetch("https://api.spotify.com/v1/tracks/" + trackId, {
-      headers: { "Authorization": "Bearer " + token }
-    }).then(function(r) { return r.ok ? r.json() : null; }).then(function(info) {
-      if (!info) { mostrarToast("Não encontrei essa música no Spotify."); return; }
-      var titulo = info.name || "Música";
-      var artista = (info.artists || []).map(function(a) { return a.name; }).join(", ");
-      var thumb = (info.album && info.album.images && info.album.images[0]) ? info.album.images[0].url : "";
-      var uri = info.uri || ("spotify:track:" + trackId);
-      var busca = extrairArtistaMusica(titulo, artista);
+// Busca nome/artista/capa da faixa. Conectado (computador): API do Spotify, com artista.
+// Sem login (ex.: iPhone): oEmbed público do Spotify, que não precisa de conta — traz o
+// nome e a capa (sem o artista).
+function spBuscarInfoFaixa(trackId) {
+  function viaOEmbed() {
+    return fetch("https://open.spotify.com/oembed?url=" + encodeURIComponent("https://open.spotify.com/track/" + trackId))
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(d) {
+        if (!d) return null;
+        return { titulo: d.title || "Música", artista: "", thumb: d.thumbnail_url || "" };
+      })
+      .catch(function() { return null; });
+  }
+  if (!spUsaPlayerWeb()) return viaOEmbed();
+  return spObterToken().then(function(token) {
+    if (!token) return viaOEmbed();
+    return fetch("https://api.spotify.com/v1/tracks/" + trackId, { headers: { "Authorization": "Bearer " + token } })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(info) {
+        if (!info) return viaOEmbed();
+        return {
+          titulo: info.name || "Música",
+          artista: (info.artists || []).map(function(a) { return a.name; }).join(", "),
+          thumb: (info.album && info.album.images && info.album.images[0]) ? info.album.images[0].url : "",
+          uri: info.uri
+        };
+      });
+  }).catch(function() { return viaOEmbed(); });
+}
 
-      return buscarLetraLRCLIB(busca.artista || artista, busca.musica || titulo).then(function(letra) {
-        return traduzirLetra(letra).then(function(traducao) {
-          return api("/rest/v1/musicas", {
-            method: "POST",
-            headers: {
-              "apikey": SUPABASE_KEY,
-              "Authorization": "Bearer " + session.access_token,
-              "Content-Type": "application/json",
-              "Prefer": "return=minimal"
-            },
-            body: JSON.stringify({
-              fonte: "spotify",
-              spotify_id: trackId,
-              spotify_uri: uri,
-              titulo: titulo,
-              artista: artista,
-              thumb: thumb,
-              letra: letra || null,
-              traducao: traducao || null,
-              autor: perfilAtual()
-            })
-          }).then(function() {
-            document.getElementById("musica-link").value = "";
-            fecharModal("modal-musicas");
-            mostrarToast("✓ Música adicionada!");
-            carregarMusicas();
-            carregarNovidades();
-          });
+function adicionarMusicaSpotify(trackId) {
+  spBuscarInfoFaixa(trackId).then(function(info) {
+    if (!info) { mostrarToast("Não encontrei essa música no Spotify."); return; }
+    var titulo = info.titulo, artista = info.artista, thumb = info.thumb;
+    var uri = info.uri || ("spotify:track:" + trackId);
+    var busca = extrairArtistaMusica(titulo, artista);
+    return buscarLetraLRCLIB(busca.artista || artista, busca.musica || titulo).then(function(letra) {
+      return traduzirLetra(letra).then(function(traducao) {
+        return api("/rest/v1/musicas", {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": "Bearer " + session.access_token,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify({
+            fonte: "spotify",
+            spotify_id: trackId,
+            spotify_uri: uri,
+            titulo: titulo,
+            artista: artista,
+            thumb: thumb,
+            letra: letra || null,
+            traducao: traducao || null,
+            autor: perfilAtual()
+          })
+        }).then(function() {
+          document.getElementById("musica-link").value = "";
+          fecharModal("modal-musicas");
+          mostrarToast("✓ Música adicionada!");
+          carregarMusicas();
+          carregarNovidades();
         });
       });
     });
@@ -6239,11 +6282,11 @@ function atualizarBotaoTocarDetalhe() {
   var btn = document.getElementById("md-tocar-btn");
   if (!btn || !musicaAtual) return;
   if (musicaAtual.fonte === "spotify") {
-    if (spConectado()) {
+    if (spUsaPlayerWeb()) {
       var tocando = spFaixaTocandoAgora() === musicaAtual.spotify_uri;
       btn.textContent = tocando ? "⏸ Pausar" : "▶ Tocar no Spotify";
     } else {
-      btn.textContent = "↗ Abrir no Spotify";
+      btn.textContent = spEhIOS() ? "↗ Abrir no app do Spotify" : "↗ Abrir no Spotify";
     }
   } else {
     btn.textContent = "▶ Ouvir no YouTube";
@@ -6265,7 +6308,7 @@ function alternarTraducao() {
 function tocarMusicaDetalhe() {
   if (!musicaAtual) return;
   if (musicaAtual.fonte === "spotify") {
-    if (spConectado()) {
+    if (spUsaPlayerWeb()) {
       spAlternarPlayPause(musicaAtual.spotify_uri);
     } else {
       window.open("https://open.spotify.com/track/" + musicaAtual.spotify_id, "_blank");
