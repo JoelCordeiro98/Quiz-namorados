@@ -1,4 +1,4 @@
-const CACHE = 'nosso-espaco-v4';
+const CACHE = 'nosso-espaco-v5';
 const MEDIA_CACHE = 'nosso-espaco-media-v1';
 const MEDIA_CACHE_MAX = 250;
 const ASSETS = ['index.html', 'manifest.json'];
@@ -55,4 +55,33 @@ self.addEventListener('fetch', function(e) {
   }
 
   e.respondWith(fetch(req).catch(function() { return caches.match(req); }));
+});
+
+// ===== NOTIFICAÇÕES PUSH =====
+// O Supabase manda um JSON { titulo, corpo, tipo, url }. Todo push precisa virar uma
+// notificação visível (o iPhone exige isso, senão cancela a inscrição).
+self.addEventListener('push', function(e) {
+  var dados = {};
+  try { dados = e.data ? e.data.json() : {}; } catch (err) { dados = { corpo: e.data ? e.data.text() : '' }; }
+  var titulo = dados.titulo || 'Nosso Espaço ♥';
+  e.waitUntil(self.registration.showNotification(titulo, {
+    body: dados.corpo || '',
+    icon: 'icon-192.png',
+    badge: 'icon-192.png',
+    tag: dados.tipo || 'geral',
+    renotify: true,
+    data: { url: dados.url || './' }
+  }));
+});
+
+// Tocar na notificação abre (ou traz pra frente) o app
+self.addEventListener('notificationclick', function(e) {
+  e.notification.close();
+  var destino = (e.notification.data && e.notification.data.url) || './';
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(lista) {
+    for (var i = 0; i < lista.length; i++) {
+      if ('focus' in lista[i]) return lista[i].focus();
+    }
+    if (self.clients.openWindow) return self.clients.openWindow(destino);
+  }));
 });
