@@ -500,6 +500,28 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .jg-chat-msg-dur{font-size:0.78rem;color:rgba(255,255,255,0.85)}
 .jg-chat-msg-meta{display:flex;align-items:center;gap:0.4rem;font-size:0.62rem;color:rgba(255,255,255,0.35);margin-top:0.2rem;padding:0 0.2rem}
 .jg-chat-msg-del{background:none;border:none;color:rgba(255,255,255,0.3);font-size:0.75rem;cursor:pointer;padding:0.1rem}
+.jg-chat-dia{align-self:center;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);font-size:0.68rem;padding:0.2rem 0.7rem;border-radius:50px;margin:0.4rem 0}
+.jg-chat-msg-bolha{position:relative}
+.jg-chat-msg-bolha .jg-chat-hora{display:inline-flex;align-items:center;gap:0.2rem;float:right;margin:0.35rem 0 -0.15rem 0.7rem;font-size:0.6rem;color:rgba(255,255,255,0.5)}
+.jg-chat-tick{letter-spacing:-0.18em;font-size:0.7rem}
+.jg-chat-tick.lido{color:#53bdeb}
+.jg-chat-citacao{background:rgba(0,0,0,0.25);border-left:3px solid var(--redl);border-radius:8px;padding:0.3rem 0.5rem;margin-bottom:0.35rem;font-size:0.74rem;color:rgba(255,255,255,0.75);cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jg-chat-citacao b{display:block;color:var(--redl);font-size:0.68rem}
+.jg-chat-reacoes{display:flex;gap:0.2rem;margin-top:-0.35rem;position:relative;z-index:1}
+.jg-chat-reacao{background:var(--blk2);border:1px solid rgba(255,255,255,0.18);border-radius:50px;font-size:0.78rem;padding:0.05rem 0.4rem}
+.jg-chat-msg.destaque .jg-chat-msg-bolha{box-shadow:0 0 0 2px #e6a81a}
+.jg-chat-msg-bolha.apagada{font-style:italic;opacity:0.6}
+.jg-chat-barra{display:none;align-items:center;gap:0.6rem;padding:0.5rem 1rem;border-top:1px solid rgba(255,255,255,0.08);font-size:0.76rem;color:rgba(255,255,255,0.75)}
+.jg-chat-barra.show{display:flex}
+.jg-chat-barra-txt{flex:1;border-left:3px solid var(--redl);padding-left:0.5rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jg-chat-barra-txt b{display:block;color:var(--redl);font-size:0.68rem}
+.jg-chat-menu{position:fixed;z-index:800;background:var(--blk2);border:1px solid rgba(255,255,255,0.15);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.6);padding:0.4rem;display:none;min-width:190px}
+.jg-chat-menu.show{display:block}
+.jg-chat-menu-emojis{display:flex;gap:0.1rem;padding:0.2rem;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:0.2rem}
+.jg-chat-menu-emojis button{background:none;border:none;font-size:1.35rem;padding:0.2rem 0.3rem;cursor:pointer;border-radius:8px}
+.jg-chat-menu-emojis button.sel{background:rgba(255,255,255,0.15)}
+.jg-chat-menu-item{display:block;width:100%;text-align:left;background:none;border:none;color:#fff;font-size:0.84rem;padding:0.55rem 0.7rem;border-radius:8px;cursor:pointer;font-family:"Lato",sans-serif}
+.jg-chat-menu-item:active{background:rgba(255,255,255,0.1)}
 .jg-chat-composer{display:flex;align-items:center;gap:0.5rem;padding:0.8rem 1rem;border-top:1px solid rgba(255,255,255,0.08)}
 .jg-chat-composer input[type=text]{flex:1;padding:0.65rem 0.9rem;border-radius:50px;border:1.5px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#fff;font-size:0.85rem;font-family:"Lato",sans-serif;outline:none}
 .jg-chat-icone-btn{background:rgba(255,255,255,0.08);border:none;color:#fff;width:38px;height:38px;min-width:38px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
@@ -909,7 +931,9 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
       <div class="jg-chat-hdr-sub" id="jg-chat-quem-atual" onclick="abrirEscolhaPerfil(true)"></div>
       <button class="jg-chat-fechar" onclick="jgChatFecharPainel()" aria-label="Fechar">✕</button>
     </div>
-    <div class="jg-chat-lista" id="jg-chat-lista"></div>
+    <div class="jg-chat-lista" id="jg-chat-lista" onclick="jgChatCliqueLista(event)"></div>
+    <div class="jg-chat-menu" id="jg-chat-menu"></div>
+    <div class="jg-chat-barra" id="jg-chat-barra"><div class="jg-chat-barra-txt" id="jg-chat-barra-txt"></div><button type="button" class="jg-chat-fechar" onclick="jgChatLimparContexto()" aria-label="Cancelar">✕</button></div>
     <div class="jg-chat-composer" id="jg-chat-composer">
       <input type="text" id="jg-chat-input" name="jg-chat-input" placeholder="Escreva algo..." autocomplete="off" onkeydown="jgChatInputKeydown(event)">
       <button type="button" class="jg-chat-icone-btn jg-chat-gravar" id="jg-chat-gravar-btn" onclick="jgChatAlternarGravacao()" aria-label="Gravar áudio">🎤</button>
@@ -2629,6 +2653,8 @@ function jgChatFecharPainel() {
   var painel = document.getElementById("jg-chat-painel");
   if (painel) painel.classList.remove("show");
   if (jgChatGravando) jgChatCancelarGravacao();
+  jgChatFecharMenu();
+  jgChatLimparContexto();
 }
 
 var jgChatUltimoIdRemoto = null;
@@ -2639,9 +2665,9 @@ function jgChatPoll(forcar) {
   var painelAberto = document.getElementById("jg-chat-painel").classList.contains("show");
   var cabeca = forcar
     ? Promise.resolve(undefined)
-    : api("/rest/v1/jogo_mensagens?select=id&order=criado_em.desc&limit=1")
+    : api("/rest/v1/jogo_mensagens?select=id,atualizado_em&order=atualizado_em.desc&limit=1")
         .then(function(r) { return r.ok ? r.json() : null; })
-        .then(function(d) { return Array.isArray(d) ? (d[0] ? d[0].id : "") : null; })
+        .then(function(d) { return Array.isArray(d) ? (d[0] ? d[0].id + "|" + d[0].atualizado_em : "") : null; })
         .catch(function() { return null; });
   return cabeca.then(function(idRemoto) {
     if (idRemoto === null) return;
@@ -2656,9 +2682,10 @@ function jgChatPoll(forcar) {
         data.reverse();
         jgChatMensagens = data;
         var ultimoId = data.length ? data[data.length - 1].id : "";
-        jgChatUltimoIdRemoto = ultimoId;
+        jgChatUltimoIdRemoto = jgChatAssinatura(data);
         if (painelAberto) {
           jgChatRenderizarLista();
+          jgChatMarcarLidas();
           if (ultimoId) localStorage.setItem("jg_chat_visto", ultimoId);
           document.getElementById("jg-chat-badge").classList.remove("show");
         } else if (ultimoId && ultimoId !== localStorage.getItem("jg_chat_visto")) {
@@ -2667,6 +2694,44 @@ function jgChatPoll(forcar) {
       });
   }).catch(function() {});
 }
+
+function jgChatEsc(t) {
+  return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Assinatura = "id|atualizado_em" da mensagem mexida mais recentemente (igual à consulta leve)
+function jgChatAssinatura(data) {
+  var melhor = null, melhorT = "";
+  data.forEach(function(m) {
+    var t = m.atualizado_em || m.criado_em || "";
+    if (!melhor || t >= melhorT) { melhor = m; melhorT = t; }
+  });
+  return melhor ? melhor.id + "|" + melhor.atualizado_em : "";
+}
+
+function jgChatNomeDia(iso) {
+  var d = new Date(iso), h = new Date();
+  var chave = function(x) { return x.getFullYear() + "-" + x.getMonth() + "-" + x.getDate(); };
+  if (chave(d) === chave(h)) return "Hoje";
+  var o = new Date(); o.setDate(o.getDate() - 1);
+  if (chave(d) === chave(o)) return "Ontem";
+  return String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
+}
+
+function jgChatHora(iso) {
+  var d = new Date(iso);
+  return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+}
+
+function jgChatResumo(m) {
+  if (!m) return "Mensagem apagada";
+  if (m.tipo === "audio") return "🎤 Mensagem de voz";
+  return m.texto || "";
+}
+
+var jgChatResponderA = null;
+var jgChatEditandoId = null;
+var jgChatMenuId = null;
 
 function jgChatRenderizarLista() {
   var lista = document.getElementById("jg-chat-lista");
@@ -2677,22 +2742,207 @@ function jgChatRenderizarLista() {
     lista.innerHTML = '<div class="jg-chat-vazio">Nenhuma mensagem ainda. Manda um "oi" 👋</div>';
     return;
   }
+  var diaAnterior = "";
   lista.innerHTML = jgChatMensagens.map(function(m) {
     var minha = quemSou && m.jogador === quemSou;
     var classes = "jg-chat-msg " + (minha ? "minha" : "delas");
-    var nome = perfilNome(m.jogador);
+    var dia = jgChatNomeDia(m.criado_em);
+    var sep = "";
+    if (dia !== diaAnterior) { sep = '<div class="jg-chat-dia">' + dia + '</div>'; diaAnterior = dia; }
+    var cit = "";
+    if (m.responde_a) {
+      var orig = jgChatMensagens.find(function(x) { return String(x.id) === String(m.responde_a); });
+      cit = '<div class="jg-chat-citacao" data-ir="' + jgChatEsc(m.responde_a) + '"><b>' + (orig ? jgChatEsc(perfilNome(orig.jogador)) : "Mensagem") + '</b>' + jgChatEsc(jgChatResumo(orig)) + '</div>';
+    }
+    var tick = minha ? ' <span class="jg-chat-tick' + (m.lido_em ? ' lido' : '') + '">✓✓</span>' : "";
+    var hora = '<span class="jg-chat-hora">' + (m.editado ? "editada · " : "") + jgChatHora(m.criado_em) + tick + '</span>';
     var corpo;
     if (m.tipo === "audio") {
-      corpo = '<div class="jg-chat-msg-bolha audio"><button type="button" class="jg-chat-play" data-id="' + m.id + '" onclick="jgChatTocarAudio(\'' + m.id + '\')">▶</button><span class="jg-chat-msg-dur">' + jgFormatarDuracao(m.duracao) + '</span></div>';
+      corpo = '<div class="jg-chat-msg-bolha audio">' + cit + '<button type="button" class="jg-chat-play" data-id="' + m.id + '" onclick="jgChatTocarAudio(\'' + m.id + '\')">▶</button><span class="jg-chat-msg-dur">' + jgFormatarDuracao(m.duracao) + '</span>' + hora + '</div>';
     } else {
-      corpo = '<div class="jg-chat-msg-bolha">' + (m.texto || "") + '</div>';
+      corpo = '<div class="jg-chat-msg-bolha">' + cit + jgChatEsc(m.texto) + hora + '</div>';
     }
-    return '<div class="' + classes + '" data-id="' + m.id + '">' + corpo +
-      '<div class="jg-chat-msg-meta"><span>' + nome + '</span><span>· ' + jgFormatarTempoRelativo(m.criado_em) + '</span>' +
-      '<button type="button" class="jg-chat-msg-del" onclick="jgChatApagar(\'' + m.id + '\')" aria-label="Apagar mensagem">🗑</button></div></div>';
+    var reac = "";
+    var r = m.reacoes || {};
+    var chaves = Object.keys(r).filter(function(k) { return r[k]; });
+    if (chaves.length) {
+      var cont = {};
+      chaves.forEach(function(k) { cont[r[k]] = (cont[r[k]] || 0) + 1; });
+      reac = '<div class="jg-chat-reacoes">' + Object.keys(cont).map(function(e) {
+        return '<span class="jg-chat-reacao">' + e + (cont[e] > 1 ? " " + cont[e] : "") + '</span>';
+      }).join("") + '</div>';
+    }
+    return sep + '<div class="' + classes + '" data-id="' + m.id + '">' + corpo + reac + '</div>';
   }).join("");
   if (pertoDoFim) lista.scrollTop = lista.scrollHeight;
 }
+
+// Marca como lidas as mensagens da outra pessoa (só faz requisição se houver alguma não lida)
+function jgChatMarcarLidas() {
+  var quem = jgChatQuemSou();
+  if (!quem || document.hidden) return;
+  var pend = jgChatMensagens.some(function(m) { return m.jogador !== quem && !m.lido_em; });
+  if (!pend) return;
+  var agora = new Date().toISOString();
+  jgChatMensagens.forEach(function(m) { if (m.jogador !== quem && !m.lido_em) m.lido_em = agora; });
+  api("/rest/v1/jogo_mensagens?jogador=neq." + quem + "&lido_em=is.null", {
+    method: "PATCH",
+    headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + session.access_token, "Content-Type": "application/json", "Prefer": "return=minimal" },
+    body: JSON.stringify({ lido_em: agora, atualizado_em: agora })
+  }).catch(function() {});
+}
+
+function jgChatPatch(id, campos) {
+  campos.atualizado_em = new Date().toISOString();
+  return api("/rest/v1/jogo_mensagens?id=eq." + id, {
+    method: "PATCH",
+    headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + session.access_token, "Content-Type": "application/json", "Prefer": "return=minimal" },
+    body: JSON.stringify(campos)
+  });
+}
+
+function jgChatCliqueLista(e) {
+  if (jgChatSwipeRecente) return;
+  var cit = e.target.closest(".jg-chat-citacao");
+  if (cit) { jgChatIrPara(cit.getAttribute("data-ir")); return; }
+  if (e.target.closest(".jg-chat-play")) return;
+  var bolha = e.target.closest(".jg-chat-msg-bolha");
+  if (!bolha) { jgChatFecharMenu(); return; }
+  var msg = bolha.closest(".jg-chat-msg");
+  jgChatAbrirMenu(msg.getAttribute("data-id"), bolha);
+}
+
+function jgChatIrPara(id) {
+  var el = document.querySelector('#jg-chat-lista .jg-chat-msg[data-id="' + id + '"]');
+  if (!el) { mostrarToast("Essa mensagem é antiga demais."); return; }
+  el.scrollIntoView({ block: "center", behavior: "smooth" });
+  el.classList.add("destaque");
+  setTimeout(function() { el.classList.remove("destaque"); }, 1400);
+}
+
+var JG_CHAT_EMOJIS = ["❤️", "😂", "👍", "😮", "😢", "🙏"];
+
+function jgChatAbrirMenu(id, ancora) {
+  var msg = jgChatMensagens.find(function(m) { return String(m.id) === String(id); });
+  if (!msg) return;
+  var quem = jgChatQuemSou();
+  var minha = msg.jogador === quem;
+  var meu = (msg.reacoes || {})[quem];
+  jgChatMenuId = id;
+  var menu = document.getElementById("jg-chat-menu");
+  var h = '<div class="jg-chat-menu-emojis">' + JG_CHAT_EMOJIS.map(function(e) {
+    return '<button type="button" class="' + (meu === e ? "sel" : "") + '" onclick="jgChatReagir(\'' + e + '\')">' + e + '</button>';
+  }).join("") + '</div>';
+  h += '<button type="button" class="jg-chat-menu-item" onclick="jgChatMenuAcao(\'responder\')">↩ Responder</button>';
+  if (msg.tipo !== "audio") h += '<button type="button" class="jg-chat-menu-item" onclick="jgChatMenuAcao(\'copiar\')">⧉ Copiar</button>';
+  if (minha && msg.tipo !== "audio") h += '<button type="button" class="jg-chat-menu-item" onclick="jgChatMenuAcao(\'editar\')">✎ Editar</button>';
+  if (minha) h += '<button type="button" class="jg-chat-menu-item" onclick="jgChatMenuAcao(\'apagar\')">🗑 Apagar para os dois</button>';
+  menu.innerHTML = h;
+  menu.classList.add("show");
+  var r = ancora.getBoundingClientRect();
+  var mh = menu.offsetHeight, mw = menu.offsetWidth;
+  var top = r.top - mh - 6;
+  if (top < 8) top = Math.min(r.bottom + 6, window.innerHeight - mh - 8);
+  var left = minha ? r.right - mw : r.left;
+  left = Math.max(8, Math.min(left, window.innerWidth - mw - 8));
+  menu.style.top = top + "px";
+  menu.style.left = left + "px";
+}
+
+function jgChatFecharMenu() {
+  var menu = document.getElementById("jg-chat-menu");
+  if (menu) menu.classList.remove("show");
+  jgChatMenuId = null;
+}
+
+function jgChatReagir(emoji) {
+  var id = jgChatMenuId;
+  var quem = jgChatQuemSou();
+  var msg = jgChatMensagens.find(function(m) { return String(m.id) === String(id); });
+  jgChatFecharMenu();
+  if (!msg || !quem) return;
+  var r = Object.assign({}, msg.reacoes || {});
+  var removendo = r[quem] === emoji;
+  if (removendo) delete r[quem]; else r[quem] = emoji;
+  msg.reacoes = r;
+  jgChatRenderizarLista();
+  jgChatPatch(id, { reacoes: r }).then(function(resp) {
+    if (!resp.ok) { mostrarToast("Não deu pra reagir."); return; }
+    if (!removendo) notificar("chat", "💬 " + notificarNome(), "Reagiu " + emoji + " à: " + jgChatResumo(msg).slice(0, 60));
+  }).catch(function() { mostrarToast("Não deu pra reagir."); });
+}
+
+function jgChatMenuAcao(acao) {
+  var id = jgChatMenuId;
+  var msg = jgChatMensagens.find(function(m) { return String(m.id) === String(id); });
+  jgChatFecharMenu();
+  if (!msg) return;
+  if (acao === "responder") jgChatDefinirResposta(id);
+  else if (acao === "copiar") {
+    if (navigator.clipboard) navigator.clipboard.writeText(msg.texto || "").then(function() { mostrarToast("Copiado."); }).catch(function() {});
+  }
+  else if (acao === "editar") {
+    jgChatEditandoId = id;
+    jgChatResponderA = null;
+    var inp = document.getElementById("jg-chat-input");
+    inp.value = msg.texto || "";
+    jgChatMostrarBarra("Editando mensagem", msg.texto || "");
+    inp.focus();
+  }
+  else if (acao === "apagar") jgChatApagar(id);
+}
+
+function jgChatDefinirResposta(id) {
+  var msg = jgChatMensagens.find(function(m) { return String(m.id) === String(id); });
+  if (!msg) return;
+  jgChatEditandoId = null;
+  jgChatResponderA = id;
+  jgChatMostrarBarra("Respondendo " + perfilNome(msg.jogador), jgChatResumo(msg));
+  document.getElementById("jg-chat-input").focus();
+}
+
+function jgChatMostrarBarra(titulo, texto) {
+  var b = document.getElementById("jg-chat-barra");
+  document.getElementById("jg-chat-barra-txt").innerHTML = '<b>' + jgChatEsc(titulo) + '</b>' + jgChatEsc(texto);
+  b.classList.add("show");
+}
+
+function jgChatLimparContexto() {
+  var estavaEditando = !!jgChatEditandoId;
+  jgChatResponderA = null;
+  jgChatEditandoId = null;
+  document.getElementById("jg-chat-barra").classList.remove("show");
+  if (estavaEditando) document.getElementById("jg-chat-input").value = "";
+}
+
+// Deslizar a mensagem pra direita = responder
+var jgChatSwipeRecente = false;
+(function() {
+  var x0 = 0, y0 = 0, el = null, ativo = false;
+  document.addEventListener("touchstart", function(e) {
+    var msg = e.target.closest && e.target.closest("#jg-chat-lista .jg-chat-msg");
+    if (!msg) { el = null; return; }
+    el = msg; ativo = false;
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener("touchmove", function(e) {
+    if (!el) return;
+    var dx = e.touches[0].clientX - x0, dy = Math.abs(e.touches[0].clientY - y0);
+    if (dy > 25 && !ativo) { el = null; return; }
+    if (dx > 10 && dx > dy) { ativo = true; el.style.transform = "translateX(" + Math.min(dx, 70) + "px)"; }
+  }, { passive: true });
+  document.addEventListener("touchend", function(e) {
+    if (!el) return;
+    var dx = (e.changedTouches[0].clientX - x0);
+    el.style.transform = "";
+    if (ativo) {
+      jgChatSwipeRecente = true;
+      setTimeout(function() { jgChatSwipeRecente = false; }, 350);
+      if (dx > 60) jgChatDefinirResposta(el.getAttribute("data-id"));
+    }
+    el = null; ativo = false;
+  }, { passive: true });
+})();
 
 function jgChatInputKeydown(event) {
   if (event.key === "Enter") { event.preventDefault(); jgChatEnviarTexto(); }
@@ -2704,7 +2954,21 @@ function jgChatEnviarTexto() {
   var input = document.getElementById("jg-chat-input");
   var texto = input.value.trim();
   if (!texto) return;
+  if (jgChatEditandoId) {
+    var idEd = jgChatEditandoId;
+    input.value = "";
+    jgChatLimparContexto();
+    var m = jgChatMensagens.find(function(x) { return String(x.id) === String(idEd); });
+    if (m) { m.texto = texto; m.editado = true; jgChatRenderizarLista(); }
+    jgChatPatch(idEd, { texto: texto, editado: true }).then(function(r) {
+      if (!r.ok) mostrarToast("Não deu pra editar.");
+    }).catch(function() { mostrarToast("Não deu pra editar."); });
+    return;
+  }
+  var corpoMsg = { jogador: quem, tipo: "texto", texto: texto };
+  if (jgChatResponderA) corpoMsg.responde_a = String(jgChatResponderA);
   input.value = "";
+  jgChatLimparContexto();
   api("/rest/v1/jogo_mensagens", {
     method: "POST",
     headers: {
@@ -2713,7 +2977,7 @@ function jgChatEnviarTexto() {
       "Content-Type": "application/json",
       "Prefer": "return=minimal"
     },
-    body: JSON.stringify({ jogador: quem, tipo: "texto", texto: texto })
+    body: JSON.stringify(corpoMsg)
   }).then(function(r) {
     if (!r.ok) { mostrarToast("Não deu pra enviar a mensagem."); return; }
     jgChatPoll(true);
@@ -2855,7 +3119,7 @@ function jgChatTocarAudio(id) {
 function jgChatApagar(id) {
   var msg = jgChatMensagens.find(function(m) { return String(m.id) === String(id); });
   if (!msg) return;
-  if (!confirm("Apagar essa mensagem?")) return;
+  if (!confirm("Apagar essa mensagem para os dois?")) return;
   api("/rest/v1/jogo_mensagens?id=eq." + id, {
     method: "DELETE",
     headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + session.access_token }

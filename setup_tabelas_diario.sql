@@ -332,5 +332,35 @@ alter table pensamentos add column if not exists postado_ela_em timestamptz;
 -- "perguntou_por" guarda quem fez (id de perfis: 'joel' ou 'ranny').
 alter table pergunta_respostas add column if not exists perguntou_por text;
 
--- Estilo de leitura dos textos (design escolhido ao criar: padrao, carta, romantico, noturno, maquina)
+-- Estilo de leitura dos textos (design escolhido ao criar: padrao, carta, romantico, noturno, maquina, pergaminho, sol, floral, minimalista)
 alter table textos add column if not exists estilo text default 'padrao';
+
+-- Notificações push: uma linha por aparelho inscrito. "perfil" diz de quem é o aparelho
+-- ('joel' ou 'ranny'), "prefs" guarda quais tipos de aviso ele quer (jogos, chat, novidades,
+-- perguntas). A função "enviar-push" (Edge Function) lê essa tabela pra saber pra quem mandar.
+create table if not exists push_inscricoes (
+  id uuid primary key default gen_random_uuid(),
+  perfil text not null check (perfil in ('joel', 'ranny')),
+  endpoint text not null unique,
+  p256dh text not null,
+  auth text not null,
+  prefs jsonb not null default '{"jogos":true,"chat":true,"novidades":true,"perguntas":true}',
+  atualizado_em timestamptz default now()
+);
+
+alter table push_inscricoes enable row level security;
+
+drop policy if exists "authenticated full access push_inscricoes" on push_inscricoes;
+create policy "authenticated full access push_inscricoes"
+on push_inscricoes for all
+to authenticated
+using (true)
+with check (true);
+
+-- Chat estilo WhatsApp: responder, reações, editar, lido
+alter table jogo_mensagens add column if not exists responde_a text;
+alter table jogo_mensagens add column if not exists reacoes jsonb not null default '{}';
+alter table jogo_mensagens add column if not exists editado boolean not null default false;
+alter table jogo_mensagens add column if not exists lido_em timestamptz;
+alter table jogo_mensagens add column if not exists atualizado_em timestamptz not null default now();
+create index if not exists jogo_mensagens_atualizado_idx on jogo_mensagens (atualizado_em desc);
