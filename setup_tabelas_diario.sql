@@ -364,3 +364,20 @@ alter table jogo_mensagens add column if not exists editado boolean not null def
 alter table jogo_mensagens add column if not exists lido_em timestamptz;
 alter table jogo_mensagens add column if not exists atualizado_em timestamptz not null default now();
 create index if not exists jogo_mensagens_atualizado_idx on jogo_mensagens (atualizado_em desc);
+
+-- Estado do jogo de Batalha Naval (linha única, sincronizada entre os dois aparelhos).
+-- "estado" guarda as duas frotas, os tiros de cada um, de quem é a vez e quem ganhou.
+create table if not exists jogo_naval (
+  id int primary key default 1 check (id = 1),
+  estado jsonb,
+  atualizado_em timestamptz default now()
+);
+
+alter table jogo_naval enable row level security;
+
+drop policy if exists "authenticated full access jogo_naval" on jogo_naval;
+create policy "authenticated full access jogo_naval"
+on jogo_naval for all
+to authenticated
+using (true)
+with check (true);

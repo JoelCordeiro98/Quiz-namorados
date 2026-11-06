@@ -477,6 +477,23 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .xz-peca{cursor:pointer;text-shadow:0 2px 3px rgba(0,0,0,0.6)}
 .xz-peca.joel{color:var(--red)}
 .xz-peca.ranny{color:#E6A81A}
+.nv-grid{display:grid;grid-template-columns:repeat(10,1fr);border-radius:10px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.4);flex-shrink:0;border:1px solid rgba(255,255,255,0.1)}
+.nv-grid.grande{width:min(320px,92vw);height:min(320px,92vw)}
+.nv-grid.pequena{width:200px;height:200px}
+.nv-c{background:#14212d;position:relative;box-shadow:inset 0 0 0 0.5px rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;font-size:0.9rem;line-height:1;color:#fff}
+.nv-c.navio{background:#6f7f90}
+.nv-c.alvo{cursor:pointer}
+.nv-c.errou::after{content:"";width:28%;height:28%;border-radius:50%;background:rgba(255,255,255,0.55)}
+.nv-c.acertou{background:rgba(192,57,43,0.8)}
+.nv-c.acertou::after{content:"✕";font-weight:700}
+.nv-c.afundado{background:#5a1a14}
+.nv-c.ultimo{box-shadow:inset 0 0 0 2px #E6A81A}
+.nv-pequena .nv-c{font-size:0.6rem}
+.nv-rotulo{font-size:0.72rem;color:rgba(255,255,255,0.5);text-align:center;margin:0.9rem 0 0.4rem;letter-spacing:0.05em;text-transform:uppercase}
+.nv-ctrl{display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;margin:0.8rem 0}
+.nv-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:50px;padding:0.5rem 0.9rem;font-size:0.8rem;cursor:pointer;font-family:"Lato",sans-serif}
+.nv-btn.principal{background:var(--red);border-color:var(--red)}
+.nv-btn:disabled{opacity:0.4;cursor:default}
 .jg-chat-badge{position:absolute;top:3px;right:3px;width:9px;height:9px;border-radius:50%;background:var(--redl);border:1.5px solid var(--blk2);display:none}
 .jg-chat-badge.show{display:block}
 .jg-chat-painel{position:fixed;left:0;right:0;bottom:0;z-index:760;background:var(--blk2);border-top:1.5px solid rgba(192,57,43,0.35);border-radius:20px 20px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,0.5);max-height:78vh;display:flex;flex-direction:column;transform:translateY(105%);transition:transform 0.3s ease}
@@ -733,6 +750,12 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
           <div class="hcard-icon">♟️</div>
           <div class="hcard-label">Jogo</div>
           <div class="hcard-title">Xadrez</div>
+          <div class="hcard-count">Jogar a dois</div>
+        </div>
+        <div class="hcard" onclick="abrirNaval()">
+          <div class="hcard-icon">🚢</div>
+          <div class="hcard-label">Jogo</div>
+          <div class="hcard-title">Batalha Naval</div>
           <div class="hcard-count">Jogar a dois</div>
         </div>
       </div>
@@ -1394,6 +1417,59 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
   </div>
 </div>
 
+<!-- JOGO: BATALHA NAVAL -->
+<div class="leitura-view" id="naval-view">
+  <div class="jg-hdr">
+    <button class="leitura-fechar" onclick="fecharNaval()" aria-label="Fechar">✕</button>
+    <div class="jg-hdr-titulo">Batalha Naval</div>
+    <div class="leitura-hdr-actions">
+      <button class="leitura-acao" onclick="nvReiniciarConfirmar()" aria-label="Reiniciar">↺</button>
+    </div>
+  </div>
+  <div class="jg-conteudo" id="nv-carregando" style="text-align:center;padding-top:3rem;color:rgba(255,255,255,0.5)">Carregando...</div>
+  <div class="jg-conteudo" id="nv-jogo" style="display:none">
+    <div class="jg-scoreboard">
+      <div class="jg-player-chip a">
+        <div class="jg-player-letra" style="background:var(--red)">J</div>
+        <div class="jg-player-info">
+          <div class="jg-player-nome" id="nv-nome-joel">Joel</div>
+          <div class="jg-player-pontos" id="nv-restam-joel">5</div>
+        </div>
+      </div>
+      <div class="jg-vs">×</div>
+      <div class="jg-player-chip b">
+        <div class="jg-player-info" style="text-align:right">
+          <div class="jg-player-nome" id="nv-nome-ranny">Ranny</div>
+          <div class="jg-player-pontos" id="nv-restam-ranny">5</div>
+        </div>
+        <div class="jg-player-letra" style="background:#E6A81A">R</div>
+      </div>
+    </div>
+    <div class="jg-turno" id="nv-turno"></div>
+    <div class="jg-dica" id="nv-dica"></div>
+    <div class="nv-ctrl" id="nv-ctrl" style="display:none">
+      <button type="button" class="nv-btn" id="nv-btn-girar" onclick="nvGirar()">↻ Girar</button>
+      <button type="button" class="nv-btn" onclick="nvAleatorio()">🎲 Aleatório</button>
+      <button type="button" class="nv-btn" onclick="nvLimpar()">Limpar</button>
+      <button type="button" class="nv-btn principal" id="nv-btn-pronto" onclick="nvPronto()">Pronto ✓</button>
+    </div>
+    <div id="nv-inimigo-wrap">
+      <div class="nv-rotulo" id="nv-rotulo-inimigo">Mar do inimigo</div>
+      <div class="jg-board-wrap"><div class="nv-grid grande" id="nv-grid-inimigo"></div></div>
+    </div>
+    <div class="nv-rotulo" id="nv-rotulo-meu">Minha frota</div>
+    <div class="jg-board-wrap"><div class="nv-grid pequena nv-pequena" id="nv-grid-meu"></div></div>
+  </div>
+</div>
+
+<div class="jg-vencedor-overlay" id="nv-vencedor-overlay">
+  <div class="jg-vencedor-box">
+    <div class="jg-vencedor-emoji">🏆</div>
+    <div class="jg-vencedor-titulo" id="nv-vencedor-titulo"></div>
+    <button class="btn-primary" onclick="nvJogarDeNovo()">Jogar de novo</button>
+  </div>
+</div>
+
 <!-- ÁRVORE DO RELACIONAMENTO -->
 <div class="leitura-view" id="arvore-view">
   <div class="jg-hdr">
@@ -1721,6 +1797,7 @@ function fazerLogout() {
   pararPollingChatGlobal();
   pararPollingDama();
   pararPollingXadrez();
+  clearInterval(navalPollingTimer);
   midias = []; textos = []; desejos = [];
   mostrarLogin();
 }
@@ -2212,6 +2289,324 @@ function reiniciarDamaConfirmar() {
   sincronizarEstadoDama();
   document.getElementById("dm-vencedor-overlay").classList.remove("show");
   mostrarTelaDamaAtiva();
+}
+
+// ===== JOGO: BATALHA NAVAL =====
+// Estado único (jogo_naval, id=1). Cada um posiciona a frota em segredo (na tela, o mar do
+// outro só mostra tiros); quando os dois ficam prontos a partida começa. Acertou = joga de novo.
+var navalEstado = null;
+var navalPollingTimer = null;
+var nvLocal = null; // posicionamento em andamento (só no aparelho até apertar "Pronto")
+var NV_FROTA = [5, 4, 3, 3, 2];
+var NV_N = 10;
+
+function nvOponente(j) { return j === "joel" ? "ranny" : "joel"; }
+
+function nvNovoEstado() {
+  return {
+    partida: Date.now(),
+    fase: "posicionando",
+    frotas: { joel: [], ranny: [] },
+    prontos: { joel: false, ranny: false },
+    tiros: { joel: [], ranny: [] },
+    vez: Math.random() < 0.5 ? "joel" : "ranny",
+    vencedor: null, ultimo: null, rev: 0
+  };
+}
+
+function nvLocalNovo(partida) { return { partida: partida, navios: [], h: true }; }
+
+function nvCelas(r, c, t, h) {
+  var cel = [];
+  for (var i = 0; i < t; i++) {
+    var rr = h ? r : r + i, cc = h ? c + i : c;
+    if (rr < 0 || rr >= NV_N || cc < 0 || cc >= NV_N) return null;
+    cel.push(rr * NV_N + cc);
+  }
+  return cel;
+}
+
+function nvOcupadas(navios, ignorarK) {
+  var o = {};
+  navios.forEach(function(n) { if (n.k !== ignorarK) n.cells.forEach(function(c) { o[c] = true; }); });
+  return o;
+}
+
+function nvProximoK(navios) {
+  for (var k = 0; k < NV_FROTA.length; k++) {
+    if (!navios.some(function(n) { return n.k === k; })) return k;
+  }
+  return -1;
+}
+
+function nvTocarPosicao(idx) {
+  if (!nvLocal || navalEstado.prontos[perfilAtual()]) return;
+  var ocup = nvOcupadas(nvLocal.navios, -1);
+  // tocar num navio já posto: remove (pra reposicionar)
+  if (ocup[idx]) {
+    nvLocal.navios = nvLocal.navios.filter(function(n) { return n.cells.indexOf(idx) === -1; });
+    nvRenderizar();
+    return;
+  }
+  var k = nvProximoK(nvLocal.navios);
+  if (k < 0) return;
+  var t = NV_FROTA[k];
+  var r = Math.floor(idx / NV_N), c = idx % NV_N;
+  if (nvLocal.h && c + t > NV_N) c = NV_N - t;
+  if (!nvLocal.h && r + t > NV_N) r = NV_N - t;
+  var cel = nvCelas(r, c, t, nvLocal.h);
+  if (!cel || cel.some(function(x) { return ocup[x]; })) { mostrarToast("Aí já tem outro navio."); return; }
+  nvLocal.navios.push({ k: k, t: t, cells: cel });
+  nvRenderizar();
+}
+
+function nvGirar() { if (!nvLocal) return; nvLocal.h = !nvLocal.h; nvRenderizar(); }
+function nvLimpar() { if (!nvLocal || navalEstado.prontos[perfilAtual()]) return; nvLocal.navios = []; nvRenderizar(); }
+
+function nvAleatorio() {
+  if (!nvLocal || navalEstado.prontos[perfilAtual()]) return;
+  var navios = [];
+  for (var k = 0; k < NV_FROTA.length; k++) {
+    var t = NV_FROTA[k], ok = false, tent = 0;
+    while (!ok && tent++ < 500) {
+      var h = Math.random() < 0.5;
+      var r = Math.floor(Math.random() * NV_N), c = Math.floor(Math.random() * NV_N);
+      var cel = nvCelas(r, c, t, h);
+      if (!cel) continue;
+      var ocup = nvOcupadas(navios, -1);
+      if (cel.some(function(x) { return ocup[x]; })) continue;
+      navios.push({ k: k, t: t, cells: cel });
+      ok = true;
+    }
+    if (!ok) return nvAleatorio();
+  }
+  nvLocal.navios = navios;
+  nvRenderizar();
+}
+
+function nvPronto() {
+  var eu = perfilAtual();
+  if (!nvLocal || nvLocal.navios.length !== NV_FROTA.length) { mostrarToast("Posicione todos os navios primeiro."); return; }
+  var meus = nvLocal.navios.map(function(n) { return { t: n.t, cells: n.cells.slice() }; });
+  buscarEstadoNavalRemoto().then(function(remoto) {
+    var base = (remoto && remoto.partida === navalEstado.partida) ? remoto : navalEstado;
+    base.frotas[eu] = meus;
+    base.prontos[eu] = true;
+    var outro = nvOponente(eu);
+    if (base.prontos[outro]) {
+      base.fase = "jogando";
+      navalEstado = base;
+      sincronizarEstadoNaval();
+      notificar("jogos", "🚢 Batalha Naval", base.vez === outro ? notificarNome() + " terminou — frotas prontas, é a sua vez!" : "Frotas prontas! A partida começou.");
+    } else {
+      navalEstado = base;
+      sincronizarEstadoNaval();
+      notificar("jogos", "🚢 Batalha Naval", notificarNome() + " posicionou a frota. Falta você!");
+    }
+    nvRenderizar();
+  });
+}
+
+function nvAfundados(estado, atacante) {
+  var def = nvOponente(atacante);
+  var tiros = estado.tiros[atacante] || [];
+  return (estado.frotas[def] || []).filter(function(n) {
+    return n.cells.every(function(c) { return tiros.indexOf(c) !== -1; });
+  });
+}
+
+function nvAtirar(idx) {
+  var eu = perfilAtual();
+  var e = navalEstado;
+  if (!e || e.fase !== "jogando" || e.vencedor || e.vez !== eu) return;
+  if (e.tiros[eu].indexOf(idx) !== -1) return;
+  var outro = nvOponente(eu);
+  var antes = nvAfundados(e, eu).length;
+  e.tiros[eu].push(idx);
+  var acerto = e.frotas[outro].some(function(n) { return n.cells.indexOf(idx) !== -1; });
+  var afundados = nvAfundados(e, eu);
+  e.ultimo = { por: eu, idx: idx, acerto: acerto };
+  var vezAntes = e.vez;
+  if (afundados.length === NV_FROTA.length) {
+    e.vencedor = eu; e.fase = "fim";
+  } else if (!acerto) {
+    e.vez = outro;
+  }
+  if (afundados.length > antes) { mostrarToast("Afundou um navio! 💥"); vibrar(); }
+  else mostrarToast(acerto ? "Acertou! Joga de novo 🎯" : "Água 🌊");
+  sincronizarEstadoNaval();
+  nvRenderizar();
+  if (e.vencedor) notificar("jogos", "🚢 Batalha Naval", "A partida terminou! Veja o resultado 🏆");
+  else if (e.vez !== vezAntes) notificar("jogos", "🚢 Batalha Naval", notificarNome() + " jogou — é a sua vez!");
+}
+
+function sincronizarEstadoNaval() {
+  if (!navalEstado) return;
+  navalEstado.rev = (navalEstado.rev || 0) + 1;
+  api("/rest/v1/jogo_naval?on_conflict=id", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      "Prefer": "resolution=merge-duplicates,return=minimal"
+    },
+    body: JSON.stringify({ id: 1, estado: navalEstado })
+  }).catch(function() {});
+}
+
+function buscarEstadoNavalRemoto() {
+  return api("/rest/v1/jogo_naval?id=eq.1&select=estado")
+    .then(function(r) { return r.json(); })
+    .then(function(data) { return (Array.isArray(data) && data[0] && data[0].estado) ? data[0].estado : null; })
+    .catch(function() { return null; });
+}
+
+function iniciarPollingNaval() {
+  clearInterval(navalPollingTimer);
+  navalPollingTimer = setInterval(function() {
+    if (document.hidden || !document.getElementById("naval-view").classList.contains("show")) return;
+    buscarRevRemoto("jogo_naval").then(function(revRemoto) {
+      if (revRemoto === null || (navalEstado && revRemoto <= (navalEstado.rev || 0))) return;
+      return buscarEstadoNavalRemoto();
+    }).then(function(remoto) {
+      if (!remoto) return;
+      if (!navalEstado || (remoto.rev || 0) > (navalEstado.rev || 0)) {
+        navalEstado = remoto;
+        nvRenderizar();
+      }
+    });
+  }, 4000);
+}
+
+function abrirNaval() {
+  if (!perfilAtual()) { abrirEscolhaPerfil(true); mostrarToast("Escolha seu perfil primeiro."); return; }
+  document.getElementById("naval-view").classList.add("show");
+  document.getElementById("nv-carregando").style.display = "block";
+  document.getElementById("nv-jogo").style.display = "none";
+  buscarEstadoNavalRemoto().then(function(remoto) {
+    if (remoto) navalEstado = remoto;
+    else if (!navalEstado) { navalEstado = nvNovoEstado(); sincronizarEstadoNaval(); }
+    nvRenderizar();
+    iniciarPollingNaval();
+  });
+}
+
+function fecharNaval() {
+  clearInterval(navalPollingTimer);
+  document.getElementById("naval-view").classList.remove("show");
+}
+
+function nvReiniciar() {
+  navalEstado = nvNovoEstado();
+  nvLocal = nvLocalNovo(navalEstado.partida);
+  sincronizarEstadoNaval();
+  document.getElementById("nv-vencedor-overlay").classList.remove("show");
+  nvRenderizar();
+}
+function nvReiniciarConfirmar() { if (confirm("Começar uma nova partida de Batalha Naval?")) nvReiniciar(); }
+function nvJogarDeNovo() { nvReiniciar(); }
+
+function nvGrade(el, cellFn, clickFn) {
+  el.innerHTML = "";
+  for (var i = 0; i < NV_N * NV_N; i++) {
+    var d = document.createElement("div");
+    d.className = "nv-c";
+    cellFn(i, d);
+    if (clickFn && d.classList.contains("alvo")) d.onclick = (function(x) { return function() { clickFn(x); }; })(i);
+    el.appendChild(d);
+  }
+}
+
+function nvRenderizar() {
+  var e = navalEstado;
+  if (!e) return;
+  var eu = perfilAtual(), outro = nvOponente(eu);
+  if (!nvLocal || nvLocal.partida !== e.partida) nvLocal = nvLocalNovo(e.partida);
+  document.getElementById("nv-carregando").style.display = "none";
+  document.getElementById("nv-jogo").style.display = "block";
+  document.getElementById("nv-nome-joel").textContent = perfilNome("joel");
+  document.getElementById("nv-nome-ranny").textContent = perfilNome("ranny");
+  ["joel", "ranny"].forEach(function(j) {
+    var afund = e.fase === "posicionando" ? 0 : nvAfundados(e, nvOponente(j)).length;
+    document.getElementById("nv-restam-" + j).textContent = (NV_FROTA.length - afund) + " navios";
+  });
+  var turno = document.getElementById("nv-turno"), dica = document.getElementById("nv-dica");
+  var ctrl = document.getElementById("nv-ctrl");
+  var inimigoWrap = document.getElementById("nv-inimigo-wrap");
+  var gMeu = document.getElementById("nv-grid-meu"), gIni = document.getElementById("nv-grid-inimigo");
+  var meusNavios = e.prontos[eu] ? e.frotas[eu] : (nvLocal ? nvLocal.navios : []);
+  var celMeus = {};
+  meusNavios.forEach(function(n) { n.cells.forEach(function(c) { celMeus[c] = true; }); });
+
+  if (e.fase === "posicionando") {
+    inimigoWrap.style.display = "none";
+    gMeu.className = "nv-grid grande";
+    document.getElementById("nv-rotulo-meu").textContent = "Minha frota";
+    if (e.prontos[eu]) {
+      ctrl.style.display = "none";
+      turno.textContent = "Frota pronta ✓";
+      dica.textContent = "Aguardando " + perfilNome(outro) + " posicionar a frota...";
+    } else {
+      ctrl.style.display = "flex";
+      var k = nvProximoK(nvLocal.navios);
+      turno.textContent = "Posicione sua frota";
+      dica.textContent = k >= 0
+        ? "Toque no mar para colocar o navio de " + NV_FROTA[k] + " casas. Toque num navio para tirá-lo."
+        : "Tudo no lugar! Aperte \"Pronto\" quando quiser.";
+      document.getElementById("nv-btn-girar").textContent = "↻ Girar (" + (nvLocal.h ? "horizontal" : "vertical") + ")";
+      document.getElementById("nv-btn-pronto").disabled = (k >= 0);
+    }
+    nvGrade(gMeu, function(i, d) {
+      if (celMeus[i]) d.classList.add("navio");
+      else if (!e.prontos[eu]) d.classList.add("alvo");
+    }, function(i) { nvTocarPosicao(i); });
+    // navios postos também são tocáveis (pra remover)
+    if (!e.prontos[eu]) {
+      Array.prototype.forEach.call(gMeu.children, function(d, i) {
+        if (celMeus[i]) d.onclick = function() { nvTocarPosicao(i); };
+      });
+    }
+    return;
+  }
+
+  // jogando / fim
+  ctrl.style.display = "none";
+  inimigoWrap.style.display = "block";
+  gMeu.className = "nv-grid pequena nv-pequena";
+  document.getElementById("nv-rotulo-inimigo").textContent = "Mar de " + perfilNome(outro);
+  document.getElementById("nv-rotulo-meu").textContent = "Minha frota";
+  var meuTurno = e.fase === "jogando" && e.vez === eu;
+  if (e.vencedor) { turno.textContent = ""; dica.textContent = ""; }
+  else {
+    turno.textContent = meuTurno ? "Sua vez" : "Vez de " + perfilNome(e.vez);
+    dica.textContent = meuTurno ? "Toque no mar do inimigo para atirar" : "Aguardando " + perfilNome(e.vez) + "...";
+  }
+  var meusTiros = e.tiros[eu] || [], tirosDele = e.tiros[outro] || [];
+  var celInimigo = {}, afundCel = {};
+  (e.frotas[outro] || []).forEach(function(n) { n.cells.forEach(function(c) { celInimigo[c] = true; }); });
+  nvAfundados(e, eu).forEach(function(n) { n.cells.forEach(function(c) { afundCel[c] = true; }); });
+  nvGrade(gIni, function(i, d) {
+    if (meusTiros.indexOf(i) !== -1) {
+      d.classList.add(celInimigo[i] ? "acertou" : "errou");
+      if (afundCel[i]) d.classList.add("afundado");
+    } else if (meuTurno) d.classList.add("alvo");
+    if (e.ultimo && e.ultimo.por === eu && e.ultimo.idx === i) d.classList.add("ultimo");
+  }, nvAtirar);
+  var afundadosMeus = {};
+  nvAfundados(e, outro).forEach(function(n) { n.cells.forEach(function(c) { afundadosMeus[c] = true; }); });
+  nvGrade(gMeu, function(i, d) {
+    if (celMeus[i]) d.classList.add("navio");
+    if (tirosDele.indexOf(i) !== -1) {
+      d.classList.add(celMeus[i] ? "acertou" : "errou");
+      if (afundadosMeus[i]) d.classList.add("afundado");
+    }
+    if (e.ultimo && e.ultimo.por === outro && e.ultimo.idx === i) d.classList.add("ultimo");
+  }, null);
+  if (e.vencedor) {
+    document.getElementById("nv-vencedor-titulo").textContent = perfilNome(e.vencedor) + " venceu! 🏆";
+    document.getElementById("nv-vencedor-overlay").classList.add("show");
+  }
 }
 
 // ===== JOGO: XADREZ (regras completas: roque, en passant, promoção, xeque-mate) =====
