@@ -122,6 +122,16 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
 .diario-campo textarea:focus{border-color:var(--redl)}
 .diario-campo textarea[readonly]{border-color:rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);color:rgba(255,255,255,0.7)}
 .diario-postar{width:100%;margin-top:0.5rem;padding:0.5rem;border-radius:10px;border:1.5px solid rgba(192,57,43,0.35);background:rgba(192,57,43,0.12);color:var(--redl);font-size:0.72rem;letter-spacing:0.5px;text-transform:uppercase;font-weight:700;cursor:pointer;font-family:"Lato",sans-serif;transition:all 0.2s}
+.pm-modo{display:flex;gap:0.3rem;margin-bottom:0.4rem}
+.pm-modo button{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.55);border-radius:50px;font-size:0.66rem;padding:0.3rem 0.2rem;cursor:pointer;font-family:"Lato",sans-serif}
+.pm-modo button.ativo{background:rgba(192,57,43,0.25);border-color:rgba(192,57,43,0.6);color:#fff}
+.pm-modo button:disabled{opacity:0.45;cursor:default}
+.pm-audio{display:none;min-height:90px;border-radius:12px;border:1.5px solid rgba(192,57,43,0.25);background:rgba(255,255,255,0.05);flex-direction:column;align-items:center;justify-content:center;gap:0.45rem;padding:0.6rem;text-align:center}
+.pm-play{background:rgba(255,255,255,0.14);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:0.95rem;cursor:pointer}
+.pm-play.tocando{background:#fff;color:var(--redl)}
+.pm-dur{font-size:0.8rem;color:rgba(255,255,255,0.8)}
+.pm-rec{font-size:0.85rem;color:#fff}
+.pm-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:50px;padding:0.35rem 0.8rem;font-size:0.72rem;cursor:pointer;font-family:"Lato",sans-serif}
 .diario-postar:disabled{border-color:rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.3);cursor:default}
 .diario-salvo{font-size:0.7rem;color:var(--gray);margin-top:0.6rem;opacity:0;transition:opacity 0.3s;height:1rem}
 .diario-salvo.show{opacity:1}
@@ -680,7 +690,9 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
             <label>Ele</label>
             <button type="button" class="diario-lido" id="lido-ele" onclick="toggleLido('ele')" aria-label="Marcar como lido">☀️</button>
           </div>
+          <div class="pm-modo" id="pm-modo-ele"><button type="button" data-m="texto" onclick="pmSetModo('ele','texto')">✍️ Texto</button><button type="button" data-m="audio" onclick="pmSetModo('ele','audio')">🎤 Áudio</button></div>
           <textarea id="pensamento-ele" name="pensamento-ele" placeholder="O que está pensando hoje?" oninput="campoAlterado('ele')" autocomplete="off"></textarea>
+          <div class="pm-audio" id="pm-audio-ele"></div>
           <button type="button" class="diario-postar" id="postar-ele" onclick="postarPensamento('ele')">Postar</button>
         </div>
         <div class="diario-campo">
@@ -688,7 +700,9 @@ body{font-family:"Lato",sans-serif;background:var(--blk);color:#fff;min-height:1
             <label>Ela</label>
             <button type="button" class="diario-lido" id="lido-ela" onclick="toggleLido('ela')" aria-label="Marcar como lido">🌙</button>
           </div>
+          <div class="pm-modo" id="pm-modo-ela"><button type="button" data-m="texto" onclick="pmSetModo('ela','texto')">✍️ Texto</button><button type="button" data-m="audio" onclick="pmSetModo('ela','audio')">🎤 Áudio</button></div>
           <textarea id="pensamento-ela" name="pensamento-ela" placeholder="O que está pensando hoje?" oninput="campoAlterado('ela')" autocomplete="off"></textarea>
+          <div class="pm-audio" id="pm-audio-ela"></div>
           <button type="button" class="diario-postar" id="postar-ela" onclick="postarPensamento('ela')">Postar</button>
         </div>
       </div>
@@ -5207,6 +5221,11 @@ function carregarPensamento() {
       postadoEla = row ? !!row.postado_ela : false;
       postadoEleEm = (row && row.postado_ele_em) ? new Date(row.postado_ele_em).getTime() : null;
       postadoElaEm = (row && row.postado_ela_em) ? new Date(row.postado_ela_em).getTime() : null;
+      ["ele", "ela"].forEach(function(q) {
+        var url = row ? row["audio_" + q + "_url"] : null;
+        pmRemoto[q] = url ? { url: url, dur: (row["audio_" + q + "_dur"] || 0) } : null;
+        if (!pmLocal[q] && !(pmRec && pmRec.quem === q)) pmModo[q] = (row && row["modo_" + q]) || (url ? "audio" : "texto");
+      });
       atualizarBotoesLido();
       atualizarEstadoPostado();
     });
@@ -5242,6 +5261,7 @@ function atualizarEstadoPostado() {
       btn.disabled = true;
       btn.textContent = "🔒 Postado";
     }
+    pmRender(quem);
   });
 }
 
@@ -5267,20 +5287,160 @@ function postarPensamento(quem) {
     mostrarToast("Pode editar — toque em Postar de novo quando terminar.");
     return;
   }
-  var texto = document.getElementById("pensamento-" + quem).value.trim();
-  if (!texto) { mostrarToast("Escreva algo antes de postar!"); return; }
-  if (quem === "ele") {
-    postadoEle = true;
-    if (!postadoEleEm) postadoEleEm = Date.now(); // a janela de 1h conta da 1ª vez que postou
+  var modoAudio = pmModo[quem] === "audio";
+  if (modoAudio) {
+    if (pmRec && pmRec.quem === quem) { mostrarToast("Pare a gravação antes de postar."); return; }
+    if (!pmLocal[quem] && !pmRemoto[quem]) { mostrarToast("Grave um áudio antes de postar!"); return; }
   } else {
-    postadoEla = true;
-    if (!postadoElaEm) postadoElaEm = Date.now();
+    var texto = document.getElementById("pensamento-" + quem).value.trim();
+    if (!texto) { mostrarToast("Escreva algo antes de postar!"); return; }
   }
-  atualizarEstadoPostado();
-  salvarPensamento();
-  vibrar();
-  mostrarToast("✓ Postado! Dá pra editar por 1 hora.");
-  notificar("perguntas", "💭 No que estou pensando", notificarNome() + " postou o que está pensando hoje");
+  var concluir = function() {
+    if (quem === "ele") {
+      postadoEle = true;
+      if (!postadoEleEm) postadoEleEm = Date.now(); // a janela de 1h conta da 1ª vez que postou
+    } else {
+      postadoEla = true;
+      if (!postadoElaEm) postadoElaEm = Date.now();
+    }
+    atualizarEstadoPostado();
+    salvarPensamento();
+    vibrar();
+    mostrarToast("✓ Postado! Dá pra editar por 1 hora.");
+    notificar("perguntas", "💭 No que estou pensando", notificarNome() + (modoAudio ? " deixou um áudio 🎤 sobre o que está pensando" : " postou o que está pensando hoje"));
+  };
+  if (modoAudio && pmLocal[quem]) {
+    var btn = document.getElementById("postar-" + quem);
+    btn.disabled = true; btn.textContent = "Enviando...";
+    pmEnviarAudio(quem).then(concluir).catch(function() {
+      btn.disabled = false; btn.textContent = "Postar";
+      mostrarToast("Não deu pra enviar o áudio agora.");
+    });
+  } else {
+    concluir();
+  }
+}
+
+// ----- Áudio no pensamento do dia -----
+var pmModo = { ele: "texto", ela: "texto" };
+var pmLocal = { ele: null, ela: null };   // gravação ainda não enviada: { blob, url, dur }
+var pmRemoto = { ele: null, ela: null };  // áudio já postado: { url, dur }
+var pmRec = null;                         // gravação em andamento
+var pmPlayer = null;                      // { audio, quem }
+
+function pmPostado(q) { return q === "ele" ? postadoEle : postadoEla; }
+
+function pmSetModo(q, modo) {
+  if (pmPostado(q) || pmModo[q] === modo) return;
+  if (pmRec && pmRec.quem === q) pmParar(q, true);
+  pmModo[q] = modo;
+  pmRender(q);
+  agendarSalvarPensamento();
+}
+
+function pmRender(q) {
+  var postado = pmPostado(q);
+  var barra = document.getElementById("pm-modo-" + q);
+  if (!barra) return;
+  Array.prototype.forEach.call(barra.querySelectorAll("button"), function(b) {
+    b.classList.toggle("ativo", b.getAttribute("data-m") === pmModo[q]);
+    b.disabled = postado;
+  });
+  var txt = document.getElementById("pensamento-" + q), box = document.getElementById("pm-audio-" + q);
+  var aud = pmModo[q] === "audio";
+  txt.style.display = aud ? "none" : "";
+  box.style.display = aud ? "flex" : "none";
+  if (!aud) return;
+  var fonte = pmLocal[q] || pmRemoto[q];
+  var h = "";
+  if (pmRec && pmRec.quem === q) {
+    h = '<span class="pm-rec">🔴 <b id="pm-timer-' + q + '">' + jgFormatarDuracao(pmRec.seg) + '</b></span><button type="button" class="pm-btn" onclick="pmParar(\'' + q + '\')">■ Parar</button>';
+  } else {
+    var tocando = pmPlayer && pmPlayer.quem === q;
+    if (fonte) h += '<button type="button" class="pm-play' + (tocando ? " tocando" : "") + '" onclick="pmTocar(\'' + q + '\')">' + (tocando ? "⏸" : "▶") + '</button><span class="pm-dur">' + jgFormatarDuracao(fonte.dur) + '</span>';
+    if (!postado) h += '<button type="button" class="pm-btn" onclick="pmGravar(\'' + q + '\')">' + (fonte ? "↺ Regravar" : "🎤 Gravar") + '</button>';
+    else if (!fonte) h += '<span class="pm-dur">Sem áudio</span>';
+  }
+  box.innerHTML = h;
+}
+
+function pmTocar(q) {
+  var fonte = pmLocal[q] || pmRemoto[q];
+  if (!fonte) return;
+  var mesmo = pmPlayer && pmPlayer.quem === q;
+  if (pmPlayer) { var antigo = pmPlayer.quem; pmPlayer.audio.pause(); pmPlayer = null; pmRender(antigo); }
+  if (mesmo) return;
+  var audio = new Audio(fonte.url);
+  pmPlayer = { audio: audio, quem: q };
+  audio.onended = function() { if (pmPlayer && pmPlayer.audio === audio) { pmPlayer = null; pmRender(q); } };
+  audio.play().catch(function() { pmPlayer = null; pmRender(q); mostrarToast("Não deu pra tocar o áudio."); });
+  pmRender(q);
+}
+
+function pmGravar(q) {
+  if (pmRec || pmPostado(q)) return;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
+    mostrarToast("Esse navegador não permite gravar áudio.");
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+    var mime = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/aac"].find(function(t) {
+      return MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t);
+    }) || "";
+    var rec;
+    try { rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream); }
+    catch (e) { stream.getTracks().forEach(function(t) { t.stop(); }); mostrarToast("Não deu pra iniciar a gravação."); return; }
+    var estado = { quem: q, recorder: rec, chunks: [], seg: 0, descartar: false, timer: null };
+    pmRec = estado;
+    rec.ondataavailable = function(e) { if (e.data && e.data.size > 0) estado.chunks.push(e.data); };
+    rec.onstop = function() {
+      stream.getTracks().forEach(function(t) { t.stop(); });
+      clearInterval(estado.timer);
+      if (pmRec === estado) pmRec = null;
+      if (!estado.descartar && estado.chunks.length) {
+        var blob = new Blob(estado.chunks, { type: rec.mimeType || mime || "audio/webm" });
+        if (pmLocal[q]) URL.revokeObjectURL(pmLocal[q].url);
+        pmLocal[q] = { blob: blob, url: URL.createObjectURL(blob), dur: estado.seg };
+      }
+      pmRender(q);
+    };
+    rec.start();
+    estado.timer = setInterval(function() {
+      estado.seg++;
+      var el = document.getElementById("pm-timer-" + q);
+      if (el) el.textContent = jgFormatarDuracao(estado.seg);
+      if (estado.seg >= 120) pmParar(q);
+    }, 1000);
+    pmRender(q);
+  }).catch(function() { mostrarToast("Não consegui acessar o microfone. Confira as permissões."); });
+}
+
+function pmParar(q, descartar) {
+  if (!pmRec || pmRec.quem !== q) return;
+  pmRec.descartar = !!descartar;
+  if (pmRec.recorder.state !== "inactive") pmRec.recorder.stop();
+}
+
+function pmEnviarAudio(q) {
+  var loc = pmLocal[q];
+  var blob = loc.blob;
+  var ext = blob.type.indexOf("mp4") >= 0 ? "m4a" : (blob.type.indexOf("aac") >= 0 ? "aac" : "webm");
+  var path = "pensamento-audios/" + hojeStr() + "_" + q + "_" + Date.now() + "." + ext;
+  return fetch(SUPABASE_URL + "/storage/v1/object/midias/" + path, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + session.access_token,
+      "Content-Type": blob.type || "audio/webm",
+      "x-upsert": "true"
+    },
+    body: blob
+  }).then(function(r) {
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    pmRemoto[q] = { url: SUPABASE_URL + "/storage/v1/object/public/midias/" + path, dur: loc.dur };
+    URL.revokeObjectURL(loc.url);
+    pmLocal[q] = null;
+  });
 }
 
 function toggleLido(quem) {
@@ -5315,7 +5475,10 @@ function salvarPensamento() {
     },
     body: JSON.stringify({ data: hojeStr(), ele: ele, ela: ela, lido_ele: lidoEle, lido_ela: lidoEla, postado_ele: postadoEle, postado_ela: postadoEla,
       postado_ele_em: postadoEleEm ? new Date(postadoEleEm).toISOString() : null,
-      postado_ela_em: postadoElaEm ? new Date(postadoElaEm).toISOString() : null })
+      postado_ela_em: postadoElaEm ? new Date(postadoElaEm).toISOString() : null,
+      modo_ele: pmModo.ele, modo_ela: pmModo.ela,
+      audio_ele_url: pmRemoto.ele ? pmRemoto.ele.url : null, audio_ele_dur: pmRemoto.ele ? pmRemoto.ele.dur : null,
+      audio_ela_url: pmRemoto.ela ? pmRemoto.ela.url : null, audio_ela_dur: pmRemoto.ela ? pmRemoto.ela.dur : null })
   }).then(function(r) {
     if (r.ok) {
       var el = document.getElementById("diario-salvo");

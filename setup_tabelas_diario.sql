@@ -381,3 +381,11 @@ on jogo_naval for all
 to authenticated
 using (true)
 with check (true);
+
+-- Pensamento do dia com áudio: cada um escolhe texto OU áudio
+alter table pensamentos add column if not exists modo_ele text default 'texto';
+alter table pensamentos add column if not exists modo_ela text default 'texto';
+alter table pensamentos add column if not exists audio_ele_url text;
+alter table pensamentos add column if not exists audio_ele_dur int;
+alter table pensamentos add column if not exists audio_ela_url text;
+alter table pensamentos add column if not exists audio_ela_dur int;
